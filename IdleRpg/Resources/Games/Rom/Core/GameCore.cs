@@ -1,8 +1,12 @@
-﻿namespace IdleRpg.Resources.Games.Rom.Core;
+﻿namespace Rom.Core;
+using System;
+
 
 public class GameCore : IdleRpg.Game.Core.IGameCore
 {
+    public Type GetStats() => typeof(Stats);
 }
+
 
 public enum Stats
 {
