@@ -51,7 +51,7 @@ public class CoreLoader : IDisposable
 
         var syntaxTree = CSharpSyntaxTree.ParseText(File.ReadAllText(Path.Combine("Resources", "Games", "Rom", "Core", "GameCore.cs")));
 
-        var assemblyPath = Path.GetDirectoryName(typeof(object).Assembly.Location);
+        var assemblyPath = Path.GetDirectoryName(typeof(object).Assembly.Location) ?? string.Empty;
 
         CSharpCompilation compilation = CSharpCompilation.Create("Rom.dll")
             .AddSyntaxTrees(syntaxTree)

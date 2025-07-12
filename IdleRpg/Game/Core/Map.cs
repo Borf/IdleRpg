@@ -2,13 +2,18 @@
 
 public class Map
 {
-    public string Name { get; set; } = string.Empty;
-    public int MinX { get; set; } = 0;
-    public int MinY { get; set; } = 0;
-    public int MaxX { get; set; } = 0;
-    public int MaxY { get; set; } = 0;
+    public string Name { get; private set; } = string.Empty;
+    public int MinX { get; private set; } = 0;
+    public int MinY { get; private set; } = 0;
+    public int MaxX { get; private set; } = 0;
+    public int MaxY { get; private set; } = 0;
     
-    public TileType[,] Tiles { get; set; } = new TileType[0, 0];
+    public TileType[,] Tiles { get; private set; } = new TileType[0, 0];
+    public Map(string name)
+    {
+        Name = name;
+        Load();
+    }
 
     public void Load() 
     {
@@ -19,7 +24,6 @@ public class Map
         Tiles = new TileType[128, 128];
     }
     public TileType this[int x, int y] => Tiles[x - MinX, y - MinY];
-
 
     //TODO
     //method for pathfinding (dynamic blocking?)

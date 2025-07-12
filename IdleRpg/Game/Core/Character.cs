@@ -7,6 +7,6 @@ public class Character
     
     public Dictionary<object, ulong> Stats { get; set; } = new();
 
-    public Location Location { get; set; }
+    public Location? Location { get; set; }
 
 }
