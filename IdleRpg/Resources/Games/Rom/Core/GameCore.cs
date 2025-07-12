@@ -1,4 +1,6 @@
 ﻿namespace Rom.Core;
+
+using IdleRpg.Game.Attributes;
 using System;
 
 
@@ -10,6 +12,7 @@ public class GameCore : IdleRpg.Game.Core.IGameCore
 
 public enum Stats
 {
+    [StatAttribute]
     Str,
     Dex,
     Int,
