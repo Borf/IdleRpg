@@ -1,52 +1,90 @@
-﻿
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis;
-using System.Runtime.Loader;
+﻿using IdleRpg.Game.Attributes;
 using IdleRpg.Game.Core;
-using Microsoft.Identity.Client;
-
 namespace IdleRpg.Game;
 
-public class GameService : IHostedService
+public class GameService : IHostedService, ICoreHolder
 {
-    public const string CoreName = "Rom";
+    public const string CoreName = "TinyRpg";
     private readonly ILogger<GameService> _logger;
-    private Task? bgTask;
-    IGameCore GameCore = null!;
+    private readonly BgTaskManager BgTaskManager;
+    private BgTask bgTask;
     private CoreLoader CoreLoader;
+    public List<IItem> Items { get; set; } = new();
     private List<Map> Maps = new();
     private List<MapInstance> MapInstances = new();
 
-    public GameService(ILoggerFactory loggerFactory)
+    public IGameCore GameCore { get; set; } = null!;
+    public Type statsEnum { get; set; } = null!;
+
+    public GameService(ILoggerFactory loggerFactory, BgTaskManager bgTaskManager)
     {
         _logger = loggerFactory.CreateLogger<GameService>();
-        CoreLoader = new CoreLoader(CoreName, loggerFactory.CreateLogger<CoreLoader>(), c => GameCore = c);
+        BgTaskManager = bgTaskManager;
+        CoreLoader = new CoreLoader(CoreName, loggerFactory.CreateLogger<CoreLoader>(), this);
+        bgTask = new BgTask("Main Game Loop", BackgroundLoop);
     }
     public async Task StartAsync(CancellationToken cancellationToken)
     {
         _logger.LogInformation("Game service is starting.");
-        bgTask = Task.Run(BackgroundLoop, cancellationToken);
-
         //TODO: load from list, to determine what maps to load and which one to instantiate immediately
+
+        //TODO: this should be done after every reload
+        List<StatModifier> AllModifiers = new();
+
+        var stats = Enum.GetValues(statsEnum).Cast<Enum>().ToList();
+        foreach (var stat in stats)
+        {
+            //skip over stats with [Notcalculated]
+            var attributes = stat.GetType().GetMember(stat.ToString()).First(m => m.DeclaringType == statsEnum).GetCustomAttributes(false);
+            if (attributes.Any(a => a is NotCalculatedAttribute))
+                continue;
+
+            AllModifiers.Add(GameCore.CalculateInitialStat(stat));
+        }
+
+        foreach (var item in Items.Where(item => item.GetType().IsAssignableTo(typeof(IEquippable))).Select(item => (IEquippable)item))
+            AllModifiers.AddRange(item.EquipEffects);
+
+        _logger.LogInformation($"Found {AllModifiers.Count} modifiers in total");
+
+
+        List<StatModifier> sortedModifiers = new();
+        while(AllModifiers.Count > 0)
+        {
+            List<StatModifier> toRemove = new();
+            foreach(var modifier in AllModifiers)
+            {
+                if (modifier.StatsUsed.All(m => !AllModifiers.Any(mm => mm.Stat == m)))
+                {
+                    sortedModifiers.Add(modifier);
+                    toRemove.Add(modifier);
+                }
+            }
+            AllModifiers.RemoveAll(m => toRemove.Contains(m));
+        }
+        _logger.LogInformation($"Sorted {AllModifiers.Count} modifiers in total");
+
+
 
         Maps.Add(new Map("WorldMap"));
 
+        BgTaskManager.Run(bgTask);
 
 
-
+        await Task.Yield();
     }
 
 
 
-    public Task StopAsync(CancellationToken cancellationToken)
+    public async Task StopAsync(CancellationToken cancellationToken)
     {
         _logger.LogInformation("Game service is stopping.");
         CoreLoader.Dispose();
-        return Task.CompletedTask;
+        await bgTask.Cancel();
     }
 
 
-    public async Task BackgroundLoop()
+    public async Task BackgroundLoop(CancellationToken cancellationToken)
     {
         while(true)
         {

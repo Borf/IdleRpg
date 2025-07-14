@@ -1,18 +1,25 @@
 ﻿namespace Rom.Core;
 
+using IdleRpg.Game;
 using IdleRpg.Game.Attributes;
+using IdleRpg.Game.Core;
 using System;
+using System.Collections.Generic;
 
-
-public class GameCore : IdleRpg.Game.Core.IGameCore
+public class GameCore : IGameCore
 {
     public Type GetStats() => typeof(Stats);
+
+    public StatModifier CalculateInitialStat(Enum s)
+    {
+        return null!;
+    }
 }
 
 
 public enum Stats
 {
-    [StatAttribute]
+    Level,
     Str,
     Dex,
     Int,
@@ -23,4 +30,7 @@ public enum Stats
     MaxHp,
     Sp,
     MaxSp,
+
+    Attack,
+    AttackPerc,
 }

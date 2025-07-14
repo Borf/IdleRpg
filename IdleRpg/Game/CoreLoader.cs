@@ -2,23 +2,26 @@
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis;
 using System.Runtime.Loader;
+using System.Reflection;
 
 namespace IdleRpg.Game;
 
 public class CoreLoader : IDisposable
 {
     private AssemblyLoadContext? assemblyContext;
+    private Assembly? assembly;
     private FileSystemWatcher CoreWatcher;
 
     private readonly string CoreName;
     private readonly ILogger<CoreLoader> Logger;
-    private readonly Action<IGameCore> ReloadCallback;
+    private readonly ICoreHolder coreHolder;
 
-    public CoreLoader(string coreName, ILogger<CoreLoader> logger, Action<IGameCore> reloadCallback)
+    public CoreLoader(string coreName, ILogger<CoreLoader> logger, ICoreHolder coreHolder)
     {
         CoreName = coreName;
         Logger = logger;
-        CoreWatcher = new FileSystemWatcher(Path.Combine("Resources", "Games", "Rom", "Core"));
+        this.coreHolder = coreHolder;
+        CoreWatcher = new FileSystemWatcher(Path.Combine("Resources", "Games", CoreName, "Core"));
         CoreWatcher.NotifyFilter = NotifyFilters.Attributes
                                  | NotifyFilters.CreationTime
                                  | NotifyFilters.DirectoryName
@@ -35,7 +38,6 @@ public class CoreLoader : IDisposable
         CoreWatcher.EnableRaisingEvents = true;
 
         CoreName = coreName;
-        ReloadCallback = reloadCallback;
         LoadCore();
     }
 
@@ -47,23 +49,30 @@ public class CoreLoader : IDisposable
     private void LoadCore()
     {
         var oldAssemblyContext = assemblyContext;
-        assemblyContext = new AssemblyLoadContext("Rom.dll", true);
+        assemblyContext = new AssemblyLoadContext($"{CoreName}.dll", true);
 
-        var syntaxTree = CSharpSyntaxTree.ParseText(File.ReadAllText(Path.Combine("Resources", "Games", "Rom", "Core", "GameCore.cs")));
 
         var assemblyPath = Path.GetDirectoryName(typeof(object).Assembly.Location) ?? string.Empty;
-
-        CSharpCompilation compilation = CSharpCompilation.Create("Rom.dll")
-            .AddSyntaxTrees(syntaxTree)
+        CSharpCompilation compilation = CSharpCompilation.Create($"{CoreName}.dll")
             .AddReferences(MetadataReference.CreateFromFile(Path.Combine(assemblyPath, "mscorlib.dll")))
             .AddReferences(MetadataReference.CreateFromFile(Path.Combine(assemblyPath, "System.dll")))
             .AddReferences(MetadataReference.CreateFromFile(Path.Combine(assemblyPath, "System.Core.dll")))
             .AddReferences(MetadataReference.CreateFromFile(Path.Combine(assemblyPath, "System.Runtime.dll")))
+            .AddReferences(MetadataReference.CreateFromFile(Path.Combine(assemblyPath, "System.Collections.dll")))
             .AddReferences(MetadataReference.CreateFromFile(typeof(object).Assembly.Location))
+            .AddReferences(MetadataReference.CreateFromFile(typeof(System.Console).Assembly.Location))
             .AddReferences(MetadataReference.CreateFromFile(typeof(Type).Assembly.Location))
             .AddReferences(MetadataReference.CreateFromFile(typeof(Game.Core.IGameCore).Assembly.Location))
             .WithOptions(new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
 
+        var files = Directory
+            .GetFiles(Path.Combine("Resources", "Games", CoreName), "*.cs", SearchOption.AllDirectories)
+            .Where(f => !Path.GetRelativePath(Path.Combine("Resources", "Games", CoreName), f).StartsWith("obj\\"));
+        Logger.LogInformation($"Compiling files {string.Join(", ", files.Select(f => Path.GetRelativePath(Path.Combine("Resources", "Games", CoreName), f)))}");
+        foreach (var file in files)
+        {
+            compilation = compilation.AddSyntaxTrees(CSharpSyntaxTree.ParseText(File.ReadAllText(file)));
+        }
 
         using (var dllStream = new MemoryStream())
         using (var pdbStream = new MemoryStream())
@@ -71,27 +80,30 @@ public class CoreLoader : IDisposable
             var emitResult = compilation.Emit(dllStream, pdbStream);
             if (!emitResult.Success)
             {
+                Logger.LogError(string.Join("\n", emitResult.Diagnostics.Select(d => $"{d.Location}\t{d.GetMessage()}")));
                 assemblyContext.Unload();
-                Logger.LogError(string.Join("\n", emitResult.Diagnostics.Select(d => d.GetMessage())));
+                assemblyContext = oldAssemblyContext;
             }
             else
             {
-                Logger.LogInformation("Core loaded successfully.");
+                Logger.LogInformation("Core Compiled successfully.");
                 dllStream.Seek(0, SeekOrigin.Begin);
                 pdbStream.Seek(0, SeekOrigin.Begin);
-                var assembly = assemblyContext.LoadFromStream(dllStream, pdbStream);
+                assembly = assemblyContext.LoadFromStream(dllStream, pdbStream);
+                Logger.LogInformation($"Core Loaded successfully. Found {assembly.GetTypes().Length} types");
 
                 var core = (IGameCore?)Activator.CreateInstance(assembly.GetTypes().First(t => typeof(Game.Core.IGameCore).IsAssignableFrom(t) && !t.IsAbstract));
                 if (core != null)
                 {
-                    ReloadCallback.Invoke(core);
-                    var statsEnum = core.GetStats();
-                    Console.WriteLine(string.Join(", ", Enum.GetNames(statsEnum)));
+                    coreHolder.GameCore = core;
+                    coreHolder.statsEnum = core.GetStats();
+                    LoadItems();
                     oldAssemblyContext?.Unload();
                 }
                 else
                 {
                     assemblyContext.Unload();
+                    assemblyContext = oldAssemblyContext;
                     Logger.LogError("Couldn't instantiate gamecore");
                 }
             }
@@ -99,4 +111,22 @@ public class CoreLoader : IDisposable
 
 
     }
+
+    private void LoadItems()
+    {
+        Logger.LogInformation("Loading Items");
+        coreHolder.Items.Clear(); //TODO: make sure the old items are not referenced, or move them to the new item references somehow?
+
+        var types = assembly.GetTypes().Where(t => t.IsAssignableTo(typeof(IItem))).ToList();
+        Logger.LogInformation($"Found {types.Count} items");
+        foreach (var t in types)
+            coreHolder.Items.Add((IItem)Activator.CreateInstance(t)!);
+    }
+}
+
+public interface ICoreHolder
+{
+    List<IItem> Items { get; set; }
+    IGameCore GameCore { get; set; }
+    Type statsEnum { get; set; }
 }

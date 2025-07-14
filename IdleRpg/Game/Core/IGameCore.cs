@@ -4,4 +4,5 @@
 public interface IGameCore
 {
     Type GetStats();
+    StatModifier CalculateInitialStat(Enum s);
 }
