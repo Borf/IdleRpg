@@ -12,13 +12,13 @@ public class Cutlass : IEquippable
 {
     public int Id => 10001;
     public string Name => "Cutlass";
-    public string EquipDescription => "Attack + 30";
+    public string EquipDescription => "Attack + 3";
     public List<StatModifier> EquipEffects => new List<StatModifier>
     {
         new StatModifier
         {
             Stat = Stats.Attack,
-            Calculation = (currentStats) => 30,
+            Calculation = (currentStats) => 3,
         }
     };
 
