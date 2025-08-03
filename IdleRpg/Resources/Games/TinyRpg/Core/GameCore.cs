@@ -87,3 +87,20 @@ public enum Stats
     MaxHp,
 
 }
+
+
+public enum Jobs
+{
+    Warrior,
+    Mage,
+    Archer,
+    Healer,
+}
+
+[Flags]
+public enum EquipSlots
+{
+    Weapon = 1<<0,
+    Armor = 1<<1,
+    Helm = 1<<2,
+}

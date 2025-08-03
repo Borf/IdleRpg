@@ -47,7 +47,7 @@ public class GameService : IHostedService, ICoreHolder
 
         _logger.LogInformation($"Found {AllModifiers.Count} modifiers in total");
 
-
+        //TODO: move this somewhere else
         List<StatModifier> sortedModifiers = new();
         while(AllModifiers.Count > 0)
         {
@@ -62,7 +62,7 @@ public class GameService : IHostedService, ICoreHolder
             }
             AllModifiers.RemoveAll(m => toRemove.Contains(m));
         }
-        _logger.LogInformation($"Sorted {AllModifiers.Count} modifiers in total");
+        _logger.LogInformation($"Sorted {sortedModifiers.Count} modifiers in total");
 
 
 

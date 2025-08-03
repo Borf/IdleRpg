@@ -12,6 +12,7 @@ public class Cutlass : IEquippable
 {
     public int Id => 10001;
     public string Name => "Cutlass";
+    public Enum EquipSlot => EquipSlots.Weapon;
     public string EquipDescription => "Attack + 3";
     public List<StatModifier> EquipEffects => new List<StatModifier>
     {
