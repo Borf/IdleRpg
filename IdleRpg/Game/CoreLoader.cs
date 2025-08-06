@@ -1,8 +1,8 @@
 ﻿using IdleRpg.Game.Core;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis;
 using System.Runtime.Loader;
 using System.Reflection;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis;
 
 namespace IdleRpg.Game;
 

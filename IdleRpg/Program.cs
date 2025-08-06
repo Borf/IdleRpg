@@ -2,9 +2,11 @@ using IdleRpg.Components;
 using IdleRpg.Components.Account;
 using IdleRpg.Data;
 using IdleRpg.Game;
+using IdleRpg.Game.Core;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -61,3 +63,4 @@ app.MapRazorComponents<App>()
 app.MapAdditionalIdentityEndpoints();
 
 app.Run();
+

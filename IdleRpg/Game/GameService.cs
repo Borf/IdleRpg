@@ -66,7 +66,7 @@ public class GameService : IHostedService, ICoreHolder
 
 
 
-        Maps.Add(new Map("WorldMap"));
+        Maps.Add(Map.Load("WorldMap"));
 
         BgTaskManager.Run(bgTask);
 
