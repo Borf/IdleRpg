@@ -5,6 +5,7 @@ using IdleRpg.Game.Attributes;
 using IdleRpg.Game.Core;
 using System;
 using System.Collections.Generic;
+using TinyRpg.Maps;
 
 public class GameCore : IGameCore
 {
@@ -65,6 +66,14 @@ public class GameCore : IGameCore
                     Calculation = (currentStats) => 5 * currentStats[Stats.Level],
                 },
             _ => throw new Exception("Requested stat that is not implemented: " + stat.ToString()),
+        };
+    }
+
+    public List<Map> LoadMaps()
+    {
+        return new List<Map>()
+        {
+            new WorldMap()
         };
     }
 }

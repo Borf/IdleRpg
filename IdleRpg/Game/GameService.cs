@@ -63,9 +63,9 @@ public class GameService : ICoreHolder
         }
         _logger.LogInformation($"Sorted {sortedModifiers.Count} modifiers in total");
 
+        Maps = GameCore.LoadMaps(); //TODO: should happen more often?
 
-
-        Maps.Add(Map.Load("WorldMap"));
+        _logger.LogInformation($"Loaded {Maps.Count} maps");
 
         BgTaskManager.Run(bgTask);
         await Task.Yield();

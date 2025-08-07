@@ -63,6 +63,7 @@ public class CoreLoader : IDisposable
             .AddReferences(MetadataReference.CreateFromFile(typeof(System.Console).Assembly.Location))
             .AddReferences(MetadataReference.CreateFromFile(typeof(Type).Assembly.Location))
             .AddReferences(MetadataReference.CreateFromFile(typeof(Game.Core.IGameCore).Assembly.Location))
+            .AddReferences(MetadataReference.CreateFromFile(typeof(MemoryPack.MemoryPackSerializer).Assembly.Location))
             .WithOptions(new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
 
         var files = Directory
