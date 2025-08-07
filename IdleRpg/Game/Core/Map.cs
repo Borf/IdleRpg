@@ -9,20 +9,19 @@ namespace IdleRpg.Game.Core;
 public partial class Map_Base
 {
     [MemoryPackOrder(0)]
-    public short Version { get; set; } = 0x0101;
+    public short Version { get; set; }
 }
 
 [MemoryPackable(GenerateType.VersionTolerant)]
 public partial class Map_v1_1 : Map_Base
 {
+    Map_v1_1() => Version = 0x0101;
     [MemoryPackOrder(1)]
     public int Width { get; set; }
     [MemoryPackOrder(2)]
     public int Height { get; set; }
     [MemoryPackOrder(10)]
     public CellType[,] CellType { get; set; } = new CellType[0,0];
-
-
 }
 
 [Flags]
@@ -40,7 +39,7 @@ public class Map
     public string Name { get; protected set; } = string.Empty;
     public Map_Base MapData = null!;
     public Map_v1_1? MapData11 => MapData as Map_v1_1;
-
+    public InstanceType InstanceType { get; set; } = InstanceType.NoInstance;
     protected void Load(string name)
     {
         var filename = Path.Combine("Resources", "Games", GameService.CoreName, "Maps", $"{name}.map");
@@ -59,3 +58,12 @@ public class Map
     }
 }
 
+public enum InstanceType
+{
+    NoInstance,
+    SinglePersonInstance,
+    ChannelInstance,
+    PartyInstance,
+    GuildInstance,
+    FixedSizeInstance,
+}

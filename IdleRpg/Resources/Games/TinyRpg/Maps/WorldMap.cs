@@ -12,6 +12,13 @@ public class WorldMap : Map
 {
     public WorldMap()
     {
+        InstanceType = InstanceType.NoInstance;
         Load("WorldMap");
+        // precalculate pathfinding and collision (cache this)
+
+        // start up maptasks
+
+        // register how to instances work on this map
+
     }
 }
