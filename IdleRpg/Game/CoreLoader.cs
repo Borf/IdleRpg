@@ -117,7 +117,7 @@ public class CoreLoader : IDisposable
         Logger.LogInformation("Loading Items");
         coreHolder.Items.Clear(); //TODO: make sure the old items are not referenced, or move them to the new item references somehow?
 
-        var types = assembly.GetTypes().Where(t => t.IsAssignableTo(typeof(IItem))).ToList();
+        var types = assembly!.GetTypes().Where(t => t.IsAssignableTo(typeof(IItem))).ToList();
         Logger.LogInformation($"Found {types.Count} items");
         foreach (var t in types)
             coreHolder.Items.Add((IItem)Activator.CreateInstance(t)!);

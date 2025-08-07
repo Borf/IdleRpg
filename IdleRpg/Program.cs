@@ -14,7 +14,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
-builder.Services.AddHostedService<GameService>();
+builder.Services.AddSingleton<GameService>();
+builder.Services.AddHostedService<GameHostedService>();
 builder.Services.AddSingleton<BgTaskManager>();
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddScoped<IdentityUserAccessor>();

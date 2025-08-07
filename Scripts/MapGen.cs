@@ -158,6 +158,7 @@ for (int y = 0; y < height; y++)
 using var compressor = new BrotliCompressor();
 MemoryPackSerializer.Serialize(compressor, map);
 File.WriteAllText(fileName, "MAP");
+File.AppendAllBytes(fileName, [0x01, 0x01]);
 File.AppendAllBytes(fileName, compressor.ToArray());
 
 

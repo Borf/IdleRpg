@@ -3,7 +3,7 @@
 public class MapInstance
 {
     public Guid InstanceId { get; set; } = Guid.NewGuid();
-    public Map Map { get; set; }
+    public required Map Map { get; set; }
     public List<Character> Characters { get; set; } = new();
 
     public IEnumerable<Npc> Npcs => Characters.Where(c => c is Npc).Select(c => (Npc)c);

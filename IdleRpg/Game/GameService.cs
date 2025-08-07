@@ -1,13 +1,13 @@
 ﻿using IdleRpg.Game.Attributes;
 using IdleRpg.Game.Core;
+using System.Threading.Tasks;
 namespace IdleRpg.Game;
 
-public class GameService : IHostedService, ICoreHolder
+public class GameService : ICoreHolder
 {
     public const string CoreName = "TinyRpg";
     private readonly ILogger<GameService> _logger;
     private readonly BgTaskManager BgTaskManager;
-    private BgTask bgTask;
     private CoreLoader CoreLoader;
     public List<IItem> Items { get; set; } = new();
     private List<Map> Maps = new();
@@ -15,6 +15,7 @@ public class GameService : IHostedService, ICoreHolder
 
     public IGameCore GameCore { get; set; } = null!;
     public Type statsEnum { get; set; } = null!;
+    private BgTask bgTask;
 
     public GameService(ILoggerFactory loggerFactory, BgTaskManager bgTaskManager)
     {
@@ -23,11 +24,9 @@ public class GameService : IHostedService, ICoreHolder
         CoreLoader = new CoreLoader(CoreName, loggerFactory.CreateLogger<CoreLoader>(), this);
         bgTask = new BgTask("Main Game Loop", BackgroundLoop);
     }
+
     public async Task StartAsync(CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Game service is starting.");
-        //TODO: load from list, to determine what maps to load and which one to instantiate immediately
-
         //TODO: this should be done after every reload
         List<StatModifier> AllModifiers = new();
 
@@ -49,10 +48,10 @@ public class GameService : IHostedService, ICoreHolder
 
         //TODO: move this somewhere else
         List<StatModifier> sortedModifiers = new();
-        while(AllModifiers.Count > 0)
+        while (AllModifiers.Count > 0)
         {
             List<StatModifier> toRemove = new();
-            foreach(var modifier in AllModifiers)
+            foreach (var modifier in AllModifiers)
             {
                 if (modifier.StatsUsed.All(m => !AllModifiers.Any(mm => mm.Stat == m)))
                 {
@@ -69,12 +68,8 @@ public class GameService : IHostedService, ICoreHolder
         Maps.Add(Map.Load("WorldMap"));
 
         BgTaskManager.Run(bgTask);
-
-
         await Task.Yield();
     }
-
-
 
     public async Task StopAsync(CancellationToken cancellationToken)
     {
@@ -82,7 +77,6 @@ public class GameService : IHostedService, ICoreHolder
         CoreLoader.Dispose();
         await bgTask.Cancel();
     }
-
 
     public async Task BackgroundLoop(CancellationToken cancellationToken)
     {
