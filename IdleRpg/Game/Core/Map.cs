@@ -39,6 +39,7 @@ public class Map
     public string Name { get; protected set; } = string.Empty;
     public Map_Base MapData = null!;
     public Map_v1_1? MapData11 => MapData as Map_v1_1;
+    PathFindData PathFindData { get; set; } = null!;
     public InstanceType InstanceType { get; set; } = InstanceType.NoInstance;
     protected void Load(string name)
     {
@@ -55,7 +56,12 @@ public class Map
         var decompressedBuffer = decompressor.Decompress(data[5..]);
         MapData = MemoryPackSerializer.Deserialize<Map_v1_1>(decompressedBuffer)!;
         Debug.Assert(version == MapData.Version, $"Unsupported map version: {version}");
+
+        PathFindData = PathFinder.LoadData(this);
     }
+
+
+
 }
 
 public enum InstanceType
