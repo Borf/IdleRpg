@@ -63,7 +63,15 @@ public class GameService : ICoreHolder
         }
         _logger.LogInformation($"Sorted {sortedModifiers.Count} modifiers in total");
 
-        Maps = GameCore.LoadMaps(); //TODO: should happen more often?
+        Maps = GameCore.LoadMaps();
+
+        SemaphoreSlim LoadSemaphore = new SemaphoreSlim(6); // 6 maps at the same time
+        List<Task> loadTasks = new();
+        foreach (var map in Maps)
+            loadTasks.Add(Task.Run(async () => { await LoadSemaphore.WaitAsync(); try { _logger.LogInformation($"Loading map {map.Name}"); map.Load(); } finally { LoadSemaphore.Release(); } }));
+        await Task.WhenAll(loadTasks.ToArray());
+
+
 
         _logger.LogInformation($"Loaded {Maps.Count} maps");
 

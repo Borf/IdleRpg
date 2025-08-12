@@ -10,15 +10,19 @@ namespace TinyRpg.Maps;
 
 public class WorldMap : Map
 {
-    public WorldMap()
+    public WorldMap() : base("WorldMap")
     {
         InstanceType = InstanceType.NoInstance;
-        Load("WorldMap");
-        // precalculate pathfinding and collision (cache this)
+    }
 
+    
+    public override void Load()
+    {
+        base.Load();
         // start up maptasks
 
         // register how to instances work on this map
 
+        // warp portals 'n stuff
     }
 }

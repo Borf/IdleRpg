@@ -1,12 +1,20 @@
-using IdleRpg.Components;
+﻿using IdleRpg.Components;
 using IdleRpg.Components.Account;
 using IdleRpg.Data;
 using IdleRpg.Game;
 using IdleRpg.Game.Core;
+using L1PathFinder;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using System.Text;
+
+
+Console.WriteLine(@"  ___    _ _      ____  ____   ____ 
+ |_ _|__| | | ___|  _ \|  _ \ / ___|
+  | |/ _` | |/ _ \ |_) | |_) | |  _ 
+  | | (_| | |  __/  _ <|  __/| |_| |
+ |___\__,_|_|\___|_| \_\_|    \____|
+                           \By Borf/");
 
 var builder = WebApplication.CreateBuilder(args);
 

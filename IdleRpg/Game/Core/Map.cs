@@ -1,5 +1,7 @@
-﻿using MemoryPack;
+﻿using L1PathFinder;
+using MemoryPack;
 using MemoryPack.Compression;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Diagnostics;
 
@@ -34,16 +36,17 @@ public enum CellType
 }
 
 
-public class Map
+public class Map(string name)
 {
-    public string Name { get; protected set; } = string.Empty;
-    public Map_Base MapData = null!;
-    public Map_v1_1? MapData11 => MapData as Map_v1_1;
-    PathFindData PathFindData { get; set; } = null!;
+    public string Name { get; private set; } = name;
+    private Map_Base MapData = null!;
+    private Map_v1_1? MapData11 => MapData as Map_v1_1;
+    public L1PathPlanner Planner { get; private set; } = null!;
+    //PathFindData PathFindData { get; set; } = null!;
     public InstanceType InstanceType { get; set; } = InstanceType.NoInstance;
-    protected void Load(string name)
+    public virtual void Load()
     {
-        var filename = Path.Combine("Resources", "Games", GameService.CoreName, "Maps", $"{name}.map");
+        var filename = Path.Combine("Resources", "Games", GameService.CoreName, "Maps", $"{Name}.map");
         var data = File.ReadAllBytes(filename);
         using var decompressor = new BrotliDecompressor();
 
@@ -57,10 +60,35 @@ public class Map
         MapData = MemoryPackSerializer.Deserialize<Map_v1_1>(decompressedBuffer)!;
         Debug.Assert(version == MapData.Version, $"Unsupported map version: {version}");
 
-        PathFindData = PathFinder.LoadData(this);
+        var grid = new int[Width, Height];
+        for (int y = 0; y < Height; y++)
+            for (int x = 0; x < Width; x++)
+                grid[x, y] = MapData11!.CellType[x, y].HasFlag(CellType.Walkable) ? 0 : 1;
+        Planner = L1PathPlanner.CreatePlanner(grid);
     }
 
+    public CellType this[Point pos]
+    {
+        get
+        {
+            if (MapData11 == null)
+                throw new InvalidOperationException("Map data is not loaded or is of an unsupported version.");
+            if (pos.X < 0 || pos.Y < 0 || pos.X >= MapData11.Width || pos.Y >= MapData11.Height)
+                return CellType.NotWalkable; // out of bounds
+            return MapData11.CellType[pos.X, pos.Y];
+        }
+        set
+        {
+            if (MapData11 == null)
+                throw new InvalidOperationException("Map data is not loaded or is of an unsupported version.");
+            if (pos.X < 0 || pos.Y < 0 || pos.X >= MapData11.Width || pos.Y >= MapData11.Height)
+                throw new ArgumentOutOfRangeException(nameof(pos), "Position is out of bounds.");
+            MapData11.CellType[pos.X, pos.Y] = value;
+        }
+    }
 
+    public int Width => MapData11?.Width ?? throw new InvalidOperationException("Map data is not loaded or is of an unsupported version.");
+    public int Height => MapData11?.Height ?? throw new InvalidOperationException("Map data is not loaded or is of an unsupported version.");
 
 }
 
