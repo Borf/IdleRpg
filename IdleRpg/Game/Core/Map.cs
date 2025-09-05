@@ -90,6 +90,26 @@ public class Map(string name)
     public int Width => MapData11?.Width ?? throw new InvalidOperationException("Map data is not loaded or is of an unsupported version.");
     public int Height => MapData11?.Height ?? throw new InvalidOperationException("Map data is not loaded or is of an unsupported version.");
 
+    public List<MapInstance> MapInstances { get; private set; } = new();
+    public MapInstance MapInstance() 
+    { 
+        if(InstanceType == InstanceType.NoInstance)
+        {
+            if (MapInstances.Count == 0)
+                MapInstances.Add(NewInstance());
+            return MapInstances.First();
+        }
+        throw new NotImplementedException();
+    }
+
+    public virtual MapInstance NewInstance() 
+    { 
+        return new MapInstance()
+        {
+            Map = this,
+        };
+    }
+
 }
 
 public enum InstanceType

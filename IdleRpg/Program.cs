@@ -3,6 +3,8 @@ using IdleRpg.Components.Account;
 using IdleRpg.Data;
 using IdleRpg.Game;
 using IdleRpg.Game.Core;
+using IdleRpg.Services.Discord;
+using IdleRpg.Util;
 using L1PathFinder;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -18,10 +20,14 @@ Console.WriteLine(@"  ___    _ _      ____  ____   ____
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Logging.AddConsole(c => c.FormatterName = "proper")
+               .AddConsoleFormatter<ProperFormatter, ProperFormatterOptions>(c => { });
+
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
+builder.Services.AddDiscord();
 builder.Services.AddSingleton<GameService>();
 builder.Services.AddHostedService<GameHostedService>();
 builder.Services.AddSingleton<BgTaskManager>();

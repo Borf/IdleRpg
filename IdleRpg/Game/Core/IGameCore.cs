@@ -7,4 +7,6 @@ public interface IGameCore
     StatModifier CalculateInitialStat(Enum s);
     List<Map> LoadMaps();
 
+    Location SpawnLocation { get; }
+
 }

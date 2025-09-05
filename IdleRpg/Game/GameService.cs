@@ -71,12 +71,16 @@ public class GameService : ICoreHolder
             loadTasks.Add(Task.Run(async () => { await LoadSemaphore.WaitAsync(); try { _logger.LogInformation($"Loading map {map.Name}"); map.Load(); } finally { LoadSemaphore.Release(); } }));
         await Task.WhenAll(loadTasks.ToArray());
 
-
-
         _logger.LogInformation($"Loaded {Maps.Count} maps");
 
         BgTaskManager.Run(bgTask);
         await Task.Yield();
+    }
+
+
+    public void LoadCharacter(ulong id)
+    {
+
     }
 
     public async Task StopAsync(CancellationToken cancellationToken)

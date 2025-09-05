@@ -68,14 +68,21 @@ public class GameCore : IGameCore
             _ => throw new Exception("Requested stat that is not implemented: " + stat.ToString()),
         };
     }
+    //should this be a dictionary or a list indexed by an enum?
+    private List<Map> Maps = new List<Map>();
 
     public List<Map> LoadMaps()
     {
-        return new List<Map>()
+        Maps = new List<Map>()
         {
             new WorldMap()
         };
+
+        return Maps;
     }
+
+
+    public Location SpawnLocation => new Location(10, 10) { MapInstance = Maps[0].MapInstance() };
 }
 
 
