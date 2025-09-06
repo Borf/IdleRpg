@@ -12,16 +12,23 @@ public class CharacterMenu : InteractionModuleBase<SocketInteractionContext>
         //if no character exists, create it
         await ModifyOriginalResponseAsync(c =>
         {
-            c.Embed = new EmbedBuilder()
-                .WithImageUrl("https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/250740/ss_a8ed2612270b0080b514ddcf364f7142dc599581.600x338.jpg?t=1566831836")
-                .WithTitle("Idle RPG - Main Menu")
-                .Build();
-            c.Components = new ComponentBuilder()
-                .WithButton("Stats", "character:stats",     ButtonStyle.Primary, emote: Emoji.Parse(":man_mage:"))
-                .WithButton("Skills", "character:skills",   ButtonStyle.Primary, emote: Emoji.Parse(":crossed_swords:"))
-                .WithButton("Equipment", "character:equip", ButtonStyle.Primary, emote: Emoji.Parse(":crossed_swords:"))
-                .WithButton("Jobs", "character:jobs",       ButtonStyle.Secondary, emote: Emoji.Parse(":compass:"))
-                .WithButton("Dress Up", "character:dressup",ButtonStyle.Secondary, emote: Emoji.Parse(":compass:"))
+            c.Components = new ComponentBuilderV2()
+                .WithTextDisplay("### Main Menu > Character")
+                .WithSeparator()
+                .WithMediaGallery(["https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/250740/ss_a8ed2612270b0080b514ddcf364f7142dc599581.600x338.jpg?t=1566831836"])
+                .WithTextDisplay("Your character is currently: ")
+                .WithSeparator()
+                .WithActionRow([
+                    new ButtonBuilder("Stats", "character:stats",       ButtonStyle.Primary, emote: Emoji.Parse(":handbag:")),
+                    new ButtonBuilder("Skills", "character:skills",     ButtonStyle.Primary, emote: Emoji.Parse(":notebook_with_decorative_cover:")),
+                    new ButtonBuilder("Equip", "character:equip",       ButtonStyle.Primary, emote: Emoji.Parse(":compass:")),
+                    new ButtonBuilder("Jobs", "character:jobs",         ButtonStyle.Primary, emote: Emoji.Parse(":compass:")),
+                    new ButtonBuilder("Dress Up", "character:dressup",  ButtonStyle.Primary, emote: Emoji.Parse(":compass:")),
+                ])
+                .WithActionRow([
+                    new ButtonBuilder("Refresh", "character",           ButtonStyle.Secondary, emote: Emoji.Parse(":arrows_counterclockwise:")),
+                    new ButtonBuilder("Back", "start",                  ButtonStyle.Secondary, emote: Emoji.Parse(":arrow_backward:")),
+                ])
                 .Build();
         });
     }

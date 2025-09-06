@@ -78,9 +78,9 @@ public class GameService : ICoreHolder
     }
 
 
-    public void LoadCharacter(ulong id)
+    public Character LoadCharacter(ulong id)
     {
-
+        return null;
     }
 
     public async Task StopAsync(CancellationToken cancellationToken)
