@@ -45,7 +45,7 @@ builder.Services.AddAuthentication(options =>
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(connectionString));
+    options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
@@ -61,11 +61,25 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseMigrationsEndPoint();
+
+    using (var scope = app.Services.CreateScope())
+    {
+        using (var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>())
+        {
+            if(!dbContext.Database.EnsureCreated())
+            {
+                Console.WriteLine("Making database");
+            }
+        }
+    }
+
+
 }
 else
 {
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
 }
+
 
 
 app.UseAntiforgery();

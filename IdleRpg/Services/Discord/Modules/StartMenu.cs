@@ -1,6 +1,7 @@
 ﻿using Discord;
 using Discord.Interactions;
 using IdleRpg.Game;
+using System.Runtime.InteropServices;
 
 namespace IdleRpg.Services.Discord.Modules;
 
@@ -17,7 +18,7 @@ public class StartMenu : InteractionModuleBase<SocketInteractionContext>
     public async Task Start()
     {
         //if no character exists, create it and show intro
-        var character = gameService.LoadCharacter(Context.User.Id);
+        var character = gameService.GetCharacter(Context.User.Id);
 
 
         await RespondAsync(null, ephemeral: true, components: new ComponentBuilderV2().WithTextDisplay("Loading...").Build());
@@ -32,14 +33,17 @@ public class StartMenu : InteractionModuleBase<SocketInteractionContext>
     }
 
     public async Task UpdateStart()
-    { 
+    {
+        var character = gameService.GetCharacter(Context.User.Id);
         await ModifyOriginalResponseAsync(c =>
         {
             c.Components = new ComponentBuilderV2()
                 .WithTextDisplay("### Main Menu")
                 .WithSeparator()
                 .WithMediaGallery(["https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/250740/ss_a8ed2612270b0080b514ddcf364f7142dc599581.600x338.jpg?t=1566831836"])
-                .WithTextDisplay("Your character is currently: ")
+                .WithTextDisplay($"Your character:\n" +
+                $"- Your character is {character.Status}\n" +
+                $"- Level: xxx")
                 .WithSeparator()
                 .WithActionRow([
                     new ButtonBuilder("Character", "character", ButtonStyle.Primary, emote: Emoji.Parse(":man_mage:")),

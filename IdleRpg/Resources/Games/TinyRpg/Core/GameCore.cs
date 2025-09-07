@@ -88,18 +88,25 @@ public class GameCore : IGameCore
 
 public enum Stats
 {
-    [NotCalculated]
+    [NotCalculated, Group("Core")]
     Level,
 
+    [Group("Base")]
     Attack,
+    [Group("Base")]
     Defense,
+    [Group("Base")]
     MagicAttack,
+    [Group("Base")]
     MagicDefense,
+    [Group("Base")]
     Dodge,
+    [Group("Base")]
     Accuracy,
     
-    [NotCalculated]
+    [NotCalculated, Group("Core")]
     Hp,
+    [Group("Core", nameof(Hp))]
     MaxHp,
 
 }
