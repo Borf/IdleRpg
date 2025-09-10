@@ -76,11 +76,21 @@ public class GameCore : IGameCore
 
 
     public Location SpawnLocation => new Location(10, 10) { MapInstance = Maps[0].MapInstance() };
+
+    public void Damage(Character source, Character target, IDamageProperties damageProperties)
+    {
+        var properties = (damageProperties as DamageProperties) ?? throw new Exception();
+        target.Stats[Stats.Hp] = Math.Max(0, target.Stats[Stats.Hp] - properties.Damage);
+    }
+    public bool IsAlive(Character character) => character.Stats[Stats.Hp] > 0;
+
 }
+
+
+
 
 // How do we determine death condition?
 // How do we handle multiple exp systems?
-// how do we handle multiple 'energy' systems (SP, adrenalin)
 public enum Stats
 {
     [NotCalculated, Group("Core")]
@@ -122,4 +132,10 @@ public enum EquipSlots
     Weapon = 1<<0,
     Armor = 1<<1,
     Helm = 1<<2,
+}
+
+
+public class DamageProperties : IDamageProperties
+{
+    public int Damage { get; set; }
 }
