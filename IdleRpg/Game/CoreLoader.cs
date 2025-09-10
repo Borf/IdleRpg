@@ -99,6 +99,7 @@ public class CoreLoader : IDisposable
                     coreHolder.GameCore = core;
                     coreHolder.statsEnum = core.GetStats();
                     LoadItems();
+                    LoadNpcs();
                     oldAssemblyContext?.Unload();
                 }
                 else
@@ -113,21 +114,34 @@ public class CoreLoader : IDisposable
 
     }
 
+    private void LoadNpcs()
+    {
+        Logger.LogInformation("Loading NPCs");
+        coreHolder.NpcTemplates.Clear(); //TODO: make sure the old npcs are not referenced, or move them to the new npc references somehow?
+        var types = assembly!.GetTypes().Where(t => !t.IsAbstract && t.IsAssignableTo(typeof(INpc))).ToList();
+        Logger.LogInformation($"Found {types.Count} npcs");
+        foreach (var t in types)
+        {
+            var npc = ((INpc)Activator.CreateInstance(t)!);
+            coreHolder.NpcTemplates[npc.Id] = npc;
+        }
+    }
     private void LoadItems()
     {
         Logger.LogInformation("Loading Items");
-        coreHolder.Items.Clear(); //TODO: make sure the old items are not referenced, or move them to the new item references somehow?
+        coreHolder.ItemTemplates.Clear(); //TODO: make sure the old items are not referenced, or move them to the new item references somehow?
 
         var types = assembly!.GetTypes().Where(t => t.IsAssignableTo(typeof(IItem))).ToList();
         Logger.LogInformation($"Found {types.Count} items");
         foreach (var t in types)
-            coreHolder.Items.Add((IItem)Activator.CreateInstance(t)!);
+            coreHolder.ItemTemplates.Add((IItem)Activator.CreateInstance(t)!);
     }
 }
 
 public interface ICoreHolder
 {
-    List<IItem> Items { get; set; }
+    List<IItem> ItemTemplates { get; set; }
+    Dictionary<Enum, INpc> NpcTemplates { get; set; }
     IGameCore GameCore { get; set; }
     Type statsEnum { get; set; }
 }

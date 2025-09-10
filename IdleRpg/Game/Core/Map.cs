@@ -1,8 +1,6 @@
 ﻿using L1PathFinder;
 using MemoryPack;
 using MemoryPack.Compression;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System;
 using System.Diagnostics;
 
 namespace IdleRpg.Game.Core;
@@ -44,6 +42,7 @@ public class Map(string name)
     public L1PathPlanner Planner { get; private set; } = null!;
     //PathFindData PathFindData { get; set; } = null!;
     public InstanceType InstanceType { get; set; } = InstanceType.NoInstance;
+    public List<SpawnLocation> Spawns { get; set; } = new();
     public virtual void Load()
     {
         var filename = Path.Combine("Resources", "Games", GameService.CoreName, "Maps", $"{Name}.map");

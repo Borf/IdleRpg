@@ -1,6 +1,5 @@
 ﻿using IdleRpg.Game;
 using IdleRpg.Game.Core;
-using Rom.Core;
 using System;
 using System.Collections.Generic;
 using System.Linq;

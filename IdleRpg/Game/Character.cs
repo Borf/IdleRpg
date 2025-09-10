@@ -1,5 +1,6 @@
-﻿
-namespace IdleRpg.Game.Core;
+﻿using IdleRpg.Game.Core;
+
+namespace IdleRpg.Game;
 
 public class Character(IServiceProvider serviceProvider)
 {

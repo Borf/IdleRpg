@@ -12,7 +12,9 @@ public class GameService : ICoreHolder
     private readonly BgTaskManager BgTaskManager;
     private readonly IServiceProvider services;
     private CoreLoader CoreLoader;
-    public List<IItem> Items { get; set; } = new();
+    public Dictionary<Enum, INpc> NpcTemplates { get; set; } = new();
+    public List<IItem> ItemTemplates { get; set; } = new();
+
     private List<Map> Maps = new();
     private List<MapInstance> MapInstances = new();
     private List<Character> Characters = new();
@@ -49,7 +51,7 @@ public class GameService : ICoreHolder
             AllModifiers.Add(GameCore.CalculateInitialStat(stat));
         }
 
-        foreach (var item in Items.Where(item => item.GetType().IsAssignableTo(typeof(IEquippable))).Select(item => (IEquippable)item))
+        foreach (var item in ItemTemplates.Where(item => item.GetType().IsAssignableTo(typeof(IEquippable))).Select(item => (IEquippable)item))
             AllModifiers.AddRange(item.EquipEffects);
 
         _logger.LogInformation($"Found {AllModifiers.Count} modifiers in total");

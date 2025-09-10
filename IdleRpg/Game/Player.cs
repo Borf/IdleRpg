@@ -1,5 +1,4 @@
-﻿
-namespace IdleRpg.Game.Core;
+﻿namespace IdleRpg.Game;
 
 public class Player : Character
 {

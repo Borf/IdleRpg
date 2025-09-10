@@ -1,16 +1,17 @@
 ﻿using IdleRpg.Game;
 using IdleRpg.Game.Core;
-using Rom.Core;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TinyRpg.Core;
+using TinyRpg.Items;
 
 namespace Rom.Items.Equipment.Weapons.Swords;
 public class Cutlass : IEquippable
 {
-    public int Id => 10001;
+    public Enum Id => ItemIds.WeaponCutlass;
     public string Name => "Cutlass";
     public Enum EquipSlot => EquipSlots.Weapon;
     public string EquipDescription => "Attack + 3";

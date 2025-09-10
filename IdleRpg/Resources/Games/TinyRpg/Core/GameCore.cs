@@ -1,4 +1,4 @@
-﻿namespace Rom.Core;
+﻿namespace TinyRpg.Core;
 
 using IdleRpg.Game;
 using IdleRpg.Game.Attributes;
@@ -79,7 +79,7 @@ public class GameCore : IGameCore
 
     public void Damage(Character source, Character target, IDamageProperties damageProperties)
     {
-        var properties = (damageProperties as DamageProperties) ?? throw new Exception();
+        var properties = damageProperties as DamageProperties ?? throw new Exception();
         target.Stats[Stats.Hp] = Math.Max(0, target.Stats[Stats.Hp] - properties.Damage);
     }
     public bool IsAlive(Character character) => character.Stats[Stats.Hp] > 0;

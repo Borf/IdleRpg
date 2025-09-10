@@ -7,7 +7,7 @@ using System.Collections.Generic;
 
 public class RedPotion : IUsable
 {
-    public int Id => 1;
+    public Enum Id => TinyRpg.Items.ItemIds.RedPotion;
     public string Name => "Red Potion";
 
 }

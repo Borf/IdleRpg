@@ -2,6 +2,6 @@
 
 public interface IItem
 {
-    int Id { get; }
+    Enum Id { get; }
     string Name { get; }
 }
