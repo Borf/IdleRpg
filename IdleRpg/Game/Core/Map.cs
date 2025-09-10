@@ -67,6 +67,26 @@ public class Map(string name)
         Planner = L1PathPlanner.CreatePlanner(grid);
     }
 
+    public CellType this[int X, int Y]
+    {
+        get
+        {
+            if (MapData11 == null)
+                throw new InvalidOperationException("Map data is not loaded or is of an unsupported version.");
+            if (X < 0 || Y < 0 || X >= MapData11.Width || Y >= MapData11.Height)
+                return CellType.NotWalkable; // out of bounds
+            return MapData11.CellType[X, Y];
+        }
+        set
+        {
+            if (MapData11 == null)
+                throw new InvalidOperationException("Map data is not loaded or is of an unsupported version.");
+            if (X < 0 || Y < 0 || X >= MapData11.Width || Y >= MapData11.Height)
+                throw new ArgumentOutOfRangeException(X + ", " + Y, "Position is out of bounds.");
+            MapData11.CellType[X, Y] = value;
+        }
+    }
+
     public CellType this[Point pos]
     {
         get

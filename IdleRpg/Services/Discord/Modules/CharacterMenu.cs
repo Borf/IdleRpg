@@ -36,6 +36,9 @@ public class CharacterMenu : InteractionModuleBase<SocketInteractionContext>
                     new ButtonBuilder("Dress Up", "character:dressup",  ButtonStyle.Primary, emote: Emoji.Parse(":compass:")),
                 ])
                 .WithActionRow([
+                    new ButtonBuilder("Move", "character:move",  ButtonStyle.Primary, emote: Emoji.Parse(":compass:")),
+                ])
+                .WithActionRow([
                     new ButtonBuilder("Refresh", "character",           ButtonStyle.Secondary, emote: Emoji.Parse(":arrows_counterclockwise:")),
                     new ButtonBuilder("Back", "start",                  ButtonStyle.Secondary, emote: Emoji.Parse(":arrow_backward:")),
                 ])
@@ -86,6 +89,78 @@ public class CharacterMenu : InteractionModuleBase<SocketInteractionContext>
             c.Components = cb.Build();
                 
         });
+    }
+
+
+    [ComponentInteraction("character:move")]
+    public async Task CharacterMove()
+    {
+        await DeferAsync(ephemeral: true);
+        var character = gameService.GetCharacter(Context.User.Id);
+
+        int w = 15;
+        int h = 6;
+
+        var map = character.Location.MapInstance.Map;
+        var mapStr = "╔" + new string('═', w*2) + "╗\n";
+
+        for (var y = character.Location.Y - h; y < character.Location.Y + h; y++)
+        {
+            mapStr += "║";
+            for (var x =character.Location.X - w; x < character.Location.X + w; x++)
+            {
+                if (x < 0 || x >= map.Width || y < 0 || y >= map.Width)
+                    mapStr += "·";
+                else if (x == character.Location.X && y == character.Location.Y)
+                    mapStr += "☺";
+                else if (map[x, y].HasFlag(Game.Core.CellType.Walkable))
+                    mapStr += " ";
+                else if (!map[x, y].HasFlag(Game.Core.CellType.Walkable))
+                    mapStr += "█";
+            }
+            mapStr += "║\n";
+        }
+        mapStr += "╚" + new string('═', w*2) + "╝";
+
+        await ModifyOriginalResponseAsync(c =>
+        {
+            c.Components = new ComponentBuilderV2()
+                .WithTextDisplay("### Main Menu > Character > Move")
+                .WithSeparator()
+                .WithTextDisplay($"Your character:\n" +
+                $"- Your character is on {character.Location.MapInstance.Map.Name}, at {character.Location.X}, {character.Location.Y}\n")
+                .WithTextDisplay($"```ansi\n" + mapStr + "```")
+                .WithSeparator()
+                .WithActionRow([
+                    new ButtonBuilder(" ", "character:move:1", ButtonStyle.Secondary, emote: Emoji.Parse(":blue_square:")),
+                    new ButtonBuilder(" ", "character:move:u", ButtonStyle.Secondary, emote: Emoji.Parse(":arrow_up:")),
+                    new ButtonBuilder(" ", "character:move:2", ButtonStyle.Secondary, emote: Emoji.Parse(":blue_square:")),
+                ])
+                .WithActionRow([
+                    new ButtonBuilder(" ", "character:move:l", ButtonStyle.Secondary, emote: Emoji.Parse(":arrow_left:")),
+                    new ButtonBuilder(" ", "character:move:d", ButtonStyle.Secondary, emote: Emoji.Parse(":arrow_down:")),
+                    new ButtonBuilder(" ", "character:move:r", ButtonStyle.Secondary, emote: Emoji.Parse(":arrow_right:")),
+                ])
+                .WithActionRow([
+                    new ButtonBuilder("Refresh", "character:move", ButtonStyle.Secondary, emote: Emoji.Parse(":arrows_counterclockwise:")),
+                    new ButtonBuilder("Back", "character", ButtonStyle.Secondary, emote: Emoji.Parse(":arrow_backward:")),
+                ])
+                .Build();
+        });
+    }
+    [ComponentInteraction("character:move:*")]
+    public async Task CharacterDoMove(string direction)
+    {
+        var character = gameService.GetCharacter(Context.User.Id);
+        if (direction == "u")
+            character.Location.Y--;
+        else if (direction == "d")
+            character.Location.Y++;
+        else if (direction == "l")
+            character.Location.X--;
+        else if (direction == "r")
+            character.Location.X++;
+        await CharacterMove();
     }
 
 }

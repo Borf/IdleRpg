@@ -8,7 +8,7 @@ public class Character(IServiceProvider serviceProvider)
     
     public Dictionary<Enum, long> Stats { get; set; } = new();
 
-    public Location? Location { get; set; }
+    public Location Location { get; set; } = null!;
     public Status Status { get; set; } = Status.Idle;
     public IServiceProvider ServiceProvider { get; } = serviceProvider;
 

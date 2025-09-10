@@ -117,6 +117,7 @@ public class GameService : ICoreHolder
             Location = GameCore.SpawnLocation, //TODO
             Stats = dbCharacter.Stats.ToDictionary(s => (Enum)Enum.Parse(statsEnum, s.Stat), s => s.Value),
         };
+        character.Location.MapInstance.Characters.Add(character);
 
         return character;
     }
@@ -127,8 +128,11 @@ public class GameService : ICoreHolder
         Character newCharacter = new Character(services)
         {
             Id = id,
-            Stats = NotCalculatedStats.ToDictionary(s => s, s => 1L) //initialize with 1? or use gamecore initial stat calculation
+            Stats = NotCalculatedStats.ToDictionary(s => s, s => 1L), //initialize with 1? or use gamecore initial stat calculation
+            Status = Status.Idle,
+            Location = GameCore.SpawnLocation, //TODO
         };
+        newCharacter.Location.MapInstance.Characters.Add(newCharacter);
         return newCharacter;
     }
 

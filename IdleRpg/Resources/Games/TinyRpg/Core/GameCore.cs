@@ -30,26 +30,19 @@ public class GameCore : IGameCore
                     StatsUsed = [Stats.Level],
                     Calculation = (currentStats) => currentStats[Stats.Level],
                 },
-            Stats.MagicAttack =>
-                new StatModifier
-                {
-                    Stat = stat,
-                    StatsUsed = [Stats.Level],
-                    Calculation = (currentStats) => currentStats[Stats.Level],
-                },
-            Stats.MagicDefense =>
-                new StatModifier
-                {
-                    Stat = stat,
-                    StatsUsed = [Stats.Level],
-                    Calculation = (currentStats) => currentStats[Stats.Level],
-                },
             Stats.MaxHp =>
                 new StatModifier
                 {
                     Stat = stat,
                     StatsUsed = [Stats.Level],
                     Calculation = (currentStats) => 5 * currentStats[Stats.Level],
+                },
+            Stats.MaxSp =>
+                new StatModifier
+                {
+                    Stat = stat,
+                    StatsUsed = [Stats.Level],
+                    Calculation = (currentStats) => 3 * currentStats[Stats.Level],
                 },
             Stats.Dodge =>
                 new StatModifier
@@ -85,20 +78,20 @@ public class GameCore : IGameCore
     public Location SpawnLocation => new Location(10, 10) { MapInstance = Maps[0].MapInstance() };
 }
 
-
+// How do we determine death condition?
+// How do we handle multiple exp systems?
+// how do we handle multiple 'energy' systems (SP, adrenalin)
 public enum Stats
 {
     [NotCalculated, Group("Core")]
     Level,
+    [NotCalculated, Group("Core")]
+    Exp,
 
     [Group("Base")]
     Attack,
     [Group("Base")]
     Defense,
-    [Group("Base")]
-    MagicAttack,
-    [Group("Base")]
-    MagicDefense,
     [Group("Base")]
     Dodge,
     [Group("Base")]
@@ -108,7 +101,10 @@ public enum Stats
     Hp,
     [Group("Core", nameof(Hp))]
     MaxHp,
-
+    [NotCalculated, Group("Core")]
+    Sp,
+    [Group("Core", nameof(Sp))]
+    MaxSp,
 }
 
 
