@@ -17,7 +17,7 @@ public class GameService : ICoreHolder
 
     private List<Map> Maps = new();
     private List<MapInstance> MapInstances = new();
-    private List<Character> Characters = new();
+    private List<CharacterPlayer> Players = new();
     public IGameCore GameCore { get; set; } = null!;
     public Type statsEnum { get; set; } = null!;
     public List<StatModifier> sortedModifiers { get; set; } = new();
@@ -87,22 +87,22 @@ public class GameService : ICoreHolder
     }
 
 
-    public Character GetCharacter(ulong id)
+    public CharacterPlayer GetCharacter(ulong id)
     {
-        var character = Characters.FirstOrDefault(c => c.Id == id);
+        var character = Players.FirstOrDefault(c => c.Id == id);
         if (character == null)
         {
             character = LoadCharacter(id);
             if (character == null)
                 character = CreateCharacter(id);
             if (character != null)
-                Characters.Add(character);
+                Players.Add(character);
         }
 
         character?.CalculateStats();
         return character ?? throw new Exception("Could not get character");
     }
-    public Character? LoadCharacter(ulong id)
+    public CharacterPlayer? LoadCharacter(ulong id)
     {
         using var scope = services.CreateScope();
         using var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
@@ -111,7 +111,7 @@ public class GameService : ICoreHolder
             return null;
 
         _logger.LogInformation($"Loading character {dbCharacter.Name} from database", dbCharacter);
-        var character = new Character(services)
+        var character = new CharacterPlayer(services)
         {
             Id = id,
             Name = dbCharacter.Name,
@@ -124,10 +124,10 @@ public class GameService : ICoreHolder
         return character;
     }
 
-    public Character CreateCharacter(ulong id)
+    public CharacterPlayer CreateCharacter(ulong id)
     {
         _logger.LogInformation($"Creating character {id}");
-        Character newCharacter = new Character(services)
+        CharacterPlayer newCharacter = new CharacterPlayer(services)
         {
             Id = id,
             Stats = NotCalculatedStats.ToDictionary(s => s, s => 1L), //initialize with 1? or use gamecore initial stat calculation

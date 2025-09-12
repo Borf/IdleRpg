@@ -13,7 +13,7 @@ public class BasicAttack : ISkill
     public string Name => "Basic Attack";
     public SkillType SkillType => SkillType.Target;
 
-    public bool CanCast(Character character)
+    public bool CanCast(CharacterPlayer character)
     {
         return true;
     }

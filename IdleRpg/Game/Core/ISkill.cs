@@ -5,7 +5,7 @@ public interface ISkill
     int Id { get; }
     string Name { get; }
     SkillType SkillType { get; }
-    bool CanCast(Character character);
+    bool CanCast(CharacterPlayer character);
 }
 
 public enum SkillType
