@@ -1,6 +1,7 @@
 ﻿using L1PathFinder;
 using MemoryPack;
 using MemoryPack.Compression;
+using Microsoft.Extensions.DependencyInjection;
 using System.Diagnostics;
 
 namespace IdleRpg.Game.Core;
@@ -36,13 +37,14 @@ public enum CellType
 
 public class Map(string name)
 {
+    public bool Loaded = false;
     public string Name { get; private set; } = name;
     private Map_Base MapData = null!;
     private Map_v1_1? MapData11 => MapData as Map_v1_1;
     public L1PathPlanner Planner { get; private set; } = null!;
     //PathFindData PathFindData { get; set; } = null!;
     public InstanceType InstanceType { get; set; } = InstanceType.NoInstance;
-    public List<SpawnLocation> Spawns { get; set; } = new();
+    public List<SpawnTemplate> Spawns { get; set; } = new();
     public virtual void Load()
     {
         var filename = Path.Combine("Resources", "Games", GameService.CoreName, "Maps", $"{Name}.map");
@@ -110,23 +112,29 @@ public class Map(string name)
     public int Height => MapData11?.Height ?? throw new InvalidOperationException("Map data is not loaded or is of an unsupported version.");
 
     public List<MapInstance> MapInstances { get; private set; } = new();
-    public MapInstance MapInstance() 
+    public MapInstance MapInstance(IGameCore gameCore, IServiceProvider serviceProvider) 
     { 
-        if(InstanceType == InstanceType.NoInstance)
+        while(!Loaded)
+            Thread.Sleep(100);
+        if (InstanceType == InstanceType.NoInstance)
         {
             if (MapInstances.Count == 0)
-                MapInstances.Add(NewInstance());
+                MapInstances.Add(NewInstance(gameCore, serviceProvider));
             return MapInstances.First();
         }
         throw new NotImplementedException();
     }
 
-    public virtual MapInstance NewInstance() 
+    public virtual MapInstance NewInstance(IGameCore gameCore, IServiceProvider serviceProvider)
     { 
-        return new MapInstance()
+        var instance = new MapInstance()
         {
             Map = this,
         };
+        //TODO: this might take longer later, so put it in a b ackground thread
+        instance.LoadNpcs(gameCore, serviceProvider);
+
+        return instance;
     }
 
 }

@@ -1,6 +1,7 @@
 ﻿using IdleRpg.Data;
 using IdleRpg.Game.Attributes;
 using IdleRpg.Game.Core;
+using IdleRpg.Util;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
 namespace IdleRpg.Game;
@@ -10,7 +11,7 @@ public class GameService : ICoreHolder
     public const string CoreName = "TinyRpg";
     private readonly ILogger<GameService> _logger;
     private readonly BgTaskManager BgTaskManager;
-    private readonly IServiceProvider services;
+    private readonly IServiceProvider serviceProvider;
     private CoreLoader CoreLoader;
     public Dictionary<Enum, INpc> NpcTemplates { get; set; } = new();
     public List<IItem> ItemTemplates { get; set; } = new();
@@ -30,7 +31,7 @@ public class GameService : ICoreHolder
         BgTaskManager = bgTaskManager;
         CoreLoader = new CoreLoader(CoreName, loggerFactory.CreateLogger<CoreLoader>(), this);
         bgTask = new BgTask("Main Game Loop", BackgroundLoop);
-        this.services = services;
+        this.serviceProvider = services;
     }
 
     public async Task StartAsync(CancellationToken cancellationToken)
@@ -77,9 +78,8 @@ public class GameService : ICoreHolder
         SemaphoreSlim LoadSemaphore = new SemaphoreSlim(6); // 6 maps at the same time
         List<Task> loadTasks = new();
         foreach (var map in Maps)
-            loadTasks.Add(Task.Run(async () => { await LoadSemaphore.WaitAsync(); try { _logger.LogInformation($"Loading map {map.Name}"); map.Load(); } finally { LoadSemaphore.Release(); } }));
+            loadTasks.Add(Task.Run(async () => { await LoadSemaphore.WaitAsync(); try { _logger.LogInformation($"Loading map {map.Name}"); map.Load(); map.Loaded = true; } finally { LoadSemaphore.Release(); } }));
         await Task.WhenAll(loadTasks.ToArray());
-
         _logger.LogInformation($"Loaded {Maps.Count} maps");
 
         BgTaskManager.Run(bgTask);
@@ -104,19 +104,19 @@ public class GameService : ICoreHolder
     }
     public CharacterPlayer? LoadCharacter(ulong id)
     {
-        using var scope = services.CreateScope();
+        using var scope = serviceProvider.CreateScope();
         using var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
         var dbCharacter = context.Characters.Include(c => c.Stats).FirstOrDefault(c => c.Id == id);
         if(dbCharacter == null)
             return null;
 
         _logger.LogInformation($"Loading character {dbCharacter.Name} from database", dbCharacter);
-        var character = new CharacterPlayer(services)
+        var character = new CharacterPlayer(serviceProvider)
         {
             Id = id,
             Name = dbCharacter.Name,
             Status = Status.Idle,
-            Location = GameCore.SpawnLocation, //TODO
+            Location = GetLocation(GameCore.SpawnLocation), //TODO
             Stats = dbCharacter.Stats.ToDictionary(s => (Enum)Enum.Parse(statsEnum, s.Stat), s => s.Value),
         };
         character.Location.MapInstance.Characters.Add(character);
@@ -124,15 +124,25 @@ public class GameService : ICoreHolder
         return character;
     }
 
+    private Location GetLocation((Point position, string mapName) spawnLocation)
+    {
+        var map = Maps.First(map => map.Name == spawnLocation.mapName);
+        var instance = map.MapInstance(GameCore, serviceProvider);
+        return new Location(spawnLocation.position.X, spawnLocation.position.Y)
+        {
+            MapInstance = instance
+        };
+    }
+
     public CharacterPlayer CreateCharacter(ulong id)
     {
         _logger.LogInformation($"Creating character {id}");
-        CharacterPlayer newCharacter = new CharacterPlayer(services)
+        CharacterPlayer newCharacter = new CharacterPlayer(serviceProvider)
         {
             Id = id,
             Stats = NotCalculatedStats.ToDictionary(s => s, s => 1L), //initialize with 1? or use gamecore initial stat calculation
             Status = Status.Idle,
-            Location = GameCore.SpawnLocation, //TODO
+            Location = GetLocation(GameCore.SpawnLocation), //TODO
         };
         newCharacter.Location.MapInstance.Characters.Add(newCharacter);
         return newCharacter;

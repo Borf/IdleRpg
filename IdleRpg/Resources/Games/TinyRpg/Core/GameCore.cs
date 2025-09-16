@@ -3,6 +3,7 @@
 using IdleRpg.Game;
 using IdleRpg.Game.Attributes;
 using IdleRpg.Game.Core;
+using IdleRpg.Util;
 using System;
 using System.Collections.Generic;
 using TinyRpg.Maps;
@@ -61,21 +62,16 @@ public class GameCore : IGameCore
             _ => throw new Exception("Requested stat that is not implemented: " + stat.ToString()),
         };
     }
-    //should this be a dictionary or a list indexed by an enum?
-    private List<Map> Maps = new List<Map>();
-
     public List<Map> LoadMaps()
-    {
-        Maps = new List<Map>()
+    { 
+        return new List<Map>()
         {
             new WorldMap()
         };
-
-        return Maps;
     }
 
 
-    public Location SpawnLocation => new Location(10, 10) { MapInstance = Maps[0].MapInstance() };
+    public (Point position, string mapName) SpawnLocation => (new Point(10, 10), nameof(WorldMap));
 
     public void Damage(Character source, Character target, IDamageProperties damageProperties)
     {

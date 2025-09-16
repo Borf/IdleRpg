@@ -30,6 +30,7 @@ builder.Services.AddRazorComponents()
 builder.Services.AddDiscord();
 builder.Services.AddSingleton<GameService>();
 builder.Services.AddHostedService<GameHostedService>();
+builder.Services.AddSingleton<ICoreHolder>(sp => sp.GetRequiredService<GameService>());
 builder.Services.AddSingleton<BgTaskManager>();
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddScoped<IdentityUserAccessor>();

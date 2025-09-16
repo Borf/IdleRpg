@@ -28,13 +28,13 @@ public class WorldMap : Map
 
         // warp portals 'n stuff
 
-        Spawns.Add(new SpawnLocation()
+        Spawns.Add(new SpawnTemplate()
         {
             Position = new Point(5, 5),
             Amount = 5,
             Mob = Npcs.NpcIds.Slime,
             Range = 5,
-            RespawnTime = TimeSpan.FromMinutes(1),
+            RespawnTime = TimeSpan.FromSeconds(2),
             SpawnType = SpawnType.Sphere
         });
     }

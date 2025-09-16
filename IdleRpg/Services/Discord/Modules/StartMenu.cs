@@ -40,6 +40,7 @@ public class StartMenu : InteractionModuleBase<SocketInteractionContext>
         int h = 6;
 
         var map = character.Location.MapInstance.Map;
+        var characters = character.Location.MapInstance.GetCharactersAround(character.Location, 20).Where(c => c != character);
         var mapStr = "╔" + new string('═', w * 2) + "╗\n";
 
         for (var y = character.Location.Y - h; y < character.Location.Y + h; y++)
@@ -49,6 +50,8 @@ public class StartMenu : InteractionModuleBase<SocketInteractionContext>
             {
                 if (x < 0 || x >= map.Width || y < 0 || y >= map.Width)
                     mapStr += "·";
+                else if(characters.Any(c => c.Location.X == x && c.Location.Y == y))
+                    mapStr += "☻";
                 else if (x == character.Location.X && y == character.Location.Y)
                     mapStr += "☺";
                 else if (map[x, y].HasFlag(Game.Core.CellType.Walkable))

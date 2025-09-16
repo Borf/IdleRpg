@@ -1,4 +1,6 @@
-﻿namespace IdleRpg.Game.Core;
+﻿using IdleRpg.Util;
+
+namespace IdleRpg.Game.Core;
 
 
 public interface IGameCore
@@ -7,7 +9,7 @@ public interface IGameCore
     StatModifier CalculateInitialStat(Enum s);
     List<Map> LoadMaps();
 
-    Location SpawnLocation { get; }
+    public (Point position, string mapName) SpawnLocation { get; }
     void Damage(Character source, Character target, IDamageProperties damageProperties);
     bool IsAlive(Character chacater);
 }
