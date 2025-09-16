@@ -14,6 +14,7 @@ public class Slime : Mob
         { Core.Stats.Hp, 4 },
         { Core.Stats.Level, 1 },
     };
+    public override int AgroRange => 0;
 
     public override List<ItemDrop> ItemDrops => [ new ItemDrop() { Item = ItemIds.RedPotion, DropChance = 1 }];
 }

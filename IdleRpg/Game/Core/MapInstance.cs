@@ -31,9 +31,12 @@ public class MapInstance
                     if (spawner.SpawnedNpcs.Count < spawn.Amount)
                     {
                         //TODO: bound check!
-                        var location = new Location(spawner.SpawnTemplate.Position.X + Random.Shared.Next(-spawner.SpawnTemplate.Range, spawner.SpawnTemplate.Range), spawner.SpawnTemplate.Position.Y + Random.Shared.Next(-spawner.SpawnTemplate.Range, spawner.SpawnTemplate.Range)) { MapInstance = this };
+                        var location = new Location(spawner.SpawnTemplate.Position.X, spawner.SpawnTemplate.Position.Y) { MapInstance = this };
                         var otherChars = GetCharactersAround(location, spawner.SpawnTemplate.Range);
-                        while(otherChars.Any(c => c.Location.X == location.X && c.Location.Y == location.Y) || Map[location.X, location.Y].HasFlag(CellType.NotWalkable))
+                        while(location.X < 0 || location.X >= location.MapInstance.Map.Width ||
+                              location.Y < 0 || location.Y >= location.MapInstance.Map.Height || 
+                              otherChars.Any(c => c.Location.X == location.X && c.Location.Y == location.Y) || 
+                              Map[location.X, location.Y].HasFlag(CellType.NotWalkable))
                             location = new Location(spawner.SpawnTemplate.Position.X + Random.Shared.Next(-spawner.SpawnTemplate.Range, spawner.SpawnTemplate.Range), spawner.SpawnTemplate.Position.Y + Random.Shared.Next(-spawner.SpawnTemplate.Range, spawner.SpawnTemplate.Range)) { MapInstance = this };
                         var npc = new CharacterNPC(serviceProvider)
                         {
