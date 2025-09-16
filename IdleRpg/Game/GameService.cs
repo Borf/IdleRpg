@@ -1,6 +1,7 @@
 ﻿using IdleRpg.Data;
 using IdleRpg.Game.Attributes;
 using IdleRpg.Game.Core;
+using IdleRpg.Game.PlayerState;
 using IdleRpg.Util;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
@@ -115,7 +116,6 @@ public class GameService : ICoreHolder
         {
             Id = id,
             Name = dbCharacter.Name,
-            Status = Status.Idle,
             Location = GetLocation(GameCore.SpawnLocation), //TODO
             Stats = dbCharacter.Stats.ToDictionary(s => (Enum)Enum.Parse(statsEnum, s.Stat), s => s.Value),
         };
@@ -141,7 +141,6 @@ public class GameService : ICoreHolder
         {
             Id = id,
             Stats = NotCalculatedStats.ToDictionary(s => s, s => 1L), //initialize with 1? or use gamecore initial stat calculation
-            Status = Status.Idle,
             Location = GetLocation(GameCore.SpawnLocation), //TODO
         };
         newCharacter.Location.MapInstance.Characters.Add(newCharacter);

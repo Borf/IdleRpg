@@ -70,7 +70,7 @@ public class StartMenu : InteractionModuleBase<SocketInteractionContext>
                 .WithSeparator()
                 .WithMediaGallery(["https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/250740/ss_a8ed2612270b0080b514ddcf364f7142dc599581.600x338.jpg?t=1566831836"])
                 .WithTextDisplay($"Your character:\n" +
-                $"- Your character is {character.Status}\n" +
+                $"- Your character is {character.State.GetType()}\n" +
                 $"- Your character is on {character.Location.MapInstance.Map.Name}, at {character.Location.X}, {character.Location.Y}\n" +
                 "")
                 .WithTextDisplay($"```\n" + mapStr + "```")
