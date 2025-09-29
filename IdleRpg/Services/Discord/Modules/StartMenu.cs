@@ -1,6 +1,9 @@
 ﻿using Discord;
 using Discord.Interactions;
 using IdleRpg.Game;
+using IdleRpg.Util;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
 using System.Runtime.InteropServices;
 
 namespace IdleRpg.Services.Discord.Modules;
@@ -8,10 +11,12 @@ namespace IdleRpg.Services.Discord.Modules;
 public class StartMenu : InteractionModuleBase<SocketInteractionContext>
 {
     private GameService gameService;
+    private MapGeneratorService mapGenerator;
 
-    public StartMenu(GameService gameService)
+    public StartMenu(GameService gameService, MapGeneratorService mapGenerator)
     {
         this.gameService = gameService;
+        this.mapGenerator = mapGenerator;
     }
 
     [ComponentInteraction("start:new")]
@@ -28,6 +33,7 @@ public class StartMenu : InteractionModuleBase<SocketInteractionContext>
     [ComponentInteraction("start")]
     public async Task StartReplace()
     {
+        //if(Context.Interaction.HasResponded)
         await DeferAsync(ephemeral: true);
         await UpdateStart();
     }
@@ -35,45 +41,20 @@ public class StartMenu : InteractionModuleBase<SocketInteractionContext>
     public async Task UpdateStart()
     {
         var character = gameService.GetCharacter(Context.User.Id);
+        using var mapStream = mapGenerator.GenerateMapImage(character, 128, 2).AsPngStream();
 
-        int w = 15;
-        int h = 6;
-
-        var map = character.Location.MapInstance.Map;
-        var characters = character.Location.MapInstance.GetCharactersAround(character.Location, 20).Where(c => c != character);
-        var mapStr = "╔" + new string('═', w * 2) + "╗\n";
-
-        for (var y = character.Location.Y - h; y < character.Location.Y + h; y++)
-        {
-            mapStr += "║";
-            for (var x = character.Location.X - w; x < character.Location.X + w; x++)
-            {
-                if (x < 0 || x >= map.Width || y < 0 || y >= map.Width)
-                    mapStr += "·";
-                else if(characters.Any(c => c.Location.X == x && c.Location.Y == y))
-                    mapStr += "☻";
-                else if (x == character.Location.X && y == character.Location.Y)
-                    mapStr += "☺";
-                else if (map[x, y].HasFlag(Game.Core.CellType.Walkable))
-                    mapStr += " ";
-                else if (!map[x, y].HasFlag(Game.Core.CellType.Walkable))
-                    mapStr += "█";
-            }
-            mapStr += "║\n";
-        }
-        mapStr += "╚" + new string('═', w * 2) + "╝";
 
         await ModifyOriginalResponseAsync(c =>
         {
+            c.Attachments = new List<FileAttachment>() { new FileAttachment(mapStream, "map.png") };
             c.Components = new ComponentBuilderV2()
                 .WithTextDisplay("### Main Menu")
                 .WithSeparator()
-                .WithMediaGallery(["https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/250740/ss_a8ed2612270b0080b514ddcf364f7142dc599581.600x338.jpg?t=1566831836"])
+                .WithMediaGallery(["https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/250740/ss_a8ed2612270b0080b514ddcf364f7142dc599581.600x338.jpg?t=1566831836", "attachment://map.png"])
                 .WithTextDisplay($"Your character:\n" +
                 $"- Your character is {character.Status}\n" +
                 $"- Your character is on {character.Location.MapInstance.Map.Name}, at {character.Location.X}, {character.Location.Y}\n" +
                 "")
-                .WithTextDisplay($"```\n" + mapStr + "```")
                 .WithSeparator()
                 .WithActionRow([
                     new ButtonBuilder("Character", "character", ButtonStyle.Primary, emote: Emoji.Parse(":man_mage:")),

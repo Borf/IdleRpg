@@ -3,16 +3,18 @@ using Discord.Interactions;
 using IdleRpg.Game;
 using IdleRpg.Game.Attributes;
 using IdleRpg.Util;
+using SixLabors.ImageSharp;
 
 namespace IdleRpg.Services.Discord.Modules;
 
 public class CharacterMenu : InteractionModuleBase<SocketInteractionContext>
 {
     private GameService gameService;
-
-    public CharacterMenu(GameService gameService)
+    private MapGeneratorService mapGenerator;
+    public CharacterMenu(GameService gameService, MapGeneratorService mapGenerator)
     {
         this.gameService = gameService;
+        this.mapGenerator = mapGenerator;
     }
 
     [ComponentInteraction("character")]
@@ -98,48 +100,22 @@ public class CharacterMenu : InteractionModuleBase<SocketInteractionContext>
         await DeferAsync(ephemeral: true);
         var character = gameService.GetCharacter(Context.User.Id);
 
-        int w = 15;
-        int h = 6;
+        using var mapStream = mapGenerator.GenerateMapImage(character, 512, 8).AsPngStream();
 
-        var map = character.Location.MapInstance.Map;
-        var mapStr = "╔" + new string('═', w*2) + "╗\n";
-
-        for (var y = character.Location.Y - h; y < character.Location.Y + h; y++)
-        {
-            mapStr += "║";
-            for (var x =character.Location.X - w; x < character.Location.X + w; x++)
-            {
-                if (x < 0 || x >= map.Width || y < 0 || y >= map.Width)
-                    mapStr += "·";
-                else if (x == character.Location.X && y == character.Location.Y)
-                    mapStr += "☺";
-                else if (map[x, y].HasFlag(Game.Core.CellType.Walkable))
-                    mapStr += " ";
-                else if (!map[x, y].HasFlag(Game.Core.CellType.Walkable))
-                    mapStr += "█";
-            }
-            mapStr += "║\n";
-        }
-        mapStr += "╚" + new string('═', w*2) + "╝";
 
         await ModifyOriginalResponseAsync(c =>
         {
+            c.Attachments = new List<FileAttachment>() { new FileAttachment(mapStream, "map.png") };
             c.Components = new ComponentBuilderV2()
                 .WithTextDisplay("### Main Menu > Character > Move")
                 .WithSeparator()
                 .WithTextDisplay($"Your character:\n" +
                 $"- Your character is on {character.Location.MapInstance.Map.Name}, at {character.Location.X}, {character.Location.Y}\n")
-                .WithTextDisplay($"```ansi\n" + mapStr + "```")
+                .WithMediaGallery(["attachment://map.png"])
                 .WithSeparator()
                 .WithActionRow([
-                    new ButtonBuilder(" ", "character:move:1", ButtonStyle.Secondary, emote: Emoji.Parse(":blue_square:")),
-                    new ButtonBuilder(" ", "character:move:u", ButtonStyle.Secondary, emote: Emoji.Parse(":arrow_up:")),
-                    new ButtonBuilder(" ", "character:move:2", ButtonStyle.Secondary, emote: Emoji.Parse(":blue_square:")),
-                ])
-                .WithActionRow([
-                    new ButtonBuilder(" ", "character:move:l", ButtonStyle.Secondary, emote: Emoji.Parse(":arrow_left:")),
-                    new ButtonBuilder(" ", "character:move:d", ButtonStyle.Secondary, emote: Emoji.Parse(":arrow_down:")),
-                    new ButtonBuilder(" ", "character:move:r", ButtonStyle.Secondary, emote: Emoji.Parse(":arrow_right:")),
+                    new ButtonBuilder("Walk around", "character:move:walk", ButtonStyle.Secondary, emote: Emoji.Parse(":person_walking:")),
+                    new ButtonBuilder("Move on worldmap", "character:move:worldmap", ButtonStyle.Secondary, emote: Emoji.Parse(":map:")),
                 ])
                 .WithActionRow([
                     new ButtonBuilder("Refresh", "character:move", ButtonStyle.Secondary, emote: Emoji.Parse(":arrows_counterclockwise:")),
@@ -148,8 +124,121 @@ public class CharacterMenu : InteractionModuleBase<SocketInteractionContext>
                 .Build();
         });
     }
-    [ComponentInteraction("character:move:*")]
-    public async Task CharacterDoMove(string direction)
+
+
+    [ComponentInteraction("character:move:worldmap")]
+    public async Task CharacterWorldmap() => await CharacterWorldmap(0, 0, 1);
+    [ComponentInteraction("character:move:worldmap:*:*:*")]
+    public async Task CharacterWorldmap(int centerX, int centerY, int zoom)
+    {
+        await DeferAsync(ephemeral: true);
+        var character = gameService.GetCharacter(Context.User.Id);
+        using var mapStream = mapGenerator.GenerateWorldMapImage(character, centerX, centerY, zoom).AsPngStream();
+        await ModifyOriginalResponseAsync(c =>
+        {
+            c.Attachments = new List<FileAttachment>() { new FileAttachment(mapStream, "map.png") };
+            c.Components = new ComponentBuilderV2()
+                .WithTextDisplay("### Main Menu > Character > Move > Worldmap")
+                .WithSeparator()
+                .WithTextDisplay($"Your character:\n" +
+                $"- Your character is on {character.Location.MapInstance.Map.Name}, at {character.Location.X}, {character.Location.Y}\n" +
+                $"- Map: {centerX} {centerY} {zoom}")
+                .WithMediaGallery(["attachment://map.png"])
+                .WithSeparator()
+                .WithActionRow([
+                    new ButtonBuilder("A1", $"character:move:worldmap2:{centerX}:{centerY}:{zoom}:A1", ButtonStyle.Secondary),
+                    new ButtonBuilder("A2", $"character:move:worldmap2:{centerX}:{centerY}:{zoom}:A2", ButtonStyle.Secondary),
+                    new ButtonBuilder("A3", $"character:move:worldmap2:{centerX}:{centerY}:{zoom}:A3", ButtonStyle.Secondary),
+                    new ButtonBuilder("A4", $"character:move:worldmap2:{centerX}:{centerY}:{zoom}:A4", ButtonStyle.Secondary),
+                ])                          
+                .WithActionRow([            
+                    new ButtonBuilder("B1", $"character:move:worldmap2:{centerX}:{centerY}:{zoom}:B1", ButtonStyle.Secondary),
+                    new ButtonBuilder("B2", $"character:move:worldmap2:{centerX}:{centerY}:{zoom}:B2", ButtonStyle.Secondary),
+                    new ButtonBuilder("B3", $"character:move:worldmap2:{centerX}:{centerY}:{zoom}:B3", ButtonStyle.Secondary),
+                    new ButtonBuilder("B4", $"character:move:worldmap2:{centerX}:{centerY}:{zoom}:B4", ButtonStyle.Secondary),
+                ])                          
+                .WithActionRow([            
+                    new ButtonBuilder("C1", $"character:move:worldmap2:{centerX}:{centerY}:{zoom}:C1", ButtonStyle.Secondary),
+                    new ButtonBuilder("C2", $"character:move:worldmap2:{centerX}:{centerY}:{zoom}:C2", ButtonStyle.Secondary),
+                    new ButtonBuilder("C3", $"character:move:worldmap2:{centerX}:{centerY}:{zoom}:C3", ButtonStyle.Secondary),
+                    new ButtonBuilder("C4", $"character:move:worldmap2:{centerX}:{centerY}:{zoom}:C4", ButtonStyle.Secondary),
+                ])                          
+                .WithActionRow([            
+                    new ButtonBuilder("D1", $"character:move:worldmap2:{centerX}:{centerY}:{zoom}:D1", ButtonStyle.Secondary),
+                    new ButtonBuilder("D2", $"character:move:worldmap2:{centerX}:{centerY}:{zoom}:D2", ButtonStyle.Secondary),
+                    new ButtonBuilder("D3", $"character:move:worldmap2:{centerX}:{centerY}:{zoom}:D3", ButtonStyle.Secondary),
+                    new ButtonBuilder("D4", $"character:move:worldmap2:{centerX}:{centerY}:{zoom}:D4", ButtonStyle.Secondary),
+                ])
+                .WithActionRow([
+                    new ButtonBuilder("Refresh", $"character:move:worldmap:{centerX}:{centerY}:{zoom}", ButtonStyle.Secondary, emote: Emoji.Parse(":arrows_counterclockwise:")),
+                    new ButtonBuilder("Back", "character:move", ButtonStyle.Secondary, emote: Emoji.Parse(":arrow_backward:")),
+                ])
+                .Build();
+        });
+    }
+
+    [ComponentInteraction("character:move:worldmap2:*:*:*:*")]
+    public async Task CharacterWorldmapMove(int centerX, int centerY, int zoom, string newTile)
+    {
+        var character = gameService.GetCharacter(Context.User.Id);
+        var map = character.Location.MapInstance.Map;
+
+        var eightX = map.Width / zoom / 8;
+        var eightY = map.Height / zoom / 8;
+
+        //-3, -1, 1, 3
+        var x = ("ABCD".IndexOf(newTile[0]) * 2 - 3);
+        var y = ("1234".IndexOf(newTile[1]) * 2 - 3);
+
+        centerX += eightX * x;
+        centerY += eightY * y;
+
+        zoom *= 4;
+        await CharacterWorldmap(centerX, centerY, zoom);
+    }
+
+
+
+
+
+    [ComponentInteraction("character:move:walk")]
+    public async Task CharacterWalk()
+    {
+        await DeferAsync(ephemeral: true);
+        var character = gameService.GetCharacter(Context.User.Id);
+        using var mapStream = mapGenerator.GenerateMapImage(character, 512, 8).AsPngStream();
+        await ModifyOriginalResponseAsync(c =>
+        {
+            c.Attachments = new List<FileAttachment>() { new FileAttachment(mapStream, "map.png") };
+            c.Components = new ComponentBuilderV2()
+                .WithTextDisplay("### Main Menu > Character > Move > Walk")
+                .WithSeparator()
+                .WithTextDisplay($"Your character:\n" +
+                $"- Your character is on {character.Location.MapInstance.Map.Name}, at {character.Location.X}, {character.Location.Y}\n")
+                .WithMediaGallery(["attachment://map.png"])
+                .WithSeparator()
+                .WithActionRow([
+                    new ButtonBuilder(" ", "character:walk:1", ButtonStyle.Secondary, emote: Emoji.Parse(":blue_square:")),
+                    new ButtonBuilder(" ", "character:walk:u", ButtonStyle.Secondary, emote: Emoji.Parse(":arrow_up:")),
+                    new ButtonBuilder(" ", "character:walk:2", ButtonStyle.Secondary, emote: Emoji.Parse(":blue_square:")),
+                ])
+                .WithActionRow([
+                    new ButtonBuilder(" ", "character:walk:l", ButtonStyle.Secondary, emote: Emoji.Parse(":arrow_left:")),
+                    new ButtonBuilder(" ", "character:walk:d", ButtonStyle.Secondary, emote: Emoji.Parse(":arrow_down:")),
+                    new ButtonBuilder(" ", "character:walk:r", ButtonStyle.Secondary, emote: Emoji.Parse(":arrow_right:")),
+                ])
+                .WithActionRow([
+                    new ButtonBuilder("Refresh", "character:walk", ButtonStyle.Secondary, emote: Emoji.Parse(":arrows_counterclockwise:")),
+                    new ButtonBuilder("Back", "character:move", ButtonStyle.Secondary, emote: Emoji.Parse(":arrow_backward:")),
+                ])
+                .Build();
+        });
+    }
+
+
+
+    [ComponentInteraction("character:move:walk:*")]
+    public async Task CharacterDoWalk(string direction)
     {
         var character = gameService.GetCharacter(Context.User.Id);
         if (direction == "u")
@@ -160,7 +249,7 @@ public class CharacterMenu : InteractionModuleBase<SocketInteractionContext>
             character.Location.X--;
         else if (direction == "r")
             character.Location.X++;
-        await CharacterMove();
+        await CharacterWalk();
     }
 
 }

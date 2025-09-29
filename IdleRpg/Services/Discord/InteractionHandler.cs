@@ -12,13 +12,15 @@ public class InteractionHandler : IHostedService
     private readonly InteractionService _handler;
     private readonly IServiceProvider _services;
     private readonly IConfiguration _configuration;
+    private readonly ILogger<InteractionHandler> _logger;
 
-    public InteractionHandler(DiscordSocketClient client, InteractionService handler, IServiceProvider services, IConfiguration config)
+    public InteractionHandler(DiscordSocketClient client, InteractionService handler, IServiceProvider services, IConfiguration config, ILogger<InteractionHandler> logger)
     {
         _client = client;
         _handler = handler;
         _services = services;
         _configuration = config;
+        _logger = logger;
     }
 
     public async Task StartAsync(CancellationToken cancellationToken)
@@ -45,6 +47,13 @@ public class InteractionHandler : IHostedService
     {
         try
         {
+            string name = "";
+            if (interaction is SocketCommandBase interact)
+                name = interact.CommandName;
+            else if (interaction.Data.GetType().Name == "MessageComponentInteractionData")
+                name = interaction.Data.GetType().GetProperty("CustomId")?.GetValue(interaction.Data)?.ToString() ?? "";
+
+            _logger.LogInformation($"Got interaction {name} from {interaction.User.Username} in {interaction.Channel.Name}");
             var context = new SocketInteractionContext(_client, interaction);
             var result = await _handler.ExecuteCommandAsync(context, _services);
             if (!result.IsSuccess)
@@ -60,6 +69,7 @@ public class InteractionHandler : IHostedService
         }
         catch
         {
+            await interaction.RespondAsync("Error!");
             //if (interaction.Type is InteractionType.ApplicationCommand)
             //    await interaction.GetOriginalResponseAsync().ContinueWith(async (msg) => await msg.Result.DeleteAsync());
         }
