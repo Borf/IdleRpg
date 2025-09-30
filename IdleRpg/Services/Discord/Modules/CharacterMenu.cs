@@ -218,17 +218,17 @@ public class CharacterMenu : InteractionModuleBase<SocketInteractionContext>
                 .WithMediaGallery(["attachment://map.png"])
                 .WithSeparator()
                 .WithActionRow([
-                    new ButtonBuilder(" ", "character:walk:1", ButtonStyle.Secondary, emote: Emoji.Parse(":blue_square:")),
-                    new ButtonBuilder(" ", "character:walk:u", ButtonStyle.Secondary, emote: Emoji.Parse(":arrow_up:")),
-                    new ButtonBuilder(" ", "character:walk:2", ButtonStyle.Secondary, emote: Emoji.Parse(":blue_square:")),
+                    new ButtonBuilder(" ", "character:move:walk:1", ButtonStyle.Secondary, emote: Emoji.Parse(":blue_square:")),
+                    new ButtonBuilder(" ", "character:move:walk:u", ButtonStyle.Secondary, emote: Emoji.Parse(":arrow_up:")),
+                    new ButtonBuilder(" ", "character:move:walk:2", ButtonStyle.Secondary, emote: Emoji.Parse(":blue_square:")),
                 ])
                 .WithActionRow([
-                    new ButtonBuilder(" ", "character:walk:l", ButtonStyle.Secondary, emote: Emoji.Parse(":arrow_left:")),
-                    new ButtonBuilder(" ", "character:walk:d", ButtonStyle.Secondary, emote: Emoji.Parse(":arrow_down:")),
-                    new ButtonBuilder(" ", "character:walk:r", ButtonStyle.Secondary, emote: Emoji.Parse(":arrow_right:")),
+                    new ButtonBuilder(" ", "character:move:walk:l", ButtonStyle.Secondary, emote: Emoji.Parse(":arrow_left:")),
+                    new ButtonBuilder(" ", "character:move:walk:d", ButtonStyle.Secondary, emote: Emoji.Parse(":arrow_down:")),
+                    new ButtonBuilder(" ", "character:move:walk:r", ButtonStyle.Secondary, emote: Emoji.Parse(":arrow_right:")),
                 ])
                 .WithActionRow([
-                    new ButtonBuilder("Refresh", "character:walk", ButtonStyle.Secondary, emote: Emoji.Parse(":arrows_counterclockwise:")),
+                    new ButtonBuilder("Refresh", "character:move:walk", ButtonStyle.Secondary, emote: Emoji.Parse(":arrows_counterclockwise:")),
                     new ButtonBuilder("Back", "character:move", ButtonStyle.Secondary, emote: Emoji.Parse(":arrow_backward:")),
                 ])
                 .Build();
