@@ -2,8 +2,9 @@
 
 namespace IdleRpg.Game;
 
-public class CharacterNPC : CharacterPlayer
+public class CharacterNPC : Character
 {
+    public ICharacterState<CharacterNPC> State { get; set; }
     INpc npcTemplate;
     BgTask AiTask;
     public Spawner? Spawner { get; set; }
