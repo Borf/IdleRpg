@@ -13,7 +13,7 @@ public class GameService : ICoreHolder
     private readonly BgTaskManager BgTaskManager;
     private readonly IServiceProvider serviceProvider;
     private CoreLoader CoreLoader;
-    public Dictionary<Enum, INpc> NpcTemplates { get; set; } = new();
+    public Dictionary<Enum, INpcTemplate> NpcTemplates { get; set; } = new();
     public List<IItem> ItemTemplates { get; set; } = new();
 
     private List<Map> Maps = new();
