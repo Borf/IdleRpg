@@ -4,29 +4,25 @@ namespace IdleRpg.Game;
 
 public class CharacterNPC : Character
 {
-    public ICharacterState<CharacterNPC> State { get; set; }
-    INpc npcTemplate;
+//    public ICharacterState<CharacterNPC> State { get; set; }
+    public INpc NpcTemplate { get; set; }
     BgTask AiTask;
     public Spawner? Spawner { get; set; }
     
-    public CharacterNPC(IServiceProvider serviceProvider) : base(serviceProvider)
+    public CharacterNPC(IServiceProvider serviceProvider, INpc npcTemplate) : base(serviceProvider)
     {
-    }
-
-    public void LoadFromNpc(INpc npc)
-    {
-        npcTemplate = npc;
-        Name = npc.Name;
-        foreach(var stat in npc.Stats)
+        NpcTemplate = npcTemplate;
+        Name = npcTemplate.Name;
+        foreach (var stat in npcTemplate.Stats)
         {
             Stats[stat.Key] = stat.Value;
         }
+        AiTask = new BgTask("AiTask " + Name, async (token) => await AiRunner(token, serviceProvider));
     }
 
     public void Start(IServiceProvider serviceProvider)
     {
         var bgTaskManager = serviceProvider.GetRequiredService<BgTaskManager>();
-        AiTask = new BgTask("AiTask " + Name, async (token) => await AiRunner(token, serviceProvider));
         bgTaskManager.Run(AiTask);
     }
 

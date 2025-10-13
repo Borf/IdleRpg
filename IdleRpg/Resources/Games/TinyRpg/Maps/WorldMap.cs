@@ -30,7 +30,7 @@ public class WorldMap : Map
 
         Spawns.Add(new SpawnTemplate()
         {
-            Position = new Point(5, 5),
+            Position = new Point(20, 20),
             Amount = 5,
             Mob = Npcs.NpcIds.Slime,
             Range = 5,

@@ -38,14 +38,12 @@ public class MapInstance
                               otherChars.Any(c => c.Location.X == location.X && c.Location.Y == location.Y) || 
                               Map[location.X, location.Y].HasFlag(CellType.NotWalkable))
                             location = new Location(spawner.SpawnTemplate.Position.X + Random.Shared.Next(-spawner.SpawnTemplate.Range, spawner.SpawnTemplate.Range), spawner.SpawnTemplate.Position.Y + Random.Shared.Next(-spawner.SpawnTemplate.Range, spawner.SpawnTemplate.Range)) { MapInstance = this };
-                        var npc = new CharacterNPC(serviceProvider)
+                        var npc = new CharacterNPC(serviceProvider, coreHolder.NpcTemplates[spawner.SpawnTemplate.Mob])
                         {
                             Spawner = spawner,
                             Location = location,
                             Id = (ulong)Random.Shared.NextInt64(), //TODO: check for clashes
                         };
-
-                        npc.LoadFromNpc(coreHolder.NpcTemplates[spawner.SpawnTemplate.Mob]);
                         logger.LogInformation($"Spawning {npc.Name} at {npc.Location.MapInstance.Map.Name}:{npc.Location.X},{npc.Location.Y}");
                         spawner.SpawnedNpcs.Add(npc);
                         this.SpawnCharacter(npc);

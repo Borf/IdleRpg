@@ -1,4 +1,6 @@
-﻿namespace IdleRpg.Game.Core;
+﻿using System.Diagnostics.CodeAnalysis;
+
+namespace IdleRpg.Game.Core;
 
 public class Location
 {
@@ -11,7 +13,7 @@ public class Location
         X = x;
         Y = y;
     }
-
+    [SetsRequiredMembers]
     public Location(int x, int y, Location location)
     {
         X = x;

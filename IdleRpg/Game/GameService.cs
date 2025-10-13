@@ -75,12 +75,15 @@ public class GameService : ICoreHolder
         _logger.LogInformation($"Sorted {sortedModifiers.Count} modifiers in total");
 
         Maps = GameCore.LoadMaps();
-
         SemaphoreSlim LoadSemaphore = new SemaphoreSlim(6); // 6 maps at the same time
         List<Task> loadTasks = new();
         foreach (var map in Maps)
             loadTasks.Add(Task.Run(async () => { await LoadSemaphore.WaitAsync(); try { _logger.LogInformation($"Loading map {map.Name}"); map.Load(); map.Loaded = true; } finally { LoadSemaphore.Release(); } }));
         await Task.WhenAll(loadTasks.ToArray());
+
+        foreach(var map in Maps.Where(m => m.InstanceType == InstanceType.NoInstance))
+            _ = map.MapInstance(GameCore, serviceProvider);
+
         _logger.LogInformation($"Loaded {Maps.Count} maps");
 
         BgTaskManager.Run(bgTask);
@@ -164,7 +167,7 @@ public class GameService : ICoreHolder
                 continue;
             }
 
-            _logger.LogInformation("Tick");
+            //_logger.LogInformation("Tick");
             await Task.Delay(1000);
         }
     }

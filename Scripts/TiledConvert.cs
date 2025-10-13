@@ -9,7 +9,7 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 
 string jsonFilePath = "../IdleRpg/Resources/Games/TinyRpg/Maps/Worldmap.tmj";
-string fileName = "../IdleRpg/Resources/Games/TinyRpg/Maps/Worldmap_.map";
+string fileName = "../IdleRpg/Resources/Games/TinyRpg/Maps/Worldmap.map";
 
 var json = JsonSerializer.Deserialize<TiledMap>(File.ReadAllText(jsonFilePath));
 

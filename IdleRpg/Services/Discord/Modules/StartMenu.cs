@@ -41,7 +41,7 @@ public class StartMenu : InteractionModuleBase<SocketInteractionContext>
     public async Task UpdateStart()
     {
         var character = gameService.GetCharacter(Context.User.Id);
-        using var mapStream = mapGenerator.GenerateMapImage(character, 128, 2).AsPngStream();
+        using var mapStream = mapGenerator.GenerateMapImage(character, 128, 1).AsPngStream();
 
 
         await ModifyOriginalResponseAsync(c =>
@@ -50,7 +50,8 @@ public class StartMenu : InteractionModuleBase<SocketInteractionContext>
             c.Components = new ComponentBuilderV2()
                 .WithTextDisplay("### Main Menu")
                 .WithSeparator()
-                .WithMediaGallery(["https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/250740/ss_a8ed2612270b0080b514ddcf364f7142dc599581.600x338.jpg?t=1566831836", "attachment://map.png"])
+                .WithMediaGallery([/*"https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/250740/ss_a8ed2612270b0080b514ddcf364f7142dc599581.600x338.jpg?t=1566831836",*/
+                    "attachment://map.png"])
                 .WithTextDisplay($"Your character:\n" +
                 $"- Your character is {character.State.GetType()}\n" +
                 $"- Your character is on {character.Location.MapInstance.Map.Name}, at {character.Location.X}, {character.Location.Y}\n" +

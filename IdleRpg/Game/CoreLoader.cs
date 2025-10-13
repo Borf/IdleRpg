@@ -3,6 +3,8 @@ using System.Runtime.Loader;
 using System.Reflection;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
 
 namespace IdleRpg.Game;
 
@@ -64,6 +66,7 @@ public class CoreLoader : IDisposable
             .AddReferences(MetadataReference.CreateFromFile(typeof(Type).Assembly.Location))
             .AddReferences(MetadataReference.CreateFromFile(typeof(Game.Core.IGameCore).Assembly.Location))
             .AddReferences(MetadataReference.CreateFromFile(typeof(MemoryPack.MemoryPackSerializer).Assembly.Location))
+            .AddReferences(MetadataReference.CreateFromFile(typeof(Image).Assembly.Location))
             .WithOptions(new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
 
         var files = Directory
@@ -123,6 +126,10 @@ public class CoreLoader : IDisposable
         foreach (var t in types)
         {
             var npc = ((INpc)Activator.CreateInstance(t)!);
+            if(!string.IsNullOrEmpty(npc.ImageFile))
+            {
+                npc.Image = Image.Load<Rgba32>(Path.Combine("Resources", "Games", t.Namespace!.Replace('.', Path.DirectorySeparatorChar), npc.ImageFile));
+            }
             coreHolder.NpcTemplates[npc.Id] = npc;
         }
     }

@@ -5,26 +5,24 @@ namespace IdleRpg.Game;
 
 public class CharacterPlayer : Character
 {
-    public ICharacterState<CharacterPlayer> State { get; set; }
-    public BgTask BehaviourTask;
+    public ICharacterState<CharacterPlayer> State
+    {
+        get
+        {
+            if (ActionQueue.Any())
+            {
+                return new PlayerIdleState(this);
+            }
+            else
+                return new PlayerIdleState(this);
+        }
+    }
     public CharacterPlayer(IServiceProvider serviceProvider) : base(serviceProvider)
     {
-        State = new PlayerIdleState(serviceProvider, this);
     }
 
     public void Start(IServiceProvider serviceProvider)
     {
-        var bgTaskManager = serviceProvider.GetRequiredService<BgTaskManager>();
-        BehaviourTask = new BgTask("Behaviour " + Name, async (token) => await BehaviourRunner(token, serviceProvider));
-        bgTaskManager.Run(BehaviourTask);
-    }
-
-    private async Task BehaviourRunner(CancellationToken token, IServiceProvider serviceProvider)
-    {
-        while(true)
-        {
-
-        }
     }
 
 }
