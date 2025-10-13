@@ -31,4 +31,6 @@ public class Location
         X = x;
         Y = y;
     }
+
+    public int DistanceTo(Location location) => Math.Abs(X - location.X) + Math.Abs(Y - location.Y);
 }

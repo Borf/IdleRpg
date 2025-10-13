@@ -1,7 +1,6 @@
 ﻿using IdleRpg.Data;
 using IdleRpg.Game.Attributes;
 using IdleRpg.Game.Core;
-using IdleRpg.Game.PlayerState;
 using IdleRpg.Util;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
@@ -92,7 +91,7 @@ public class GameService : ICoreHolder
 
 
     public CharacterPlayer GetCharacter(ulong id)
-    {
+    {//TODO: set character name
         var character = Players.FirstOrDefault(c => c.Id == id);
         if (character == null)
         {

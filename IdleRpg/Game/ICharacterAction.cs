@@ -7,4 +7,5 @@ public interface ICharacterAction
     bool Started { get; set; }
     void Start(BgTaskManager bgTaskManager);
     Task Stop();
+    string Status { get; }
 }

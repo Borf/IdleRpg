@@ -1,4 +1,5 @@
-﻿using Discord.Interactions;
+﻿using Discord;
+using Discord.Interactions;
 using Discord.WebSocket;
 
 namespace IdleRpg.Services.Discord;
@@ -9,7 +10,7 @@ public static class ServiceHelper
     {
         var config = new DiscordSocketConfig()
         {
-
+            GatewayIntents = GatewayIntents.AllUnprivileged & ~GatewayIntents.GuildScheduledEvents & ~GatewayIntents.GuildInvites
         };
         var client = new DiscordSocketClient(config);
         serviceCollection.AddSingleton(client);

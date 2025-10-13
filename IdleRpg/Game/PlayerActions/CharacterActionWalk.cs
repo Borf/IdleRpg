@@ -1,4 +1,5 @@
 ﻿using IdleRpg.Game.Core;
+using L1PathFinder;
 using System.Threading.Tasks;
 
 namespace IdleRpg.Game.PlayerActions;
@@ -9,6 +10,8 @@ public class CharacterActionWalk : ICharacterAction
     public Location TargetLocation { get; set; }
     public BgTask BgTask { get; set; }
     public bool Started { get; set; } = false;
+    public string Status => $"Walking to {TargetLocation.X}, {TargetLocation.Y}";
+    public List<L1PathFinder.Point>? CurrentPath { get; set; }
 
     public CharacterActionWalk(Character character, Location targetLocation)
     {
@@ -32,24 +35,25 @@ public class CharacterActionWalk : ICharacterAction
         if (Character.Location.MapInstance != TargetLocation.MapInstance)
             throw new NotImplementedException();
 
-        List<L1PathFinder.Point> currentPath;
+        List<Point> currentPath;
         var length = Character.Location.MapInstance.Map.Planner.Search(
-            new L1PathFinder.Point(TargetLocation.X, TargetLocation.Y),
-            new L1PathFinder.Point(Character.Location.X, Character.Location.Y), 
+            new Point(TargetLocation.X, TargetLocation.Y),
+            new Point(Character.Location.X, Character.Location.Y), 
             out currentPath );
-        if (length <= 0 || currentPath.Count == 0)
+        CurrentPath = currentPath;
+        if (length <= 0 || CurrentPath.Count == 0)
         {
-            Console.WriteLine("Could not find path");
+            Console.WriteLine("Could not find path. Distance " + length);
             return;// No path found
         }
 
         Console.WriteLine("Found path!");
-        foreach(var point in currentPath)
+        foreach(var point in CurrentPath)
         {
             Console.WriteLine($" - {point.X}, {point.Y}");
         }
 
-        foreach (var p in currentPath)
+        foreach (var p in CurrentPath)
         {
             Console.WriteLine($"Moving {Character.Name} to {p.X}, {p.Y}");
             while((Character.Location.X != p.X || Character.Location.Y != p.Y) && !token.IsCancellationRequested)

@@ -14,24 +14,26 @@ public class CharacterMenu : InteractionModuleBase<SocketInteractionContext>
 {
     private GameService gameService;
     private MapGeneratorService mapGenerator;
-    public CharacterMenu(GameService gameService, MapGeneratorService mapGenerator)
+    private ILogger<CharacterMenu> logger;
+    public CharacterMenu(GameService gameService, MapGeneratorService mapGenerator, ILogger<CharacterMenu> logger)
     {
         this.gameService = gameService;
         this.mapGenerator = mapGenerator;
+        this.logger = logger;
     }
 
     [ComponentInteraction("character")]
     public async Task Character()
     {
         await DeferAsync(ephemeral: true);
-        //if no character exists, create it
+        var character = gameService.GetCharacter(Context.User.Id);
         await ModifyOriginalResponseAsync(c =>
         {
             c.Components = new ComponentBuilderV2()
                 .WithTextDisplay("### Main Menu > Character")
                 .WithSeparator()
                 .WithMediaGallery(["https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/250740/ss_a8ed2612270b0080b514ddcf364f7142dc599581.600x338.jpg?t=1566831836"])
-                .WithTextDisplay("Your character is currently: ")
+                .WithTextDisplay("Your character is currently: " + character.State)
                 .WithSeparator()
                 .WithActionRow([
                     new ButtonBuilder("Stats", "character:stats",       ButtonStyle.Primary, emote: Emoji.Parse(":handbag:")),
@@ -138,14 +140,14 @@ public class CharacterMenu : InteractionModuleBase<SocketInteractionContext>
         var character = gameService.GetCharacter(Context.User.Id);
         using var mapStream = mapGenerator.GenerateWorldMapImage(character, centerX, centerY, zoom).AsPngStream();
         var map = character.Location.MapInstance.Map;
+        if(map.MapImage == null)
+            return;
         int xOffset = map.MapImage.Width / 2 + centerX;
         int yOffset = map.MapImage.Height / 2 + centerY;
         int sizeX = map.MapImage.Width / zoom;
         int sizeY = map.MapImage.Height / zoom;
         var rect = new Rectangle(xOffset - (map.MapImage.Width / 2) / zoom, yOffset - (map.MapImage.Height / 2) / zoom, sizeX, sizeY);
-        Console.WriteLine($"Rect: {rect}");
         var rect2 = new Rectangle(rect.X / map.MapImageSize, rect.Y / map.MapImageSize, sizeX / map.MapImageSize, sizeY / map.MapImageSize);
-        Console.WriteLine($"=> Rect2: {rect2}");
 
         await ModifyOriginalResponseAsync(c =>
         {
@@ -202,8 +204,6 @@ public class CharacterMenu : InteractionModuleBase<SocketInteractionContext>
 
         var eightX = map.MapImage.Width / zoom / 8;
         var eightY = map.MapImage.Height / zoom / 8;
-        Console.WriteLine($"EightX: {eightX}");
-
 
         //-3, -1, 1, 3
         var y = ("ABCD".IndexOf(newTile[0]) * 2 - 3);
@@ -213,33 +213,28 @@ public class CharacterMenu : InteractionModuleBase<SocketInteractionContext>
         var newCenterY = centerY + eightY * y;
         var newZoom = zoom * 4;
 
-        //if (eightX < 100)
-        //{
-        //    int xOffset = map.MapImage.Width / 2 + newCenterX;
-        //    int yOffset = map.MapImage.Height / 2 + newCenterY;
-        //    int sizeX = map.MapImage.Width / newZoom;
-        //    int sizeY = map.MapImage.Height / newZoom;
-        //    var rect = new Rectangle(xOffset - (map.MapImage.Width / 2) / zoom, yOffset - (map.MapImage.Height / 2) / zoom, sizeX, sizeY);
-        //    Console.WriteLine($"Rect: {rect}");
-        //    var rect2 = new Rectangle(rect.X / map.MapImageSize, rect.Y / map.MapImageSize, sizeX / map.MapImageSize, sizeY / map.MapImageSize);
-        //    Console.WriteLine($"=> Rect2: {rect2}");
+        if (eightX < 100)
+        {
+            int xOffset = map.MapImage.Width / 2 + newCenterX;
+            int yOffset = map.MapImage.Height / 2 + newCenterY;
+            int sizeX = map.MapImage.Width / newZoom;
+            int sizeY = map.MapImage.Height / newZoom;
+            var rect = new Rectangle(xOffset - (map.MapImage.Width / 2) / zoom, yOffset - (map.MapImage.Height / 2) / zoom, sizeX, sizeY);
+            var rect2 = new Rectangle(rect.X / map.MapImageSize, rect.Y / map.MapImageSize, sizeX / map.MapImageSize, sizeY / map.MapImageSize);
 
-        //    int X = Random.Shared.Next(rect2.X, rect2.X + rect2.Width);
-        //    int Y = Random.Shared.Next(rect2.Y, rect2.Y + rect2.Height);
-        //    while (!map[X, Y].HasFlag(CellType.Walkable))
-        //    {
-        //        X = Random.Shared.Next(rect2.X, rect2.X + rect2.Width);
-        //        Y = Random.Shared.Next(rect2.Y, rect2.Y + rect2.Height);
-        //    }
-        //    Console.WriteLine($"Moving from {character.Location.X}, {character.Location.Y} to {X}, {Y}");
-
-        //    character.WalkTo(new Location(X, Y, character.Location));
-
-        //    //await CharacterMove();
-        //    await CharacterWorldmap(centerX, centerY, zoom);
-        //    return;
-        //}
-
+            int X = Random.Shared.Next(rect2.X, rect2.X + rect2.Width);
+            int Y = Random.Shared.Next(rect2.Y, rect2.Y + rect2.Height);
+            while (!map[X, Y].HasFlag(CellType.Walkable))
+            {
+                X = Random.Shared.Next(rect2.X, rect2.X + rect2.Width);
+                Y = Random.Shared.Next(rect2.Y, rect2.Y + rect2.Height);
+            }
+            logger.LogInformation($"Moving character {character.Name} to {X}, {Y}");
+            await character.ActionQueue.ClearActions();
+            character.WalkTo(new Location(X, Y, character.Location));
+            await CharacterMove();
+            return;
+        }
         await CharacterWorldmap(newCenterX, newCenterY, newZoom);
     }
 

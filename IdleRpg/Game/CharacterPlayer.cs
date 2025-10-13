@@ -1,28 +1,22 @@
 ﻿using IdleRpg.Data.Db;
-using IdleRpg.Game.PlayerState;
+using IdleRpg.Game.PlayerActions;
 
 namespace IdleRpg.Game;
 
 public class CharacterPlayer : Character
 {
-    public ICharacterState<CharacterPlayer> State
-    {
-        get
-        {
-            if (ActionQueue.Any())
-            {
-                return new PlayerIdleState(this);
-            }
-            else
-                return new PlayerIdleState(this);
-        }
-    }
+    public string State => ActionQueue.First?.Status ?? "Idle";
+
+    public CharacterActionFarm NextFarmAction { get; set; }
+
     public CharacterPlayer(IServiceProvider serviceProvider) : base(serviceProvider)
     {
+        NextFarmAction = new(this);
     }
 
     public void Start(IServiceProvider serviceProvider)
     {
+
     }
 
 }
