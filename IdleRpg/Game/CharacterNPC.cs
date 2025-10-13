@@ -5,11 +5,11 @@ namespace IdleRpg.Game;
 public class CharacterNPC : Character
 {
 //    public ICharacterState<CharacterNPC> State { get; set; }
-    public INpc NpcTemplate { get; set; }
+    public INpcTemplate NpcTemplate { get; set; }
     BgTask AiTask;
     public Spawner? Spawner { get; set; }
     
-    public CharacterNPC(IServiceProvider serviceProvider, INpc npcTemplate) : base(serviceProvider)
+    public CharacterNPC(IServiceProvider serviceProvider, INpcTemplate npcTemplate) : base(serviceProvider)
     {
         NpcTemplate = npcTemplate;
         Name = npcTemplate.Name;

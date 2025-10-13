@@ -121,16 +121,16 @@ public class CoreLoader : IDisposable
     {
         Logger.LogInformation("Loading NPCs");
         coreHolder.NpcTemplates.Clear(); //TODO: make sure the old npcs are not referenced, or move them to the new npc references somehow?
-        var types = assembly!.GetTypes().Where(t => !t.IsAbstract && t.IsAssignableTo(typeof(INpc))).ToList();
+        var types = assembly!.GetTypes().Where(t => !t.IsAbstract && t.IsAssignableTo(typeof(INpcTemplate))).ToList();
         Logger.LogInformation($"Found {types.Count} npcs");
         foreach (var t in types)
         {
-            var npc = ((INpc)Activator.CreateInstance(t)!);
-            if(!string.IsNullOrEmpty(npc.ImageFile))
+            var npcTemplate = ((INpcTemplate)Activator.CreateInstance(t)!);
+            if(!string.IsNullOrEmpty(npcTemplate.ImageFile))
             {
-                npc.Image = Image.Load<Rgba32>(Path.Combine("Resources", "Games", t.Namespace!.Replace('.', Path.DirectorySeparatorChar), npc.ImageFile));
+                npcTemplate.Image = Image.Load<Rgba32>(Path.Combine("Resources", "Games", t.Namespace!.Replace('.', Path.DirectorySeparatorChar), npcTemplate.ImageFile));
             }
-            coreHolder.NpcTemplates[npc.Id] = npc;
+            coreHolder.NpcTemplates[npcTemplate.Id] = npcTemplate;
         }
     }
     private void LoadItems()
@@ -148,7 +148,7 @@ public class CoreLoader : IDisposable
 public interface ICoreHolder
 {
     List<IItem> ItemTemplates { get; set; }
-    Dictionary<Enum, INpc> NpcTemplates { get; set; }
+    Dictionary<Enum, INpcTemplate> NpcTemplates { get; set; }
     IGameCore GameCore { get; set; }
     Type statsEnum { get; set; }
 }

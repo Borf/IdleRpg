@@ -3,7 +3,7 @@ using SixLabors.ImageSharp.PixelFormats;
 
 namespace IdleRpg.Game.Core;
 
-public interface INpc
+public interface INpcTemplate
 {
     Enum Id { get; }
     string Name { get; }
