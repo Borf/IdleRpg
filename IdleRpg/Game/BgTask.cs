@@ -52,4 +52,9 @@ public class BgTask
         await Task;
     }
 
+    public async Task Await()
+    {
+        await Task;
+    }
+
 }

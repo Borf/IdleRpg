@@ -51,14 +51,21 @@ public class CharacterActionFarm : ICharacterAction
             var enemy = enemies.First(); //maybe other priority? Maybe Take(1) method up there?
             var distance = Character.Location.DistanceTo(enemy.Location);
             Console.WriteLine($"Found enemy {enemy.Name} for {Character.Name}, distance {distance}");
+            //eww duplicate code
             if(distance > 2)
             {
-                Character.ActionQueue.QueueActionFront(new CharacterActionWalk(Character, enemy.Location));
+                var action = new CharacterActionWalk(Character, enemy.Location);
+                Character.ActionQueue.QueueActionFront(action);
+                await action.BgTask.Await();
             }
             else
             {
-                Character.ActionQueue.QueueActionFront(new CharacterActionAttack(Character, enemy));
+                var action = new CharacterActionAttack(Character, enemy);
+                Character.ActionQueue.QueueActionFront(action);
+                await action.BgTask.Await();
             }
+
+
             await Task.Delay(1000, token);
         }
         Console.WriteLine($"Done farming {Character.Name}");
