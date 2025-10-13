@@ -2,12 +2,15 @@
 using System.Collections.Generic;
 using System;
 using TinyRpg.Items;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
 namespace TinyRpg.Npcs.Mobs;
 
 public class Slime : Mob
 {
     public override Enum Id => NpcIds.Slime;
     public override string Name => "Slime";
+    public override string ImageFile => "slime.png";
     public override Dictionary<Enum, int> Stats => new()
     {
         { Core.Stats.MaxHp, 4 },

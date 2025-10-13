@@ -1,6 +1,8 @@
 ﻿using IdleRpg.Game;
 using IdleRpg.Game.Core;
 using MemoryPack;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,4 +18,6 @@ public abstract class Mob : INpc
     public abstract Dictionary<Enum, int> Stats { get; }
     public abstract List<ItemDrop> ItemDrops { get; }
     public abstract int AgroRange { get; }
+    public Image<Rgba32>? Image { get; set; }
+    public abstract string ImageFile { get; }
 }
