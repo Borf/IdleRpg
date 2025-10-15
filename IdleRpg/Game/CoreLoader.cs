@@ -103,6 +103,7 @@ public class CoreLoader : IDisposable
                     coreHolder.statsEnum = core.GetStats();
                     LoadItems();
                     LoadNpcs();
+                    LoadSkills();
                     oldAssemblyContext?.Unload();
                 }
                 else
@@ -143,11 +144,23 @@ public class CoreLoader : IDisposable
         foreach (var t in types)
             coreHolder.ItemTemplates.Add((IItem)Activator.CreateInstance(t)!);
     }
+
+    private void LoadSkills()
+    {
+        Logger.LogInformation("Loading Skills");
+        coreHolder.Skills.Clear(); //TODO: make sure the old items are not referenced, or move them to the new item references somehow?
+
+        var types = assembly!.GetTypes().Where(t => t.IsAssignableTo(typeof(ISkill))).ToList();
+        Logger.LogInformation($"Found {types.Count} skills");
+        foreach (var t in types)
+            coreHolder.Skills.Add((ISkill)Activator.CreateInstance(t)!);
+    }
 }
 
 public interface ICoreHolder
 {
     List<IItem> ItemTemplates { get; set; }
+    List<ISkill> Skills { get; set; }
     Dictionary<Enum, INpcTemplate> NpcTemplates { get; set; }
     IGameCore GameCore { get; set; }
     Type statsEnum { get; set; }

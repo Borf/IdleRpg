@@ -25,13 +25,17 @@ public class CharacterNPC : Character
         var bgTaskManager = serviceProvider.GetRequiredService<BgTaskManager>();
         bgTaskManager.Run(AiTask);
     }
+    public async Task Die()
+    {
+        await AiTask.Cancel();
+    }
 
 
     List<List<int>> offsets = [[0, -1], [0, 1], [-1, 0], [1, 0]];
     private async Task AiRunner(CancellationToken token, IServiceProvider serviceProvider)
     {
         var logger = serviceProvider.GetRequiredService<ILogger<CharacterNPC>>();
-        while (true)
+        while (!token.IsCancellationRequested)
         {
             var newPos = offsets[Random.Shared.Next(offsets.Count)];
             var newLocation = new Location(Location.X + newPos[0], Location.Y + newPos[1]) { MapInstance = Location.MapInstance };
@@ -45,7 +49,8 @@ public class CharacterNPC : Character
             {
                 Location = newLocation;
             }
-            await Task.Delay(1000);
+            await Task.Delay(2000, token);
         }
     }
+
 }

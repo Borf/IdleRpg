@@ -34,7 +34,7 @@ public class WorldMap : Map
             Amount = 5,
             Mob = Npcs.NpcIds.Slime,
             Range = 5,
-            RespawnTime = TimeSpan.FromSeconds(2),
+            RespawnTime = TimeSpan.FromSeconds(30),
             SpawnType = SpawnType.Sphere
         });
     }

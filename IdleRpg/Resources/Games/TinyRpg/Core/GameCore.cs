@@ -80,6 +80,10 @@ public class GameCore : IGameCore
     }
     public bool IsAlive(Character character) => character.Stats[Stats.Hp] > 0;
 
+    public void GainExp(Character character, INpcTemplate npcTemplate)
+    {
+        character.Stats[Stats.Exp] += 1; //npcTemplate's Exp
+    }
 }
 
 
@@ -134,4 +138,9 @@ public enum EquipSlots
 public class DamageProperties : IDamageProperties
 {
     public int Damage { get; set; }
+
+    public override string? ToString()
+    {
+        return Damage + "dmg";
+    }
 }

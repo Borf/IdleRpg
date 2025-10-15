@@ -33,6 +33,7 @@ builder.Services.AddHostedService<GameHostedService>();
 builder.Services.AddSingleton<ICoreHolder>(sp => sp.GetRequiredService<GameService>());
 builder.Services.AddSingleton<BgTaskManager>();
 builder.Services.AddTransient<MapGeneratorService>();
+builder.Services.AddTransient<ActionQueue>();
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddScoped<IdentityUserAccessor>();
 builder.Services.AddScoped<IdentityRedirectManager>();

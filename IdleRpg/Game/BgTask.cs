@@ -33,6 +33,8 @@ public class BgTask
             {
                 await Action(CancellationToken);
             }
+            catch(TaskCanceledException)
+            {}
             catch (Exception ex)
             {
                 Console.WriteLine("Task Exception: " + ex); //TODO: _logger

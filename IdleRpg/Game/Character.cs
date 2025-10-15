@@ -18,7 +18,7 @@ public class Character
     public Character(IServiceProvider serviceProvider)
     {
         ServiceProvider = serviceProvider;
-        ActionQueue = new(ServiceProvider.GetRequiredService<BgTaskManager>());
+        ActionQueue = serviceProvider.GetRequiredService<ActionQueue>();// new(ServiceProvider.GetRequiredService<BgTaskManager>());
     }
 
     public void CalculateStats()

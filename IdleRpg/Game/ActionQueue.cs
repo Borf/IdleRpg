@@ -10,25 +10,27 @@ public class ActionQueue
     private BgTaskManager bgTaskManager;
     public bool Any => Queue.Any();
     public ICharacterAction? First => Queue.FirstOrDefault();
+    private ILogger<ActionQueue> Logger;
 
-    public ActionQueue(BgTaskManager bgTaskManager)
+    public ActionQueue(BgTaskManager bgTaskManager, ILogger<ActionQueue> logger)
     {
         this.bgTaskManager = bgTaskManager;
-
         Task = new BgTask("Character ActionQueueTask", Handler);
         bgTaskManager.Run(Task);
+        Logger = logger;
+        Logger.LogInformation("Creating Actionqueue");
     }
     private async Task Handler(CancellationToken token)
     {
         while (!token.IsCancellationRequested)
         {
             await Signal.WaitAsync();
-            Console.WriteLine("Actionqueue semaphore!");
+            Logger.LogTrace("Actionqueue semaphore!");
             lock (Queue)
             {
                 if (!Queue.Any())
                 {
-                    Console.WriteLine("no actions in queue?");
+                    Logger.LogError("no actions in queue?");
                 }
 
                 while (Queue.Any())
@@ -36,14 +38,14 @@ public class ActionQueue
                     var front = Queue.First();
                     if (!front.Started)
                     {
-                        Console.WriteLine("Starting " + front);
+                        Logger.LogInformation("Starting " + front);
                         front.Start(bgTaskManager);
                         front.Started = true;
                         break;
                     }
                     if (front.IsDone)
                     {
-                        Console.WriteLine("Action done " + front);
+                        Logger.LogInformation("Action done " + front);
                         Queue.RemoveFirst();
                     }
                 }

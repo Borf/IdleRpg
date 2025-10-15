@@ -10,10 +10,13 @@ public class CharacterActionFarm : ICharacterAction
     public BgTask BgTask { get; set; }
     public bool Started { get; set; } = false;
     public string Status => $"Farming monsters";
+    private ILogger<CharacterActionFarm> Logger;
     
     public List<Enum> MobIds { get; set; } = new();
     public TimeSpan TimeSpan { get; set; } = TimeSpan.FromHours(1);
     public DateTimeOffset TimeStart { get; private set; } = DateTimeOffset.MinValue;
+
+    public int Kills { get; set; } = 0;
     //range
     //startlocation
 
@@ -21,10 +24,12 @@ public class CharacterActionFarm : ICharacterAction
     {
         Character = character;
         BgTask = new BgTask("Farming " + character.Name, BackgroundTask);
+        Logger = character.ServiceProvider.GetRequiredService<ILogger<CharacterActionFarm>>();
     }
 
     public void Start(BgTaskManager bgTaskManager)
     {
+        TimeStart = DateTimeOffset.Now;
         bgTaskManager.Run(BgTask);
     }
 
@@ -35,7 +40,7 @@ public class CharacterActionFarm : ICharacterAction
 
     private async Task BackgroundTask(CancellationToken token)
     {
-        while (!token.IsCancellationRequested && DateTimeOffset.Now > TimeStart + TimeSpan)
+        while (!token.IsCancellationRequested && DateTimeOffset.Now < TimeStart + TimeSpan)
         {
             var charsNear = Character.Location.MapInstance.GetCharactersAround(Character.Location, 20); //TODO: range should be configurable
             var enemies = charsNear
@@ -44,13 +49,13 @@ public class CharacterActionFarm : ICharacterAction
                 .OrderBy(c => c.Location.DistanceTo(Character.Location));
             if(!enemies.Any())
             {
-                Console.WriteLine($"No enemies found for {Character.Name}");
+                Logger.LogInformation($"No enemies found for {Character.Name}");
                 await Task.Delay(1000, token);
                 continue;
             }
             var enemy = enemies.First(); //maybe other priority? Maybe Take(1) method up there?
             var distance = Character.Location.DistanceTo(enemy.Location);
-            Console.WriteLine($"Found enemy {enemy.Name} for {Character.Name}, distance {distance}");
+            Logger.LogInformation($"Found enemy {enemy.Name} for {Character.Name}, distance {distance}");
             //eww duplicate code
             if(distance > 2)
             {
@@ -68,7 +73,7 @@ public class CharacterActionFarm : ICharacterAction
 
             await Task.Delay(1000, token);
         }
-        Console.WriteLine($"Done farming {Character.Name}");
+        Logger.LogInformation($"Done farming {Character.Name}");
     }
 
     public bool IsDone => BgTask.Finished;

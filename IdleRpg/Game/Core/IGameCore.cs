@@ -12,4 +12,5 @@ public interface IGameCore
     public (Point position, string mapName) SpawnLocation { get; }
     void Damage(Character source, Character target, IDamageProperties damageProperties);
     bool IsAlive(Character chacater);
+    void GainExp(Character character, INpcTemplate npcTemplate);
 }

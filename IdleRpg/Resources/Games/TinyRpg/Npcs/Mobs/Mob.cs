@@ -17,6 +17,7 @@ public abstract class Mob : INpcTemplate
     public abstract string Name { get; }
     public abstract Dictionary<Enum, int> Stats { get; }
     public abstract List<ItemDrop> ItemDrops { get; }
+    public abstract int Exp { get; }
     public abstract int AgroRange { get; }
     public Image<Rgba32>? Image { get; set; }
     public abstract string ImageFile { get; }

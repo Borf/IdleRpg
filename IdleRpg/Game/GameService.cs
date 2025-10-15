@@ -15,6 +15,7 @@ public class GameService : ICoreHolder
     private CoreLoader CoreLoader;
     public Dictionary<Enum, INpcTemplate> NpcTemplates { get; set; } = new();
     public List<IItem> ItemTemplates { get; set; } = new();
+    public List<ISkill> Skills { get; set; } = new();
 
     private List<Map> Maps = new();
     private List<MapInstance> MapInstances = new();

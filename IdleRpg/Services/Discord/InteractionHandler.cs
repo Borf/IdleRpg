@@ -77,7 +77,7 @@ public class InteractionHandler : IHostedService
 
     private Task HandleInteractionExecute(ICommandInfo commandInfo, IInteractionContext context, IResult result)
     {
-        Console.WriteLine("Handling interaction execution?");
+        _logger.LogTrace("Handling interaction execution?");
         if (!result.IsSuccess)
             switch (result.Error)
             {

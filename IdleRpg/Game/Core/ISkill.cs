@@ -2,10 +2,11 @@
 
 public interface ISkill
 {
-    int Id { get; }
+    Enum Id { get; }
     string Name { get; }
     SkillType SkillType { get; }
     bool CanCast(CharacterPlayer character);
+    IDamageProperties CalculateDamage(Character src, Character target); //TODO: should target matter here, or should that be used in the ICore.Damage function?
 }
 
 public enum SkillType
