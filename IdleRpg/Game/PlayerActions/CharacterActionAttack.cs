@@ -52,6 +52,10 @@ public class CharacterActionAttack : ICharacterAction
         if (!gameService.GameCore.IsAlive(Target))
         {
             Logger.LogInformation($"{Character.Name} has killed {Target.Name}");
+            if(Character is CharacterPlayer player)
+            {
+                player.Log(LogCategory.Battle, $"You killed a {Target.Name}");
+            }
             if (Target is CharacterNPC npc)
             {
                 //npc.NpcTemplate.ItemDrops

@@ -3,7 +3,7 @@ using IdleRpg.Game.Attributes;
 using IdleRpg.Game.Core;
 using IdleRpg.Util;
 using Microsoft.EntityFrameworkCore;
-using System.Threading.Tasks;
+using System.Linq.Expressions;
 namespace IdleRpg.Game;
 
 public class GameService : ICoreHolder
@@ -50,7 +50,7 @@ public class GameService : ICoreHolder
                 NotCalculatedStats.Add(stat);
                 continue;
             }
-            AllModifiers.Add(GameCore.CalculateInitialStat(stat));
+            AllModifiers.Add(GameCore.CalculateStat(stat));
         }
 
         foreach (var item in ItemTemplates.Where(item => item.GetType().IsAssignableTo(typeof(IEquippable))).Select(item => (IEquippable)item))
@@ -143,9 +143,10 @@ public class GameService : ICoreHolder
         CharacterPlayer newCharacter = new CharacterPlayer(serviceProvider)
         {
             Id = id,
-            Stats = NotCalculatedStats.ToDictionary(s => s, s => 1L), //initialize with 1? or use gamecore initial stat calculation
             Location = GetLocation(GameCore.SpawnLocation), //TODO
         };
+        newCharacter.Stats = NotCalculatedStats.ToDictionary(s => s, s => GameCore.CalculateStat(s).Calculation(newCharacter.Stats));
+
         newCharacter.Location.MapInstance.Characters.Add(newCharacter);
         return newCharacter;
     }

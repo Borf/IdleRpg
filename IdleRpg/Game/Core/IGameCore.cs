@@ -6,7 +6,7 @@ namespace IdleRpg.Game.Core;
 public interface IGameCore
 {
     Type GetStats();
-    StatModifier CalculateInitialStat(Enum s);
+    StatModifier CalculateStat(Enum s);
     List<Map> LoadMaps();
 
     public (Point position, string mapName) SpawnLocation { get; }

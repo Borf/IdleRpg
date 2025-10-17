@@ -1,6 +1,6 @@
 ﻿namespace IdleRpg.Game.Attributes;
 
 [AttributeUsage(AttributeTargets.Field)]
-public class StatAttribute : Attribute
+public class HiddenAttribute : Attribute
 {
 }

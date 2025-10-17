@@ -56,18 +56,22 @@ public class CoreLoader : IDisposable
 
         var assemblyPath = Path.GetDirectoryName(typeof(object).Assembly.Location) ?? string.Empty;
         CSharpCompilation compilation = CSharpCompilation.Create($"{CoreName}.dll")
+            .AddReferences(MetadataReference.CreateFromFile(Assembly.Load(new AssemblyName("Microsoft.CSharp")).Location))
             .AddReferences(MetadataReference.CreateFromFile(Path.Combine(assemblyPath, "mscorlib.dll")))
             .AddReferences(MetadataReference.CreateFromFile(Path.Combine(assemblyPath, "System.dll")))
             .AddReferences(MetadataReference.CreateFromFile(Path.Combine(assemblyPath, "System.Core.dll")))
             .AddReferences(MetadataReference.CreateFromFile(Path.Combine(assemblyPath, "System.Runtime.dll")))
             .AddReferences(MetadataReference.CreateFromFile(Path.Combine(assemblyPath, "System.Collections.dll")))
+            .AddReferences(MetadataReference.CreateFromFile(Path.Combine(assemblyPath, "System.Linq.dll")))
+            .AddReferences(MetadataReference.CreateFromFile(Path.Combine(assemblyPath, "System.Linq.Queryable.dll")))
+            .AddReferences(MetadataReference.CreateFromFile(Path.Combine(assemblyPath, "System.Linq.Expressions.dll")))
             .AddReferences(MetadataReference.CreateFromFile(typeof(object).Assembly.Location))
             .AddReferences(MetadataReference.CreateFromFile(typeof(System.Console).Assembly.Location))
             .AddReferences(MetadataReference.CreateFromFile(typeof(Type).Assembly.Location))
             .AddReferences(MetadataReference.CreateFromFile(typeof(Game.Core.IGameCore).Assembly.Location))
             .AddReferences(MetadataReference.CreateFromFile(typeof(MemoryPack.MemoryPackSerializer).Assembly.Location))
             .AddReferences(MetadataReference.CreateFromFile(typeof(Image).Assembly.Location))
-            .WithOptions(new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
+            .WithOptions(new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary, nullableContextOptions: NullableContextOptions.Enable));
 
         var files = Directory
             .GetFiles(Path.Combine("Resources", "Games", CoreName), "*.cs", SearchOption.AllDirectories)

@@ -36,7 +36,7 @@ public class CharacterMenu : InteractionModuleBase<SocketInteractionContext>
                 .WithTextDisplay("Your character is currently: " + character.State)
                 .WithSeparator()
                 .WithActionRow([
-                    new ButtonBuilder("Stats", "character:stats",       ButtonStyle.Primary, emote: Emoji.Parse(":handbag:")),
+                    new ButtonBuilder("Stats", "character:stats",       ButtonStyle.Primary, emote: Emoji.Parse(":1234:")),
                     new ButtonBuilder("Skills", "character:skills",     ButtonStyle.Primary, emote: Emoji.Parse(":notebook_with_decorative_cover:")),
                     new ButtonBuilder("Equip", "character:equip",       ButtonStyle.Primary, emote: Emoji.Parse(":compass:")),
                     new ButtonBuilder("Jobs", "character:jobs",         ButtonStyle.Primary, emote: Emoji.Parse(":compass:")),
@@ -61,19 +61,36 @@ public class CharacterMenu : InteractionModuleBase<SocketInteractionContext>
         var character = gameService.GetCharacter(Context.User.Id);
         //string stats = "";
         bool adjustable = false;
-        Dictionary<string, string> statsPerGroup = new();
-
-        foreach(var stat in character.Stats)
+        Dictionary<string, Dictionary<string, string>> statsPerGroup = new();
+        character.CalculateStats();
+        foreach (var stat in character.Stats)
         {
-            var group = ((Enum)stat.Key).GetAttributeOfType<IdleRpg.Game.Attributes.GroupAttribute>()?.Name ?? "";
-            if(((Enum)stat.Key).GetAttributeOfType<AdjustableAttribute>() != null)
+            if (((Enum)stat.Key).GetAttributeOfType<IdleRpg.Game.Attributes.HiddenAttribute>() != null)
+                continue;
+            var group = ((Enum)stat.Key).GetAttributeOfType<IdleRpg.Game.Attributes.GroupAttribute>();
+            var groupStr = group?.Name ?? "";
+            if(group?.MaxValueOf != null)
+                continue;
+
+            if (((Enum)stat.Key).GetAttributeOfType<AdjustableAttribute>() != null)
                 adjustable = true;
-            if (!statsPerGroup.ContainsKey(group))
-                statsPerGroup[group] = "";
-            statsPerGroup[group] += $"- `{stat.Key,-15}{stat.Value}`\n";
+            if (!statsPerGroup.ContainsKey(groupStr))
+                statsPerGroup[groupStr] = new();
+            statsPerGroup[groupStr][stat.Key.ToString()] = stat.Value.ToString();
         }
 
-        string stats = string.Join("\n", statsPerGroup.Select(g => $"## {g.Key}\n{g.Value}"));
+        foreach (var stat in character.Stats)
+        {
+            if (((Enum)stat.Key).GetAttributeOfType<IdleRpg.Game.Attributes.HiddenAttribute>() != null)
+                continue;
+            var group = ((Enum)stat.Key).GetAttributeOfType<IdleRpg.Game.Attributes.GroupAttribute>();
+            var groupStr = group?.Name ?? "";
+            if (group?.MaxValueOf == null)
+                continue;
+            statsPerGroup[groupStr][group?.MaxValueOf!] += " / " + stat.Value.ToString();
+        }
+
+        string stats = string.Join("\n", statsPerGroup.Select(g => $"## {g.Key}\n{string.Join("\n", g.Value.Select(kv => $"- `{kv.Key,-15}`{kv.Value}"))}"));
         await ModifyOriginalResponseAsync(c =>
         {
             var cb = new ComponentBuilderV2()

@@ -55,7 +55,7 @@ public class StartMenu : InteractionModuleBase<SocketInteractionContext>
                 .WithTextDisplay($"Your character:\n" +
                 $"- Your character is {character.State}\n" +
                 $"- Your character is on {character.Location.MapInstance.Map.Name}, at {character.Location.X}, {character.Location.Y}\n" +
-                "")
+                string.Join("\n", character.Logs.Reverse<LogEntry>().Take(5).Select(log => $"- <t:{log.Timestamp.ToUnixTimeSeconds()}:T>: [{log.Category}] {log.Message}")))
                 .WithSeparator()
                 .WithActionRow([
                     new ButtonBuilder("Character", "character", ButtonStyle.Primary, emote: Emoji.Parse(":man_mage:")),
