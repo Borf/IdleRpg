@@ -9,15 +9,15 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 
 string jsonFilePath = "../IdleRpg/Resources/Games/TinyRpg/Maps/Worldmap.tmj";
-string fileName = "../IdleRpg/Resources/Games/TinyRpg/Maps/Worldmap.map";
+string fileName = "../IdleRpg/Resources/Games/TinyRpg/Maps/Worldmap2.map";
 
 var json = JsonSerializer.Deserialize<TiledMap>(File.ReadAllText(jsonFilePath));
 
-int minX = json.layers.Min(l => l.chunks.Min(c => c.x));
-int maxX = json.layers.Max(l => l.chunks.Max(c => c.x + c.width));
+int minX = json.layers.Where(l => l.type == "tilelayer").Min(l => l.chunks.Min(c => c.x));
+int maxX = json.layers.Where(l => l.type == "tilelayer").Max(l => l.chunks.Max(c => c.x + c.width));
 
-int minY = json.layers.Min(l => l.chunks.Min(c => c.y));
-int maxY = json.layers.Max(l => l.chunks.Max(c => c.y + c.height));
+int minY = json.layers.Where(l => l.type == "tilelayer").Min(l => l.chunks.Min(c => c.y));
+int maxY = json.layers.Where(l => l.type == "tilelayer").Max(l => l.chunks.Max(c => c.y + c.height));
 
 Console.WriteLine($"Map bounds: ({minX}, {minY}) to ({maxX}, {maxY})");
 
