@@ -37,5 +37,23 @@ public class WorldMap : Map
             RespawnTime = TimeSpan.FromSeconds(5),
             SpawnType = SpawnType.Sphere
         });
+        Spawns.Add(new SpawnTemplate()
+        {
+            Position = new Point(746, 707),
+            Amount = 5,
+            Mob = Npcs.NpcIds.Slime,
+            Range = 3,
+            RespawnTime = TimeSpan.FromSeconds(5),
+            SpawnType = SpawnType.Rect
+        });
+        Spawns.Add(new SpawnTemplate()
+        {
+            Position = new Point(795, 717),
+            Amount = 30,
+            Mob = Npcs.NpcIds.Slime,
+            Range = 20,
+            RespawnTime = TimeSpan.FromSeconds(5),
+            SpawnType = SpawnType.Rect
+        });
     }
 }

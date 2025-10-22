@@ -1,4 +1,5 @@
 ﻿using IdleRpg.Game.Core;
+using SixLabors.Fonts;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Drawing;
 using SixLabors.ImageSharp.Drawing.Processing;
@@ -9,136 +10,151 @@ namespace IdleRpg.Game;
 
 public class MapGeneratorService
 {
-    public Image<Rgba32> GenerateMapImage(Character character, int size, int scale)
+    private Dictionary<Map, ImageCache> ImageCaches = new();
+
+    private Font font;
+
+    public MapGeneratorService()
+    {
+        this.font = SystemFonts.CreateFont("Tahoma", 20);
+    }
+
+    public Image<Rgba32> GenerateMapImage(Character character, int size, int zoom)
     {
         var map = character.Location.MapInstance.Map;
-        if (map.MapImage == null)
-            return new Image<Rgba32>(0, 0);
 
-        int mapImageCenterX = character.Location.X * map.MapImageSize;
-        int mapImageCenterY = character.Location.Y * map.MapImageSize;
+        Rectangle rect = new Rectangle(
+            (character.Location.X - size/2), 
+            (character.Location.Y - size/2),
+            size,
+            size);
 
-        int mapImageSize = size * scale;
+        var image = GenerateMapImage(map, rect, zoom);
+        int localTileSize = Math.Max(1, map.MapImageTileSize / (zoom + 1));
 
-        int mapImageX = mapImageCenterX - mapImageSize / 2;
-        int mapImageY = mapImageCenterY - mapImageSize / 2;
-
-        int cappedImageX = Math.Max(0, mapImageX);
-        int cappedImageY = Math.Max(0, mapImageY);
-
-        int mapImageSizeX = mapImageSize - (cappedImageX - mapImageX);
-        int mapImageSizeY = mapImageSize - (cappedImageY - mapImageY);
-        //TODO: border on the right side
-
-        var scaled = map.MapImage.Clone(ip =>
-        {
-            ip.Crop(new Rectangle(cappedImageX, cappedImageY, mapImageSizeX, mapImageSizeY));
-        });
-
-
-        int center = size / 2;
-        Image<Rgba32> image = new Image<Rgba32>(size, size);
-        image.Mutate(ip => ip.DrawImage(scaled, new Point((cappedImageX - mapImageX), (cappedImageY - mapImageY)), 1.0f));
+        image.Mutate(ip => ip.Fill(Color.Blue, new RectangleF((character.Location.X - rect.X) * map.MapImageTileSize, (character.Location.Y - rect.Y) * map.MapImageTileSize, localTileSize, localTileSize)));
 
         var characters = character.Location.MapInstance.GetCharactersAround(character.Location, 100).Where(c => c != character);
-        image.Mutate(ip => ip.Fill(Color.Blue, new RectangleF(center, center, 16, 16)));
-
-        foreach(var c in characters)
+        foreach (var c in characters)
         {
-            if(c is CharacterNPC npc && !string.IsNullOrEmpty(npc.NpcTemplate.ImageFile) && npc.NpcTemplate.Image != null)
+            if (c is CharacterNPC npc && !string.IsNullOrEmpty(npc.NpcTemplate.ImageFile) && npc.NpcTemplate.Image != null)
             {
-                image.Mutate(ip => ip.DrawImage(npc.NpcTemplate.Image, new Point(center + (c.Location.X - character.Location.X) * 16, center + (c.Location.Y - character.Location.Y) * 16), 1.0f));
+                image.Mutate(ip => ip.DrawImage(npc.NpcTemplate.Image, new Point(
+                    (c.Location.X - rect.X) * map.MapImageTileSize,  //TODO: zoom should be factored in here too
+                    (c.Location.Y - rect.Y) * map.MapImageTileSize), 1.0f));
             }
-            else
-                image.Mutate(ip => ip.Fill(Color.Red, new RectangleF(center + (c.Location.X - character.Location.X) * 16, center + (c.Location.Y - character.Location.Y) * 16, 16, 16)));
+            else if(c is CharacterPlayer player)
+                image.Mutate(ip => ip.Fill(c == character ? Color.Blue : Color.Green, new RectangleF((c.Location.X - rect.X) * map.MapImageTileSize, (c.Location.Y - rect.Y) * map.MapImageTileSize, localTileSize, localTileSize)));
         }
         return image;
     }
 
 
-    //public Image<Rgba32> GenerateWorldMapImage(Character character, int centerX, int centerY, int zoom)
-    //{
-    //    var map = character.Location.MapInstance.Map;
-    //    Image<Rgba32> image = new Image<Rgba32>(map.Width / zoom, map.Height / zoom);
 
-    //    int xOffset = map.Width / 2 + centerX;
-    //    int yOffset = map.Height / 2 + centerY;
+    public Image<Rgba32> GenerateMapImage(Map map, Rectangle rect, int zoom)
+    {
+        if (!ImageCaches.ContainsKey(map))
+            ImageCaches[map] = new();
 
-    //    for (var y = 0; y < image.Height; y++)
-    //    {
-    //        for (var x = 0; x < image.Width; x++)
-    //        {
-    //            int xx = xOffset + x - image.Width/2;
-    //            int yy = yOffset + y - image.Height/2;
+        var image = new Image<Rgba32>((rect.Width * map.MapImageTileSize) / (1 << zoom), (rect.Height * map.MapImageTileSize) / (1 << zoom));
+        int tilesPerImage = (map.MapImageBigTileSize / map.MapImageTileSize) << zoom;
 
-    //            Rgba32 color = new Rgba32(0, 0, 0, 0);
-    //            if (xx == character.Location.X && yy == character.Location.Y)
-    //                color = new Rgba32(0, 255, 0, 255);
-    //            else if (map[xx, yy].HasFlag(Game.Core.CellType.Walkable))
-    //                color = new Rgba32(10, 10, 10, 255);
-    //            else if (!map[xx, yy].HasFlag(Game.Core.CellType.Walkable))
-    //                color = new Rgba32(255, 255, 255, 255);
-    //            image[x, y] = color;
-    //        }
-    //    }
-    //    image.Mutate(p => p.Resize(256, 256));
+        int minX = rect.X / tilesPerImage;
+        int minY = rect.Y / tilesPerImage;
 
-    //    for (int i = 0; i <= 256; i += 64)
-    //    {
-    //        image.Mutate(p => p.DrawLine(Color.Red, 2, new PointF(i-0.5f, -0.5f), new PointF(i-0.5f, 255.5f)));
-    //        image.Mutate(p => p.DrawLine(Color.Red, 2, new PointF(-0.5f, i-0.5f), new PointF(255.5f, i - 0.5f)));
-    //    }
+        int xi = 0;
+        int yi = 0;
 
-    //    return image;
-    //}
-    public Image<Rgba32> GenerateWorldMapImage(Character character, int centerX, int centerY, int zoom)
+        int fac = Math.Max(1, 16>>zoom);
+
+        for(int x = minX; x <= (rect.X + rect.Width) / tilesPerImage; x++)
+        {
+            for(int y = minY; y <= (rect.Y + rect.Height) / tilesPerImage; y++)
+            {
+                int destX = (x * tilesPerImage - rect.X) * fac;
+                int destY = (y * tilesPerImage - rect.Y) * fac;
+                var cacheEntry = ImageCaches[map].Load(map, zoom, x, y);
+                if (cacheEntry.Image != null)
+                {
+                    image.Mutate(ip => ip.DrawImage(cacheEntry.Image, new Point(destX, destY), 1.0f));
+                }
+                if(xi == 0)
+                    yi++;
+            }
+            xi++;
+        }
+
+        image.Mutate(ip => ip.DrawText($"Zoom: {zoom}, iterations {xi},{yi}", font, Color.Pink, new PointF(10, 10)));
+
+        return image;
+    }
+
+    public Image<Rgba32> GenerateWorldMapImage(Character character, Rectangle rectangle)
     {
         var map = character.Location.MapInstance.Map;
-        if (map.MapImage == null)
-            return new Image<Rgba32>(0, 0);
-
-        Image<Rgba32> image = map.MapImage.Clone();
-
-        int xOffset = image.Width / 2 + centerX;
-        int yOffset = image.Height / 2 + centerY;
-
-        int sizeX = image.Width / zoom;
-        int sizeY = image.Height / zoom;
-
-        image.Mutate(m => m.Crop(new Rectangle(
-            xOffset - (image.Width / 2)/zoom, 
-            yOffset - (image.Height / 2) / zoom, 
-            sizeX, 
-            sizeY)));
-
-
-
-
-        //for (var y = 0; y < image.Height; y++)
-        //{
-        //    for (var x = 0; x < image.Width; x++)
-        //    {
-        //        int xx = xOffset + x - image.Width / 2;
-        //        int yy = yOffset + y - image.Height / 2;
-
-        //        Rgba32 color = new Rgba32(0, 0, 0, 0);
-        //        if (xx == character.Location.X && yy == character.Location.Y)
-        //            color = new Rgba32(0, 255, 0, 255);
-        //        else if (map[xx, yy].HasFlag(Game.Core.CellType.Walkable))
-        //            color = new Rgba32(10, 10, 10, 255);
-        //        else if (!map[xx, yy].HasFlag(Game.Core.CellType.Walkable))
-        //            color = new Rgba32(255, 255, 255, 255);
-        //        image[x, y] = color;
-        //    }
-        //}
-        image.Mutate(p => p.Resize(256, 256));
-
-        for (int i = 0; i <= 256; i += 64)
+        //0 => 1024/16 = 64 tiles wide
+        //1 => 128
+        //2 => 256
+        //3 => 512
+        //4 => 1024
+        //5 => 2048
+        //6 => 4048
+        int tilesPerImage = map.MapImageBigTileSize / map.MapImageTileSize;
+        int zoom = 0;
+        while(rectangle.Width > tilesPerImage)
         {
-            image.Mutate(p => p.DrawLine(Color.Red, 2, new PointF(i - 0.5f, -0.5f), new PointF(i - 0.5f, 255.5f)));
-            image.Mutate(p => p.DrawLine(Color.Red, 2, new PointF(-0.5f, i - 0.5f), new PointF(255.5f, i - 0.5f)));
+            zoom++;
+            tilesPerImage *= 2;
         }
+
+        var image = GenerateMapImage(map, rectangle, zoom);
+
+        int fac = 1;
+        while (fac * image.Width < 512 || fac * image.Height < 512)
+            fac *= 2;
+        if(fac != 1)
+            image.Mutate(p => p.Resize(image.Width*fac, image.Height*fac));
+
+
+        for (int i = 0; i <= image.Width; i += image.Width / 4)
+            image.Mutate(p => p.DrawLine(Color.Red, 2, new PointF(i - 0.5f, -0.5f), new PointF(i - 0.5f, image.Height)));
+        for (int i = 0; i <= image.Height; i += image.Height / 4)
+            image.Mutate(p => p.DrawLine(Color.Red, 2, new PointF(-0.5f, i - 0.5f), new PointF(image.Width, i - 0.5f)));
 
         return image;
     }
+}
+
+
+class ImageCache : List<ImageCacheEntry>
+{
+    public ImageCacheEntry Load(Map map, int zoom, int x, int y)
+    {
+        var entry = this.FirstOrDefault(e => e.Zoom == zoom && e.X == x && e.Y == y); //TODO: single equals? hash or bitcalc?
+        if (entry != null)
+            return entry;
+
+        string tilePath = System.IO.Path.Combine(map.MapImagePath, zoom.ToString(), $"map_{y}_{x}.png");
+
+        entry = new ImageCacheEntry()
+        {
+            X = x,
+            Y = y,
+            Zoom = zoom,
+            Image = File.Exists(tilePath) ? Image.Load<Rgba32>(tilePath) : null
+        };
+
+        if(this.Count > 30)
+            this.Clear(); //should only remove oldest
+        this.Add(entry);
+        return entry;
+    }
+}
+
+class ImageCacheEntry
+{
+    public required int Zoom { get; set; }
+    public required int X { get; set; }
+    public required int Y { get; set; }
+    public required Image<Rgba32>? Image { get; set; }
 }

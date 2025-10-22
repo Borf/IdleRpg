@@ -41,7 +41,7 @@ public class StartMenu : InteractionModuleBase<SocketInteractionContext>
     public async Task UpdateStart()
     {
         var character = gameService.GetCharacter(Context.User.Id);
-        using var mapStream = mapGenerator.GenerateMapImage(character, 128, 1).AsPngStream();
+        using var mapStream = mapGenerator.GenerateMapImage(character, 16, 0).AsPngStream();
 
 
         await ModifyOriginalResponseAsync(c =>

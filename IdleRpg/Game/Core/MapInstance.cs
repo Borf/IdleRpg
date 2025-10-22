@@ -67,6 +67,7 @@ public class MapInstance
     public List<Character> GetCharactersAround(Location location, int range)
     {
         return Characters
+            .ToList()
             .Where(c => Math.Abs(location.X - c.Location.X) < range && Math.Abs(location.Y - c.Location.Y) < range)
             .ToList();
     }

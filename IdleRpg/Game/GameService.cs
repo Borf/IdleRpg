@@ -1,4 +1,6 @@
-﻿using IdleRpg.Data;
+﻿using Discord;
+using Discord.WebSocket;
+using IdleRpg.Data;
 using IdleRpg.Game.Attributes;
 using IdleRpg.Game.Core;
 using IdleRpg.Util;
@@ -145,6 +147,9 @@ public class GameService : ICoreHolder
             Id = id,
             Location = GetLocation(GameCore.SpawnLocation), //TODO
         };
+
+        var user = serviceProvider.GetRequiredService<DiscordSocketClient>().GetUserAsync(id).GetAwaiter().GetResult();
+        newCharacter.Name = user.GlobalName;
         newCharacter.Stats = NotCalculatedStats.ToDictionary(s => s, s => GameCore.CalculateStat(s).Calculation(newCharacter.Stats));
 
         newCharacter.Location.MapInstance.Characters.Add(newCharacter);

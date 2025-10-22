@@ -99,7 +99,7 @@ public class GameCore : IGameCore
     }
 
 
-    public (Point position, string mapName) SpawnLocation => (new Point(18, 21), nameof(WorldMap));
+    public (Point position, string mapName) SpawnLocation => (new Point(742, 733), nameof(WorldMap));
 
     public void Damage(Character source, Character target, IDamageProperties damageProperties)
     {

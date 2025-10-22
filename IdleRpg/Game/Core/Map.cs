@@ -3,6 +3,7 @@ using MemoryPack;
 using MemoryPack.Compression;
 using Microsoft.Extensions.DependencyInjection;
 using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Memory;
 using SixLabors.ImageSharp.PixelFormats;
 using System.Diagnostics;
 
@@ -43,15 +44,18 @@ public class Map(string name)
     public string Name { get; private set; } = name;
     private Map_Base MapData = null!;
     private Map_v1_1? MapData11 => MapData as Map_v1_1;
-    public Image<Rgba32>? MapImage;
-    public int MapImageSize = 16;
+    public int MapImageTileSize { get; init; } = 16;
+    public int MapImageBigTileSize { get; init; } = 1024;
+    public int MapImageZoomLevels { get; private set; }
     public L1PathPlanner Planner { get; private set; } = null!;
     //PathFindData PathFindData { get; set; } = null!;
     public InstanceType InstanceType { get; set; } = InstanceType.NoInstance;
     public List<SpawnTemplate> Spawns { get; set; } = new();
+    public string MapImagePath { get; private set; } = string.Empty;
     public virtual void Load()
     {
         var filename = Path.Combine("Resources", "Games", GameService.CoreName, "Maps", $"{Name}.map");
+        MapImagePath = Path.Combine("Resources", "Games", GameService.CoreName, "Maps", Name);
         var data = File.ReadAllBytes(filename);
         using var decompressor = new BrotliDecompressor();
 
@@ -76,12 +80,8 @@ public class Map(string name)
             }
         }
         debugImage.SaveAsPng(filename + ".collision.png");
-
-
         Planner = L1PathPlanner.CreatePlanner(grid);
-
-
-        MapImage = Image.Load<Rgba32>(filename.Replace(".map", ".png"));
+        MapImageZoomLevels = (int)Math.Ceiling(Math.Log2(Math.Max(Width, Height) * MapImageTileSize / MapImageBigTileSize));
     }
 
     public CellType this[int X, int Y]
