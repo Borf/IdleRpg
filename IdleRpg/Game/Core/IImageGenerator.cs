@@ -16,3 +16,12 @@ public interface IImageGenerator<T, R, S>
 {
     Image<Rgba32> GetImage(T source, R options, S option2);
 }
+public interface IImageGenerator<T, R, S, U>
+{
+    Image<Rgba32> GetImage(T source, R options, S option2, U option3);
+}
+
+public interface IImageGenerator<T, R, S, U, V>
+{
+    Image<Rgba32> GetImage(T source, R options, S option2, U option3, V option4);
+}

@@ -13,7 +13,7 @@ public abstract class CharacterAction
     public CharacterAction(Character character)
     {
         Character = character;
-        BgTask = new BgTask("CharacterAction " + Status, async (token) =>
+        BgTask = new BgTask("CharacterAction " + Status(), async (token) =>
         {
             await BackgroundTask(token);
             Character.ActionQueue.SignalActionDone();

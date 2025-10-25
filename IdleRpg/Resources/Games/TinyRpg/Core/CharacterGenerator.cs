@@ -7,7 +7,7 @@ using System.IO;
 
 namespace TinyRpg.Core;
 
-public class MapCharacterGenerator : IImageGenerator<Character, SpriteDirection>
+public class CharacterGenerator : IImageGenerator<Character, SpriteDirection>, IImageGenerator<ICharacterCreateCharOptions>
 {
     //can not do DI for now
     public Image<Rgba32> GetImage(Character source, SpriteDirection direction)
@@ -28,6 +28,44 @@ public class MapCharacterGenerator : IImageGenerator<Character, SpriteDirection>
 
         {
             using var body = Image.Load<Rgba32>(Path.Combine("Resources", "Games", "TinyRpg", "CharacterArt", "Hair", "1.png"));
+            body.Mutate(ip => ip.Crop(new Rectangle(0, 0, 16, 16)));
+            image.Mutate(ip => ip.DrawImage(body, 1.0f));
+        }
+
+        {
+            using var body = Image.Load<Rgba32>(Path.Combine("Resources", "Games", "TinyRpg", "CharacterArt", "Shirt", "1.png"));
+            body.Mutate(ip => ip.Crop(new Rectangle(0, 0, 16, 16)));
+            image.Mutate(ip => ip.DrawImage(body, 1.0f));
+        }
+
+        {
+            using var body = Image.Load<Rgba32>(Path.Combine("Resources", "Games", "TinyRpg", "CharacterArt", "Pants", "1.png"));
+            body.Mutate(ip => ip.Crop(new Rectangle(0, 0, 16, 16)));
+            image.Mutate(ip => ip.DrawImage(body, 1.0f));
+        }
+
+        return image;
+    }
+
+    public Image<Rgba32> GetImage(ICharacterCreateCharOptions options)
+    {
+        var charOptions = (CharacterCreateCharOptions)options;
+        Image<Rgba32> image = new Image<Rgba32>(16, 16);
+
+        {
+            using var body = Image.Load<Rgba32>(Path.Combine("Resources", "Games", "TinyRpg", "CharacterArt", "Body", "Body.png"));
+            body.Mutate(ip => ip.Crop(new Rectangle(0, 0, 16, 16)));
+            image.Mutate(ip => ip.DrawImage(body, 1.0f));
+        }
+
+        {
+            using var body = Image.Load<Rgba32>(Path.Combine("Resources", "Games", "TinyRpg", "CharacterArt", "Face", $"{charOptions.HeadId}.png"));
+            body.Mutate(ip => ip.Crop(new Rectangle(0, 0, 16, 16)));
+            image.Mutate(ip => ip.DrawImage(body, 1.0f));
+        }
+
+        {
+            using var body = Image.Load<Rgba32>(Path.Combine("Resources", "Games", "TinyRpg", "CharacterArt", "Hair", $"{charOptions.HairId}.png"));
             body.Mutate(ip => ip.Crop(new Rectangle(0, 0, 16, 16)));
             image.Mutate(ip => ip.DrawImage(body, 1.0f));
         }

@@ -136,7 +136,8 @@ public class GameCore : IGameCore2D, IDiscordGame
 
 
 
-    public IImageGenerator<Character, SpriteDirection> MapCharacterGenerator => new MapCharacterGenerator(); //would love to be able to do dependency injection here
+    public IImageGenerator<Character, SpriteDirection> MapCharacterGenerator => new CharacterGenerator(); //would love to be able to do dependency injection here
+    public IImageGenerator<ICharacterCreateCharOptions> CharCreateCharacterGenerator => new CharacterGenerator(); //would love to be able to do dependency injection here
 
     List<long> ExpNeededPerLevel = [
     10, 20, 40, 70, 110, 160, 230, 320, 430, 560, 710, 880, 1070, 1280, 1510, 1760,
@@ -161,7 +162,15 @@ public class GameCore : IGameCore2D, IDiscordGame
 
 
     public IImageGenerator<DiscordMenu, Character> HeaderGenerator => new DiscordHeaderGenerator();
+    public ICharacterCreateCharOptions GetNewCharacterOptions() => new CharacterCreateCharOptions();
 
+    public void InitializeCharacter(CharacterPlayer newCharacter, ICharacterCreateCharOptions options)
+    {
+        var charOptions = (CharacterCreateCharOptions)options;
+        newCharacter.Stats[Stats.LookBody] = charOptions.BodyId;
+        newCharacter.Stats[Stats.LookFace] = charOptions.HeadId;
+        newCharacter.Stats[Stats.LookHair] = charOptions.HairId;
+    }
 }
 
 
@@ -239,4 +248,42 @@ public class DamageProperties : IDamageProperties
     {
         return Damage + "dmg";
     }
+}
+
+
+//TODO: change this to use attributes instead of a dictionary as we need reflection anyway
+public class CharacterCreateCharOptions : ICharacterCreateCharOptions
+{
+    public int BodyId { get; set; } = 1;
+    public int HeadId { get; set; } = 1;
+    public int HairId { get; set; } = 1;
+    public Dictionary<string, CharacterCreateCharOption> Options => new()
+    {
+        { 
+            nameof(BodyId), new CharacterCreateCharOption()
+            {
+                Minvalue = 1,
+                MaxValue = 1,
+                Name = "Body Style"
+            }
+        },
+        {
+            nameof(HeadId), new CharacterCreateCharOption()
+            {
+                Minvalue = 1,
+                MaxValue = 4,
+                Name = "Face"
+            }
+        },        
+        {
+            nameof(HairId), new CharacterCreateCharOption()
+            {
+                Minvalue = 1,
+                MaxValue = 2,
+                Name = "Hair Style"
+            }
+        }
+
+
+    };
 }

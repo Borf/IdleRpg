@@ -1,6 +1,7 @@
 ﻿using Discord;
 using Discord.WebSocket;
 using IdleRpg.Data;
+using IdleRpg.Data.Db;
 using IdleRpg.Game.Attributes;
 using IdleRpg.Game.Core;
 using IdleRpg.Util;
@@ -113,7 +114,7 @@ public class GameService : ICoreHolder
         }
 
         character?.CalculateStats();
-        return character ?? throw new Exception("Could not get character");
+        return character ?? throw new CharacterNotFoundException("Could not get character");
     }
     public CharacterPlayer? LoadCharacter(ulong id)
     {
@@ -146,7 +147,7 @@ public class GameService : ICoreHolder
         };
     }
 
-    public CharacterPlayer CreateCharacter(ulong id)
+    public CharacterPlayer CreateCharacter(ulong id, string name, ICharacterCreateCharOptions options)
     {
         _logger.LogInformation($"Creating character {id}");
         CharacterPlayer newCharacter = new CharacterPlayer(serviceProvider)
@@ -155,11 +156,13 @@ public class GameService : ICoreHolder
             Location = GetLocation(GameCore.SpawnLocation), //TODO
         };
 
-        var user = serviceProvider.GetRequiredService<DiscordSocketClient>().GetUserAsync(id).GetAwaiter().GetResult();
-        newCharacter.Name = user.GlobalName;
+        newCharacter.Name = name;
         newCharacter.Stats = NotCalculatedStats.ToDictionary(s => s, s => GameCore.CalculateStat(s).Calculation(newCharacter.Stats));
-
+        GameCore.InitializeCharacter(newCharacter, options);
+        
         newCharacter.Location.MapInstance.Characters.Add(newCharacter);
+        Players.Add(newCharacter);
+
         return newCharacter;
     }
 
@@ -183,5 +186,21 @@ public class GameService : ICoreHolder
             //_logger.LogInformation("Tick");
             await Task.Delay(1000);
         }
+    }
+}
+
+[Serializable]
+public class CharacterNotFoundException : Exception
+{
+    public CharacterNotFoundException()
+    {
+    }
+
+    public CharacterNotFoundException(string? message) : base(message)
+    {
+    }
+
+    public CharacterNotFoundException(string? message, Exception? innerException) : base(message, innerException)
+    {
     }
 }

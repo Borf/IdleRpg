@@ -1,9 +1,9 @@
 ﻿using Discord;
 using Discord.WebSocket;
-using IdleRpg.Data.Db;
 using IdleRpg.Game;
 using IdleRpg.Game.Core;
 using IdleRpg.Util;
+using SixLabors.ImageSharp.Processing;
 
 namespace IdleRpg.Services.Discord;
 
@@ -33,7 +33,7 @@ public class DiscordMessageBuilderService
             c.Attachments = new List<FileAttachment>() { new FileAttachment(mapStream, "map.png"), new FileAttachment(headerStream, "header.png") };
             c.Components = new ComponentBuilderV2()
                 .WithMediaGallery(["attachment://header.png"])
-                .WithNavigation(interaction)
+                .WithNavigation("start")
                 .WithSection(sb => sb
                     .WithTextDisplay($"Your character:\n" +
                         $"- Your character is {character.State}\n" +
@@ -83,32 +83,50 @@ public class DiscordMessageBuilderService
     }
 
 
-    public async Task CreateCharacter(SocketInteraction interaction, int body, int face, int hair)
+    public async Task CreateCharacter(SocketInteraction interaction, ICharacterCreateCharOptions options, string message = "")
     {
         using var header = ((IDiscordGame)gameService.GameCore).HeaderGenerator.GetImage(DiscordMenu.Main, null!);
         using var headerStream = header.AsPngStream();
 
-        using var characterImage = ((IGameCore2D)gameService.GameCore).MapCharacterGenerator.GetImage(null, SpriteDirection.Down);
+        using var characterImage = ((IGameCore2D)gameService.GameCore).CharCreateCharacterGenerator.GetImage(options);
+        characterImage.Mutate(ip => ip.Resize(new ResizeOptions()
+        {
+            Size = new SixLabors.ImageSharp.Size(characterImage.Width*10, characterImage.Height*10),
+            Sampler = KnownResamplers.NearestNeighbor
+        }));
         using var characterStream = characterImage.AsPngStream();
 
+        var optionsStr = options.BuildString();
+
+        var cb = new ComponentBuilderV2()
+                .WithMediaGallery(["attachment://header.png"])
+                .WithTextDisplay("# Character Creation\nLet's start off by creating your character. Click the buttons below to customize your character.")
+                .WithSection(sb => sb
+                    .WithTextDisplay($"Your character:\n{message}")
+                    .WithAccessory(new ThumbnailBuilder("attachment://character.png", null, false)))
+                .WithSeparator();
+        foreach(var option in options.Options)
+        {
+            var smb = new SelectMenuBuilder()
+                .WithMinValues(1)
+                .WithMaxValues(1)
+                .WithPlaceholder(option.Value.Name)
+                .WithCustomId($"charcreate:{optionsStr}:{option.Key}");
+            int selectedOption = options.Get(option.Key);
+            for(int i = option.Value.Minvalue; i <= option.Value.MaxValue; i++)
+            {
+                smb.AddOption($"{option.Value.Name} {i}", i + "", isDefault: i == selectedOption);
+            }
+
+            cb.WithActionRow(ar => ar.WithSelectMenu(smb));
+        }
+        cb.WithActionRow(ar => ar.WithButton("Create Character", $"charcreatedo:{optionsStr}", ButtonStyle.Success));
 
 
         await interaction.ModifyOriginalResponseAsync(c =>
         {
             c.Attachments = new List<FileAttachment>() { new FileAttachment(headerStream, "header.png"), new FileAttachment(characterStream, "character.png") };
-            c.Components = new ComponentBuilderV2()
-                .WithMediaGallery(["attachment://header.png"])
-                .WithTextDisplay("# Character Creation\nLet's start off by creating your character. Click the buttons below to customize your character.")
-                .WithSection(sb => sb
-                    .WithTextDisplay($"Your character:\n")
-                    .WithAccessory(new ThumbnailBuilder("attachment://character.png", null, false)))
-                .WithSeparator()
-                .WithActionRow(ar => ar
-                    .WithSelectMenu(smb => smb
-                        .WithCustomId("aasdasd")
-                        .WithMinValues(1)
-                        .WithMaxValues(1)
-                ))
+            c.Components = cb
                 .Build();
         });
     }
