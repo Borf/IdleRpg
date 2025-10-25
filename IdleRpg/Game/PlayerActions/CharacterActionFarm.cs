@@ -59,17 +59,13 @@ public class CharacterActionFarm : CharacterAction
             {
                 var action = new CharacterActionWalk(Character, enemy.Location);
                 Character.ActionQueue.QueueActionFront(action);
-                Logger.LogInformation($"awaiting walk");
                 await action.Await();
-                Logger.LogInformation($"Done awaiting walk");
             }
             else
             {
                 var action = new CharacterActionAttack(Character, enemy);
                 Character.ActionQueue.QueueActionFront(action);
-                Logger.LogInformation($"awaiting attack");
                 await action.Await();
-                Logger.LogInformation($"Done awaiting attack");
             }
 
 
