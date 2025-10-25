@@ -1,5 +1,6 @@
 ﻿using Discord;
 using Discord.WebSocket;
+using IdleRpg.Data.Db;
 using IdleRpg.Game;
 using IdleRpg.Game.Core;
 using IdleRpg.Util;
@@ -82,10 +83,36 @@ public class DiscordMessageBuilderService
     }
 
 
+    public async Task CreateCharacter(SocketInteraction interaction, int body, int face, int hair)
+    {
+        using var header = ((IDiscordGame)gameService.GameCore).HeaderGenerator.GetImage(DiscordMenu.Main, null!);
+        using var headerStream = header.AsPngStream();
+
+        using var characterImage = ((IGameCore2D)gameService.GameCore).MapCharacterGenerator.GetImage(null, SpriteDirection.Down);
+        using var characterStream = characterImage.AsPngStream();
 
 
+
+        await interaction.ModifyOriginalResponseAsync(c =>
+        {
+            c.Attachments = new List<FileAttachment>() { new FileAttachment(headerStream, "header.png"), new FileAttachment(characterStream, "character.png") };
+            c.Components = new ComponentBuilderV2()
+                .WithMediaGallery(["attachment://header.png"])
+                .WithTextDisplay("# Character Creation\nLet's start off by creating your character. Click the buttons below to customize your character.")
+                .WithSection(sb => sb
+                    .WithTextDisplay($"Your character:\n")
+                    .WithAccessory(new ThumbnailBuilder("attachment://character.png", null, false)))
+                .WithSeparator()
+                .WithActionRow(ar => ar
+                    .WithSelectMenu(smb => smb
+                        .WithCustomId("aasdasd")
+                        .WithMinValues(1)
+                        .WithMaxValues(1)
+                ))
+                .Build();
+        });
+    }
 }
-
 
 public static class MenuHelper
 {

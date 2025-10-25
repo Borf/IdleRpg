@@ -21,9 +21,9 @@ public class ActionQueue
     }
     private async Task Handler(CancellationToken token)
     {
-        try
+        while (!token.IsCancellationRequested)
         {
-            while (!token.IsCancellationRequested)
+            try
             {
                 await Signal.WaitAsync();
                 lock (Queue)
@@ -45,10 +45,10 @@ public class ActionQueue
                     }
                 }
             }
-        }
-        catch (Exception ex)
-        {
-            Logger.LogError("ActionQueue halted", ex);
+            catch (Exception ex)
+            {
+                Logger.LogError("ActionQueue exception: {0}", ex);
+            }
         }
         Console.WriteLine("Done????");
     }

@@ -26,7 +26,10 @@ public class StartMenu : InteractionModuleBase<SocketInteractionContext>
     {
         var character = gameService.GetCharacter(Context.User.Id);
         await RespondAsync(null, ephemeral: true, components: new ComponentBuilderV2().WithTextDisplay("Loading...").Build());
-        await dmb.StartMenu(Context.Interaction, character);
+        if (character == null)
+            await dmb.CreateCharacter(Context.Interaction);
+        else
+            await dmb.StartMenu(Context.Interaction, character);
     }
 
     [ComponentInteraction("start")]

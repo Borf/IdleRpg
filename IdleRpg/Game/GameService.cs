@@ -106,8 +106,8 @@ public class GameService : ICoreHolder
         if (character == null)
         {
             character = LoadCharacter(id);
-            if (character == null)
-                character = CreateCharacter(id);
+            //if (character == null)
+            //    character = CreateCharacter(id);
             if (character != null)
                 Players.Add(character);
         }
