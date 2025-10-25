@@ -14,3 +14,28 @@ public interface IGameCore
     bool IsAlive(Character chacater);
     void GainExp(Character character, INpcTemplate npcTemplate);
 }
+
+
+public enum DiscordMenu
+{
+    Main
+}
+public interface IDiscordGame
+{
+    IImageGenerator<DiscordMenu, Character> HeaderGenerator { get; }
+
+}
+
+
+public enum SpriteDirection
+{
+    Down,
+    Left,
+    Right,
+    Up
+}
+
+public interface IGameCore2D : IGameCore
+{
+    IImageGenerator<Character, SpriteDirection> MapCharacterGenerator { get; }
+}

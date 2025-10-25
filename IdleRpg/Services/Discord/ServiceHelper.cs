@@ -21,6 +21,7 @@ public static class ServiceHelper
         }));
         serviceCollection.AddSingleton<InteractionHandler>();
         serviceCollection.AddHostedService<InteractionHandler>(s => s.GetRequiredService<InteractionHandler>());
+        serviceCollection.AddTransient<DiscordMessageBuilderService>();
 
     }
 }

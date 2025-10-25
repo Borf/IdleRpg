@@ -4,12 +4,10 @@ using System.Threading.Tasks;
 
 namespace IdleRpg.Game.PlayerActions;
 
-public class CharacterActionFarm : ICharacterAction
+public class CharacterActionFarm : CharacterAction
 {
-    public Character Character { get; }
-    public BgTask BgTask { get; set; }
-    public bool Started { get; set; } = false;
-    public string Status => $"Farming monsters";
+    public override string Status() => $"Farming monsters";
+    public override bool IsDone => BgTask.Finished;
     private ILogger<CharacterActionFarm> Logger;
     
     public List<Enum> MobIds { get; set; } = new();
@@ -20,26 +18,19 @@ public class CharacterActionFarm : ICharacterAction
     //range
     //startlocation
 
-    public CharacterActionFarm(Character character)
+    public CharacterActionFarm(Character character) : base(character)
     {
-        Character = character;
-        BgTask = new BgTask("Farming " + character.Name, BackgroundTask);
         Logger = character.ServiceProvider.GetRequiredService<ILogger<CharacterActionFarm>>();
     }
 
-    public void Start(BgTaskManager bgTaskManager)
+    public override void Start(BgTaskManager bgTaskManager)
     {
+        base.Start(bgTaskManager);
         TimeStart = DateTimeOffset.Now;
-        bgTaskManager.Run(BgTask);
     }
-
-    public async Task Stop()
+    protected override async Task BackgroundTask(CancellationToken token)
     {
-        await BgTask.Cancel();
-    }
-
-    private async Task BackgroundTask(CancellationToken token)
-    {
+        int noMobCount = 0;
         while (!token.IsCancellationRequested && DateTimeOffset.Now < TimeStart + TimeSpan)
         {
             var charsNear = Character.Location.MapInstance.GetCharactersAround(Character.Location, 20); //TODO: range should be configurable
@@ -49,10 +40,17 @@ public class CharacterActionFarm : ICharacterAction
                 .OrderBy(c => c.Location.DistanceTo(Character.Location));
             if(!enemies.Any())
             {
+                noMobCount++;
                 Logger.LogInformation($"No enemies found for {Character.Name}");
+                if (noMobCount > 60)
+                {
+                    Logger.LogInformation($"Giving up on farming");
+                    break;
+                }
                 await Task.Delay(1000, token);
                 continue;
             }
+            noMobCount = 0;
             var enemy = enemies.First(); //maybe other priority? Maybe Take(1) method up there?
             var distance = Character.Location.DistanceTo(enemy.Location);
             Logger.LogInformation($"Found enemy {enemy.Name} for {Character.Name}, distance {distance}");
@@ -61,13 +59,17 @@ public class CharacterActionFarm : ICharacterAction
             {
                 var action = new CharacterActionWalk(Character, enemy.Location);
                 Character.ActionQueue.QueueActionFront(action);
-                await action.BgTask.Await();
+                Logger.LogInformation($"awaiting walk");
+                await action.Await();
+                Logger.LogInformation($"Done awaiting walk");
             }
             else
             {
                 var action = new CharacterActionAttack(Character, enemy);
                 Character.ActionQueue.QueueActionFront(action);
-                await action.BgTask.Await();
+                Logger.LogInformation($"awaiting attack");
+                await action.Await();
+                Logger.LogInformation($"Done awaiting attack");
             }
 
 
@@ -76,6 +78,9 @@ public class CharacterActionFarm : ICharacterAction
         Logger.LogInformation($"Done farming {Character.Name}");
     }
 
-    public bool IsDone => BgTask.Finished;
 
+    public override string? ToString()
+    {
+        return "Killing monsters... ";
+    }
 }

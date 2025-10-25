@@ -11,30 +11,23 @@ public class BgTask
     public List<BgTask> ChildTasks { get; set; } = new List<BgTask>();
     public bool Finished { get; private set; } = false;
 
-    private Task Task = null!;
+    public Task Task { get; private set; }
     private CancellationTokenSource TokenSource { get; set; } = new CancellationTokenSource();
     private CancellationToken CancellationToken { get { return TokenSource.Token; } }
 
-    public BgTask() { }
     [SetsRequiredMembers]
     public BgTask(string name, Func<CancellationToken, Task> action)
     {
         Name = name;
         Action = action;
-    }
-
-
-    public void Start()
-    {
-        Finished = false;
-        Task = Task.Run(async () =>
+        Task = new Task(async () =>
         {
             try
             {
                 await Action(CancellationToken);
             }
-            catch(TaskCanceledException)
-            {}
+            catch (TaskCanceledException)
+            { }
             catch (Exception ex)
             {
                 Console.WriteLine("Task Exception: " + ex); //TODO: _logger
@@ -46,6 +39,13 @@ public class BgTask
                     ParentTask.ChildTasks.Remove(this);
             }
         });
+    }
+
+
+    public void Start()
+    {
+        Finished = false;
+        Task.Start();        
     }
 
     public async Task Cancel()

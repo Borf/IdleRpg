@@ -13,10 +13,12 @@ public class MapGeneratorService
     private Dictionary<Map, ImageCache> ImageCaches = new();
 
     private Font font;
+    private GameService gameService;
 
-    public MapGeneratorService()
+    public MapGeneratorService(GameService gameService)
     {
         this.font = SystemFonts.CreateFont("Tahoma", 20);
+        this.gameService = gameService;
     }
 
     public Image<Rgba32> GenerateMapImage(Character character, int size, int zoom)
@@ -32,9 +34,9 @@ public class MapGeneratorService
         var image = GenerateMapImage(map, rect, zoom);
         int localTileSize = Math.Max(1, map.MapImageTileSize / (zoom + 1));
 
-        image.Mutate(ip => ip.Fill(Color.Blue, new RectangleF((character.Location.X - rect.X) * map.MapImageTileSize, (character.Location.Y - rect.Y) * map.MapImageTileSize, localTileSize, localTileSize)));
+        //image.Mutate(ip => ip.Fill(Color.Blue, new RectangleF((character.Location.X - rect.X) * map.MapImageTileSize, (character.Location.Y - rect.Y) * map.MapImageTileSize, localTileSize, localTileSize)));
 
-        var characters = character.Location.MapInstance.GetCharactersAround(character.Location, 100).Where(c => c != character);
+        var characters = character.Location.MapInstance.GetCharactersAround(character.Location, 100);
         foreach (var c in characters)
         {
             if (c is CharacterNPC npc && !string.IsNullOrEmpty(npc.NpcTemplate.ImageFile) && npc.NpcTemplate.Image != null)
@@ -43,8 +45,14 @@ public class MapGeneratorService
                     (c.Location.X - rect.X) * map.MapImageTileSize,  //TODO: zoom should be factored in here too
                     (c.Location.Y - rect.Y) * map.MapImageTileSize), 1.0f));
             }
-            else if(c is CharacterPlayer player)
-                image.Mutate(ip => ip.Fill(c == character ? Color.Blue : Color.Green, new RectangleF((c.Location.X - rect.X) * map.MapImageTileSize, (c.Location.Y - rect.Y) * map.MapImageTileSize, localTileSize, localTileSize)));
+            else if (c is CharacterPlayer player)
+            {
+                using var sprite = ((IGameCore2D)gameService.GameCore).MapCharacterGenerator.GetImage(player, SpriteDirection.Down);
+                image.Mutate(ip => ip.DrawImage(sprite, new Point(
+                    (c.Location.X - rect.X) * map.MapImageTileSize,  //TODO: zoom should be factored in here too
+                    (c.Location.Y - rect.Y) * map.MapImageTileSize), 1.0f));
+//                image.Mutate(ip => ip.Fill(c == character ? Color.Blue : Color.Green, new RectangleF((c.Location.X - rect.X) * map.MapImageTileSize, (c.Location.Y - rect.Y) * map.MapImageTileSize, localTileSize, localTileSize)));
+            }
         }
         return image;
     }
@@ -84,7 +92,7 @@ public class MapGeneratorService
             xi++;
         }
 
-        image.Mutate(ip => ip.DrawText($"Zoom: {zoom}, iterations {xi},{yi}", font, Color.Pink, new PointF(10, 10)));
+        //image.Mutate(ip => ip.DrawText($"Zoom: {zoom}, iterations {xi},{yi}", font, Color.Pink, new PointF(10, 10)));
 
         return image;
     }

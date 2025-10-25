@@ -5,8 +5,6 @@ namespace IdleRpg.Game;
 
 public class CharacterPlayer : Character
 {
-    public string State => ActionQueue.First?.Status ?? "Idle";
-
     public List<LogEntry> Logs { get; } = new();
     public void Log(LogCategory category, string message)
     {

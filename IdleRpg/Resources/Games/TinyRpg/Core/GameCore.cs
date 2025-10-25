@@ -11,7 +11,7 @@ using System.Numerics;
 using TinyRpg.Maps;
 using TinyRpg.Npcs.Mobs;
 
-public class GameCore : IGameCore
+public class GameCore : IGameCore2D, IDiscordGame
 {
     public Type GetStats() => typeof(Stats);
 
@@ -20,10 +20,18 @@ public class GameCore : IGameCore
         Stats stat = (Stats)s;
         return stat switch
         {
-            Stats.TotalExp => new FixedStatModifier(Stats.TotalExp, 0),
-            Stats.Hp => new FixedStatModifier(Stats.Hp, 1),
-            Stats.Sp => new FixedStatModifier(Stats.Sp, 1),
-            Stats.Level => new FixedStatModifier(Stats.Level, 1),
+            Stats.LookWeapon => new FixedStatModifier(stat, 0),
+            Stats.LookPants => new FixedStatModifier(stat, 0),
+            Stats.LookShirt => new FixedStatModifier(stat, 0),
+
+            Stats.LookBody => new FixedStatModifier(stat, 0),
+            Stats.LookFace => new FixedStatModifier(stat, 0),
+            Stats.LookHair => new FixedStatModifier(stat, 0),
+
+            Stats.TotalExp => new FixedStatModifier(stat, 0),
+            Stats.Hp => new FixedStatModifier(stat, 1),
+            Stats.Sp => new FixedStatModifier(stat, 1),
+            Stats.Level => new FixedStatModifier(stat, 1),
             Stats.Exp =>
                 new StatModifier
                 {
@@ -99,7 +107,7 @@ public class GameCore : IGameCore
     }
 
 
-    public (Point position, string mapName) SpawnLocation => (new Point(742, 733), nameof(WorldMap));
+    public (Point position, string mapName) SpawnLocation => (new Point(747, 707), nameof(WorldMap));
 
     public void Damage(Character source, Character target, IDamageProperties damageProperties)
     {
@@ -127,6 +135,9 @@ public class GameCore : IGameCore
     }
 
 
+
+    public IImageGenerator<Character, SpriteDirection> MapCharacterGenerator => new MapCharacterGenerator(); //would love to be able to do dependency injection here
+
     List<long> ExpNeededPerLevel = [
     10, 20, 40, 70, 110, 160, 230, 320, 430, 560, 710, 880, 1070, 1280, 1510, 1760,
     2030, 2320, 2630, 2960, 3310, 3680, 4070, 4480, 4910, 5360, 5830, 6320, 6830, 7360,
@@ -148,6 +159,9 @@ public class GameCore : IGameCore
 
     long ExpNeededToLevel(int level) => ExpNeededPerLevel.Take(level - 1).Sum(u => u);
 
+
+    public IImageGenerator<DiscordMenu, Character> HeaderGenerator => new DiscordHeaderGenerator();
+
 }
 
 
@@ -157,6 +171,20 @@ public class GameCore : IGameCore
 // How do we handle multiple exp systems?
 public enum Stats
 {
+    [NotCalculated, Group("Looks"), Hidden]
+    LookBody,
+    [NotCalculated, Group("Looks"), Hidden]
+    LookFace,
+    [NotCalculated, Group("Looks"), Hidden]
+    LookHair,
+
+    [Group("Looks"), Hidden]
+    LookPants,
+    [ Group("Looks"), Hidden]
+    LookShirt,
+    [Group("Looks"), Hidden]
+    LookWeapon,
+
     [NotCalculated, Group("Core")]
     Level,
     [Group("Core")]

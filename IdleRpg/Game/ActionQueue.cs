@@ -4,12 +4,12 @@ namespace IdleRpg.Game;
 
 public class ActionQueue
 {
-    public LinkedList<ICharacterAction> Queue { get; } = new();
+    public LinkedList<CharacterAction> Queue { get; } = new();
     public AsyncAutoResetEvent Signal { get; set; } = new(false);
     public BgTask Task { get; }
     private BgTaskManager bgTaskManager;
     public bool Any => Queue.Any();
-    public ICharacterAction? First => Queue.FirstOrDefault();
+    public CharacterAction? First => Queue.FirstOrDefault();
     private ILogger<ActionQueue> Logger;
 
     public ActionQueue(BgTaskManager bgTaskManager, ILogger<ActionQueue> logger)
@@ -18,50 +18,50 @@ public class ActionQueue
         Task = new BgTask("Character ActionQueueTask", Handler);
         bgTaskManager.Run(Task);
         Logger = logger;
-        Logger.LogInformation("Creating Actionqueue");
     }
     private async Task Handler(CancellationToken token)
     {
-        while (!token.IsCancellationRequested)
+        try
         {
-            await Signal.WaitAsync();
-            Logger.LogTrace("Actionqueue semaphore!");
-            lock (Queue)
+            while (!token.IsCancellationRequested)
             {
-                if (!Queue.Any())
+                await Signal.WaitAsync();
+                lock (Queue)
                 {
-                    Logger.LogError("no actions in queue?");
-                }
+                    if (Queue.Any())
+                    {
+                        var done = Queue.Where(q => q.IsDone && q.Started).ToList();
+                        foreach (var q in done)
+                            Queue.Remove(q);
 
-                while (Queue.Any())
-                {
-                    var front = Queue.First();
-                    if (!front.Started)
-                    {
-                        Logger.LogInformation("Starting " + front);
-                        front.Start(bgTaskManager);
-                        front.Started = true;
-                        break;
-                    }
-                    if (front.IsDone)
-                    {
-                        Logger.LogInformation("Action done " + front);
-                        Queue.RemoveFirst();
+                        var front = Queue.First();
+                        if (!front.Started)
+                        {
+                            Logger.LogInformation("Starting " + front);
+                            front.Start(bgTaskManager);
+                            front.Started = true;
+                            //break;
+                        }
                     }
                 }
             }
         }
+        catch (Exception ex)
+        {
+            Logger.LogError("ActionQueue halted", ex);
+        }
+        Console.WriteLine("Done????");
     }
 
 
-    public void QueueAction(ICharacterAction action)
+    public void QueueAction(CharacterAction action)
     {
         lock (Queue)
             Queue.AddLast(action);
         Signal.Set();
     }
 
-    public void QueueActionFront(ICharacterAction action)
+    public void QueueActionFront(CharacterAction action)
     {
         lock(Queue)
             Queue.AddFirst(action);
@@ -81,4 +81,21 @@ public class ActionQueue
         Monitor.Exit(Queue);
     }
 
+    public string ToDiscordString()
+    {
+        List<string> strings = new();
+        foreach(var action in Queue)
+        {
+            string? str = action.ToString();
+            if(str != null)
+                strings.Add(str + " " + (action.IsDone ? "done" : "not done") + ", " + (action.Started ? "started" : "not started") + ", " + action.BgTask.Task.Status);
+        }
+
+        return string.Join("\n", strings.Select(s => "- " + s));
+    }
+
+    public void SignalActionDone()
+    {
+        Signal.Set();
+    }
 }

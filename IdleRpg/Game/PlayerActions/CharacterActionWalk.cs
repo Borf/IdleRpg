@@ -5,48 +5,35 @@ using System.Threading.Tasks;
 
 namespace IdleRpg.Game.PlayerActions;
 
-public class CharacterActionWalk : ICharacterAction
+public class CharacterActionWalk : CharacterAction
 {
-    public Character Character { get; }
     public Location TargetLocation { get; set; }
-    public BgTask BgTask { get; set; }
-    public bool Started { get; set; } = false;
-    public string Status => $"Walking to {TargetLocation.X}, {TargetLocation.Y}";
+    public double Length { get; set; } = 0;
+    public int DistanceWalked { get; set; } = 0;
+    public override string Status() => $"Walking to {TargetLocation?.X}, {TargetLocation?.Y}";
     public List<Point>? CurrentPath { get; set; }
     private ILogger<CharacterActionWalk> Logger;
 
-    public CharacterActionWalk(Character character, Location targetLocation)
+    public CharacterActionWalk(Character character, Location targetLocation) : base(character)
     {
-        Character = character;
         TargetLocation = targetLocation;
-        BgTask = new BgTask("Walking " + character.Name, BackgroundTask);
         Logger = character.ServiceProvider.GetRequiredService<ILogger<CharacterActionWalk>>();
     }
 
-    public void Start(BgTaskManager bgTaskManager)
-    {
-        bgTaskManager.Run(BgTask);
-    }
-
-    public async Task Stop()
-    {
-        await BgTask.Cancel();
-    }
-
-    private async Task BackgroundTask(CancellationToken token)
+    protected override async Task BackgroundTask(CancellationToken token)
     {
         if (Character.Location.MapInstance != TargetLocation.MapInstance)
             throw new NotImplementedException();
 
         List<Point> currentPath;
-        var length = Character.Location.MapInstance.Map.Planner.Search(
+        Length = Character.Location.MapInstance.Map.Planner.Search(
             new Point(TargetLocation.X, TargetLocation.Y),
             new Point(Character.Location.X, Character.Location.Y), 
             out currentPath );
         CurrentPath = currentPath;
-        if (length <= 0 || CurrentPath.Count == 0)
+        if (Length <= 0 || CurrentPath.Count == 0)
         {
-            Logger.LogError("Could not find path. Distance " + length);
+            Logger.LogError("Could not find path. Distance " + Length);
             return;// No path found
         }
 
@@ -61,10 +48,11 @@ public class CharacterActionWalk : ICharacterAction
             Logger.LogTrace($"Moving {Character.Name} to {p.X}, {p.Y}");
             while((Character.Location.X != p.X || Character.Location.Y != p.Y) && !token.IsCancellationRequested)
             {
+                DistanceWalked++;
                 Character.Location.X += Math.Sign(p.X - Character.Location.X);
                 Character.Location.Y += Math.Sign(p.Y - Character.Location.Y);
                 Logger.LogTrace($"Step {Character.Name} to {Character.Location.X}, {Character.Location.Y}");
-                await Task.Delay(1000, token); // Simulate walking time
+                await Task.Delay(100, token); // Simulate walking time
             }
             if (token.IsCancellationRequested)
                 break;
@@ -72,7 +60,7 @@ public class CharacterActionWalk : ICharacterAction
         Logger.LogInformation($"Done Moving {Character.Name}");
     }
 
-    public bool IsDone
+    public override bool IsDone
     { 
         get 
         { 
@@ -84,4 +72,8 @@ public class CharacterActionWalk : ICharacterAction
         } 
     }
 
+    public override string? ToString()
+    {
+        return "Walking... " + (Length - DistanceWalked) + " meter remaining.";
+    }
 }

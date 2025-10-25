@@ -5,33 +5,21 @@ using System.Threading.Tasks;
 
 namespace IdleRpg.Game.PlayerActions;
 
-public class CharacterActionAttack : ICharacterAction
+public class CharacterActionAttack : CharacterAction
 {
-    public Character Character { get; }
+    public override string Status() => $"Attacking {Target?.Name}";
+    public override bool IsDone => BgTask.Finished;
+
     public Character Target { get; set; }
-    public BgTask BgTask { get; set; }
-    public bool Started { get; set; } = false;
-    public string Status => $"Attacking {Target.Name}";
     private ILogger<CharacterActionAttack> Logger;
-    public CharacterActionAttack(Character character, Character target)
+
+    public CharacterActionAttack(Character character, Character target) : base(character)
     {
-        Character = character;
         Target = target;
-        BgTask = new BgTask("Attacking " + character.Name, BackgroundTask);
         Logger = character.ServiceProvider.GetRequiredService<ILogger<CharacterActionAttack>>();
     }
 
-    public void Start(BgTaskManager bgTaskManager)
-    {
-        bgTaskManager.Run(BgTask);
-    }
-
-    public async Task Stop()
-    {
-        await BgTask.Cancel();
-    }
-
-    private async Task BackgroundTask(CancellationToken token)
+    protected override async Task BackgroundTask(CancellationToken token)
     {
         if (Character.Location.MapInstance != Target.Location.MapInstance)
             throw new NotImplementedException();
@@ -68,8 +56,13 @@ public class CharacterActionAttack : ICharacterAction
         }
 
         await Task.Delay(500);
+        Logger.LogInformation($"{Character.Name} done attacking");
     }
 
-    public bool IsDone => BgTask.Finished;
+
+    public override string? ToString()
+    {
+        return "Attacking";
+    }
 
 }

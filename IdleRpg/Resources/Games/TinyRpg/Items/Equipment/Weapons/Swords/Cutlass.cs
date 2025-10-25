@@ -20,7 +20,7 @@ public class Cutlass : IEquippable
         new StatModifier
         {
             Stat = Stats.Attack,
-            Calculation = (currentStats) => 3,
+            Calculation = (currentStats) => currentStats[Stats.Attack] + 3,
         }
     };
 

@@ -24,6 +24,8 @@ public class GameService : ICoreHolder
     private List<CharacterPlayer> Players = new();
     public IGameCore GameCore { get; set; } = null!;
     public Type statsEnum { get; set; } = null!;
+    public List<StatModifier> PrimaryModifiers { get; set; } = new();
+    public List<StatModifier> AllModifiers { get; private set; } = new();
     public List<StatModifier> sortedModifiers { get; set; } = new();
     public List<Enum> NotCalculatedStats { get; set; } = new();
     private BgTask bgTask;
@@ -39,8 +41,8 @@ public class GameService : ICoreHolder
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
-        //TODO: this should be done after every reload
-        List<StatModifier> AllModifiers = new();
+        AllModifiers = new();
+        PrimaryModifiers = new();
         NotCalculatedStats = new();
         var stats = Enum.GetValues(statsEnum).Cast<Enum>().ToList();
         foreach (var stat in stats)
@@ -52,11 +54,13 @@ public class GameService : ICoreHolder
                 NotCalculatedStats.Add(stat);
                 continue;
             }
-            AllModifiers.Add(GameCore.CalculateStat(stat));
+            var modifier = GameCore.CalculateStat(stat);
+            PrimaryModifiers.Add(modifier);
+            AllModifiers.Add(modifier);
         }
 
-        foreach (var item in ItemTemplates.Where(item => item.GetType().IsAssignableTo(typeof(IEquippable))).Select(item => (IEquippable)item))
-            AllModifiers.AddRange(item.EquipEffects);
+        //foreach (var item in ItemTemplates.Where(item => item.GetType().IsAssignableTo(typeof(IEquippable))).Select(item => (IEquippable)item))
+        //    AllModifiers.AddRange(item.EquipEffects);
 
         _logger.LogInformation($"Found {AllModifiers.Count} modifiers in total");
 
@@ -75,6 +79,9 @@ public class GameService : ICoreHolder
             AllModifiers.RemoveAll(m => toRemove.Contains(m));
         }
         _logger.LogInformation($"Sorted {sortedModifiers.Count} modifiers in total");
+
+        PrimaryModifiers = PrimaryModifiers.OrderBy(o => sortedModifiers.IndexOf(o)).ToList(); // sorting primary modifiers, not sure how efficient it is, but only done once anyway
+
 
         Maps = GameCore.LoadMaps();
         SemaphoreSlim LoadSemaphore = new SemaphoreSlim(6); // 6 maps at the same time

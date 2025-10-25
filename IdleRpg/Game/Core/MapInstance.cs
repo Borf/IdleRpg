@@ -68,7 +68,7 @@ public class MapInstance
     {
         return Characters
             .ToList()
-            .Where(c => Math.Abs(location.X - c.Location.X) < range && Math.Abs(location.Y - c.Location.Y) < range)
+            .Where(c => c != null && Math.Abs(location.X - c.Location.X) < range && Math.Abs(location.Y - c.Location.Y) < range)
             .ToList();
     }
 }

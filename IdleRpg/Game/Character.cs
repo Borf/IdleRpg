@@ -15,6 +15,7 @@ public class Character
     public IServiceProvider ServiceProvider { get; }
     
     public ActionQueue ActionQueue { get; private set; }
+    public string State => ActionQueue.First?.Status() ?? "Idle";
     public Character(IServiceProvider serviceProvider)
     {
         ServiceProvider = serviceProvider;
@@ -24,7 +25,7 @@ public class Character
     public void CalculateStats()
     {
         var gameService = ServiceProvider.GetRequiredService<GameService>();
-        foreach (var modifier in gameService.sortedModifiers)
+        foreach (var modifier in gameService.PrimaryModifiers)
         {
             if (gameService.NotCalculatedStats.Contains(modifier.Stat))
                 continue;
