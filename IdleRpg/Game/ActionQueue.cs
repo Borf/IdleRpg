@@ -28,11 +28,11 @@ public class ActionQueue
                 await Signal.WaitAsync();
                 lock (Queue)
                 {
+                    var done = Queue.Where(q => q.IsDone && q.Started).ToList();
+                    foreach (var q in done)
+                        Queue.Remove(q);
                     if (Queue.Any())
                     {
-                        var done = Queue.Where(q => q.IsDone && q.Started).ToList();
-                        foreach (var q in done)
-                            Queue.Remove(q);
 
                         var front = Queue.First();
                         if (!front.Started)
