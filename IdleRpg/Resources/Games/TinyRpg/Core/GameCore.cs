@@ -195,7 +195,7 @@ public enum Stats
     LookWeapon,
 
     [NotCalculated, Group("Core")]
-    Level,
+    Level, //could be calculated from TotalExp
     [Group("Core")]
     Exp,
     [Group("Core", nameof(Exp))]

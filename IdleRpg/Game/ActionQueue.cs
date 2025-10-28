@@ -26,9 +26,13 @@ public class ActionQueue
             try
             {
                 await Signal.WaitAsync();
-                lock (Queue)
+                Monitor.Enter(Queue);
                 {
                     var done = Queue.Where(q => q.IsDone && q.Started).ToList();
+                    Monitor.Exit(Queue);
+                    foreach (var q in done)
+                        await q.BgTask.Cancel();
+                    Monitor.Enter(Queue);
                     foreach (var q in done)
                         Queue.Remove(q);
                     if (Queue.Any())
@@ -44,9 +48,11 @@ public class ActionQueue
                         }
                     }
                 }
+                Monitor.Exit(Queue);
             }
             catch (Exception ex)
             {
+                Monitor.Exit(Queue);
                 Logger.LogError("ActionQueue exception: {0}", ex);
             }
         }
@@ -84,7 +90,7 @@ public class ActionQueue
     public string ToDiscordString()
     {
         List<string> strings = new();
-        foreach(var action in Queue)
+        foreach(var action in Queue.Take(20))
         {
             string? str = action.ToString();
             if(str != null)

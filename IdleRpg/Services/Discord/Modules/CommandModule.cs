@@ -29,7 +29,7 @@ public class CommandModule : InteractionModuleBase<SocketInteractionContext>
                 .WithTextDisplay("# Idle RPG")
                 .WithMediaGallery(["attachment://header.png"])
                 .WithSeparator()
-                .WithTextDisplay("Play as a character in an emersive world. Fight monsters, get stronger, do quests, personalize your character and share the fun with other players")
+                .WithTextDisplay("Play as a character in an immersive world. Fight monsters, get stronger, do quests, personalize your character and share the fun with other players")
                 .WithActionRow(ar => ar
                     .WithButton("Start", "start:new", ButtonStyle.Success, emote: Emoji.Parse(":crossed_swords:"))
                     .WithButton("Settings", "settings:new", ButtonStyle.Secondary, emote: Emoji.Parse(":gear:"))

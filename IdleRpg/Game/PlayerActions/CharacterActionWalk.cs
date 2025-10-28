@@ -33,6 +33,7 @@ public class CharacterActionWalk : CharacterAction
         CurrentPath = currentPath;
         if (Length <= 0 || CurrentPath.Count == 0)
         {
+            Length = -1;
             Logger.LogError("Could not find path. Distance " + Length);
             return;// No path found
         }
@@ -57,7 +58,7 @@ public class CharacterActionWalk : CharacterAction
             if (token.IsCancellationRequested)
                 break;
         }
-        Logger.LogInformation($"Done Moving {Character.Name}");
+        Logger.LogInformation($"Done Moving {Character.Name}, took {DistanceWalked} steps");
     }
 
     public override bool IsDone
@@ -67,6 +68,8 @@ public class CharacterActionWalk : CharacterAction
             if(Character.Location.X == TargetLocation.X && Character.Location.Y == TargetLocation.Y && Character.Location.MapInstance == TargetLocation.MapInstance)
                 return true;
             if (BgTask.Finished)
+                return true;
+            if (Length <= 0)
                 return true;
             return false;
         } 

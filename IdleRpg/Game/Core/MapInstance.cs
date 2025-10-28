@@ -25,6 +25,7 @@ public class MapInstance
             };
             spawner.Task = new BgTask($"Spawner {spawn.Mob} on {Map.Name}", async (token) =>
             {
+                bool starting = true;
                 while (!token.IsCancellationRequested)
                 {
                     spawner.SpawnedNpcs.RemoveAll(npc => !gameCore.IsAlive(npc));
@@ -49,7 +50,11 @@ public class MapInstance
                         this.SpawnCharacter(npc);
                         npc.Start(serviceProvider);
                     }
-                    await Task.Delay(spawn.RespawnTime, token);
+                    if (!starting)
+                        await Task.Delay(spawn.RespawnTime, token);
+                    else
+                        if (spawner.SpawnedNpcs.Count == spawn.Amount)
+                        starting = false;
                 }
             });
 

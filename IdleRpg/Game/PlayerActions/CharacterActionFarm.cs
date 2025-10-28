@@ -1,5 +1,6 @@
 ﻿using IdleRpg.Game.Core;
 using L1PathFinder;
+using System.Diagnostics;
 using System.Threading.Tasks;
 
 namespace IdleRpg.Game.PlayerActions;
@@ -67,9 +68,6 @@ public class CharacterActionFarm : CharacterAction
                 Character.ActionQueue.QueueActionFront(action);
                 await action.Await();
             }
-
-
-            await Task.Delay(1000, token);
         }
         Logger.LogInformation($"Done farming {Character.Name}");
     }

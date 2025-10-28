@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using Microsoft.EntityFrameworkCore.SqlServer.Query.Internal;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 
 namespace IdleRpg.Game;
@@ -11,7 +12,7 @@ public class BgTask
     public List<BgTask> ChildTasks { get; set; } = new List<BgTask>();
     public bool Finished { get; private set; } = false;
 
-    public Task Task { get; private set; }
+    public Task? Task { get; private set; } = null;
     private CancellationTokenSource TokenSource { get; set; } = new CancellationTokenSource();
     private CancellationToken CancellationToken { get { return TokenSource.Token; } }
 
@@ -20,7 +21,13 @@ public class BgTask
     {
         Name = name;
         Action = action;
-        Task = new Task(async () =>
+    }
+
+
+    public void Start()
+    {
+        Finished = false;
+        Task = Task.Run(async () =>
         {
             try
             {
@@ -41,21 +48,18 @@ public class BgTask
         });
     }
 
-
-    public void Start()
-    {
-        Finished = false;
-        Task.Start();        
-    }
-
     public async Task Cancel()
     {
         TokenSource.Cancel();
+        while(Task is null)
+            await Task.Delay(10);
         await Task;
     }
 
     public async Task Await()
     {
+        while (Task is null)
+            await Task.Delay(10);
         await Task;
     }
 

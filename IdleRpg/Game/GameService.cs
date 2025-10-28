@@ -129,7 +129,7 @@ public class GameService : ICoreHolder
         {
             Id = id,
             Name = dbCharacter.Name,
-            Location = GetLocation(GameCore.SpawnLocation), //TODO
+            Location = new Location(dbCharacter.X, dbCharacter.Y) { MapInstance = Maps.First(m => m.Name == dbCharacter.Map).MapInstance(GameCore, serviceProvider) },
             Stats = dbCharacter.Stats.ToDictionary(s => (Enum)Enum.Parse(statsEnum, s.Stat), s => s.Value),
         };
         character.Location.MapInstance.Characters.Add(character);
@@ -162,6 +162,8 @@ public class GameService : ICoreHolder
         
         newCharacter.Location.MapInstance.Characters.Add(newCharacter);
         Players.Add(newCharacter);
+
+        newCharacter.Save().Wait(); //TODO: async?
 
         return newCharacter;
     }
