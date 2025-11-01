@@ -10,7 +10,7 @@ public class Slime : Mob
 {
     public override Enum Id => NpcIds.Slime;
     public override string Name => "Slime";
-    public override string ImageFile => "slime.png";
+    public override string ImageFile => "Slime.png";
     public override Dictionary<Enum, int> Stats => new()
     {
         { Core.Stats.MaxHp, 4 },
@@ -21,7 +21,7 @@ public class Slime : Mob
     };
     public override int AgroRange => 0;
 
-    public override List<ItemDrop> ItemDrops => [ new ItemDrop() { Item = ItemIds.RedPotion, DropChance = 1 }];
+    public override List<ItemDrop> ItemDrops => [ new ItemDrop() { Item = ItemIds.FrogLeg, DropChance = 1 }];
 
     public override int Exp => 1;
 }

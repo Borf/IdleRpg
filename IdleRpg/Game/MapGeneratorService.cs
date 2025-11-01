@@ -34,8 +34,6 @@ public class MapGeneratorService
         var image = GenerateMapImage(map, rect, zoom);
         int localTileSize = Math.Max(1, map.MapImageTileSize / (zoom + 1));
 
-        //image.Mutate(ip => ip.Fill(Color.Blue, new RectangleF((character.Location.X - rect.X) * map.MapImageTileSize, (character.Location.Y - rect.Y) * map.MapImageTileSize, localTileSize, localTileSize)));
-
         var characters = character.Location.MapInstance.GetCharactersAround(character.Location, 100);
         foreach (var c in characters)
         {
@@ -48,10 +46,10 @@ public class MapGeneratorService
             else if (c is CharacterPlayer player)
             {
                 using var sprite = ((IGameCore2D)gameService.GameCore).MapCharacterGenerator.GetImage(player, SpriteDirection.Down);
+
                 image.Mutate(ip => ip.DrawImage(sprite, new Point(
                     (c.Location.X - rect.X) * map.MapImageTileSize,  //TODO: zoom should be factored in here too
                     (c.Location.Y - rect.Y) * map.MapImageTileSize), 1.0f));
-//                image.Mutate(ip => ip.Fill(c == character ? Color.Blue : Color.Green, new RectangleF((c.Location.X - rect.X) * map.MapImageTileSize, (c.Location.Y - rect.Y) * map.MapImageTileSize, localTileSize, localTileSize)));
             }
         }
         return image;

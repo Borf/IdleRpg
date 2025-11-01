@@ -1,6 +1,6 @@
 ﻿namespace IdleRpg.Game.Core;
 
-public interface IEquippable : IItem
+public interface IEquippable : IItemTemplate
 {
     public string EquipDescription { get; }
     public List<StatModifier> EquipEffects { get; }

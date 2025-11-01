@@ -6,6 +6,7 @@ using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Memory;
 using SixLabors.ImageSharp.PixelFormats;
 using System.Diagnostics;
+using System.Text.Json;
 
 namespace IdleRpg.Game.Core;
 
@@ -36,7 +37,17 @@ public enum CellType
     NotWalkable = 1 << 2,
     Water = 1 << 3,
 }
-
+public class Mobinfo
+{
+    public required string MobName { get; set; } = string.Empty;
+    public required string Shape { get; set; } = string.Empty;
+    public required int Amount { get; set; }
+    public required int RespawnTime { get; set; }
+    public required int X { get; set; }
+    public required int Y { get; set; }
+    public required int Width { get; set; }
+    public required int Height { get; set; }
+}
 
 public class Map(string name)
 {
@@ -56,6 +67,7 @@ public class Map(string name)
     {
         var filename = Path.Combine("Resources", "Games", GameService.CoreName, "Maps", $"{Name}.map");
         MapImagePath = Path.Combine("Resources", "Games", GameService.CoreName, "Maps", Name);
+
         var data = File.ReadAllBytes(filename);
         using var decompressor = new BrotliDecompressor();
 
@@ -82,7 +94,34 @@ public class Map(string name)
         debugImage.SaveAsPng(filename + ".collision.png");
         Planner = L1PathPlanner.CreatePlanner(grid);
         MapImageZoomLevels = (int)Math.Ceiling(Math.Log2(Math.Max(Width, Height) * MapImageTileSize / MapImageBigTileSize));
+
     }
+
+
+    public void LoadMobs<T>() where T : struct, Enum
+    {
+        var mobJsonPath = Path.Combine("Resources", "Games", GameService.CoreName, "Maps", $"{Name}.mobs.json");
+        if (File.Exists(mobJsonPath))
+        {
+            var mobData = JsonSerializer.Deserialize<List<Mobinfo>>(File.ReadAllText(mobJsonPath));
+
+            foreach (var mob in mobData)
+            {
+                Spawns.Add(new SpawnTemplate()
+                {
+                    Position = new Util.Point(mob.X, mob.Y),
+                    Amount = mob.Amount,
+                    Mob = Enum.Parse<T>(mob.MobName, true),
+                    RangeX = mob.Width,
+                    RangeY = mob.Height,
+                    RespawnTime = TimeSpan.FromSeconds(mob.RespawnTime),
+                    SpawnType = SpawnType.Rect
+                });
+            }
+        }
+
+    }
+
 
     public CellType this[int X, int Y]
     {

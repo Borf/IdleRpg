@@ -1,6 +1,8 @@
 ﻿using Discord;
 using Discord.Interactions;
 using IdleRpg.Game;
+using IdleRpg.Game.Core;
+using IdleRpg.Util;
 
 namespace IdleRpg.Services.Discord.Modules;
 
@@ -21,10 +23,15 @@ public class ActionsBattleMenu : InteractionModuleBase<SocketInteractionContext>
     {
         await DeferAsync(ephemeral: true);
         var character = gameService.GetCharacter(Context.User.Id);
+        using var header = ((IDiscordGame)gameService.GameCore).HeaderGenerator.GetImage(DiscordMenu.Main, character);
+        using var headerStream = header.AsPngStream();
+
         await ModifyOriginalResponseAsync(c =>
         {
+            c.AddAttachment(new FileAttachment(headerStream, "header.png"));
             c.Components = new ComponentBuilderV2()
-                .WithTextDisplay("### Main Menu > Battle")
+                .WithMediaGallery(["attachment://header.png"])
+                .WithNavigation("actions:battle")
                 .WithSeparator()
                 .WithTextDisplay($"Current settings:\n" +
                 $"- Farm time: {character.NextFarmAction.TimeSpan}\n" +
@@ -40,12 +47,9 @@ public class ActionsBattleMenu : InteractionModuleBase<SocketInteractionContext>
                     new ButtonBuilder("5hr", "actions:battle:settings:time:5",    character.NextFarmAction.TimeSpan.TotalHours == 5 ? ButtonStyle.Primary : ButtonStyle.Secondary, emote: Emoji.Parse(":clock5:")),
                     new ButtonBuilder("10hr", "actions:battle:settings:time:10",  character.NextFarmAction.TimeSpan.TotalHours == 10? ButtonStyle.Primary : ButtonStyle.Secondary, emote: Emoji.Parse(":clock10:")),
                 ])
-                .WithActionRow([
-                    new ButtonBuilder("Refresh", "actions:battle", ButtonStyle.Secondary, emote: Emoji.Parse(":arrows_counterclockwise:")),
-                    new ButtonBuilder("Back", "actions", ButtonStyle.Secondary, emote: Emoji.Parse(":arrow_backward:")),
-                ])
                 .Build();
         });
+        headerStream.Dispose();
     }
 
 

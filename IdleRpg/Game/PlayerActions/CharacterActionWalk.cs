@@ -53,7 +53,7 @@ public class CharacterActionWalk : CharacterAction
                 Character.Location.X += Math.Sign(p.X - Character.Location.X);
                 Character.Location.Y += Math.Sign(p.Y - Character.Location.Y);
                 Logger.LogTrace($"Step {Character.Name} to {Character.Location.X}, {Character.Location.Y}");
-                await Task.Delay(100, token); // Simulate walking time
+                await Task.Delay(1000, token); // Simulate walking time
             }
             if (token.IsCancellationRequested)
                 break;
@@ -77,6 +77,6 @@ public class CharacterActionWalk : CharacterAction
 
     public override string? ToString()
     {
-        return "Walking... " + (Length - DistanceWalked) + " meter remaining.";
+        return "Walking, " + (Length - DistanceWalked) + " meter remaining.";
     }
 }

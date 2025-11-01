@@ -1,5 +1,5 @@
 ﻿namespace IdleRpg.Game.Core;
 
-public interface IUsable : IItem
+public interface IUsable : IItemTemplate
 {
 }

@@ -58,13 +58,18 @@ public class CharacterActionFarm : CharacterAction
             //eww duplicate code
             if(distance > 2)
             {
-                var action = new CharacterActionWalk(Character, enemy.Location);
+                var action = new CharacterActionWalk(Character, enemy.Location) { ParentAction = this };
                 Character.ActionQueue.QueueActionFront(action);
                 await action.Await();
+                distance = Character.Location.DistanceTo(enemy.Location);
+                if(distance > 2)
+                {
+                    await Task.Delay(1000); // you didn't reach. Maybe no route
+                }
             }
             else
             {
-                var action = new CharacterActionAttack(Character, enemy);
+                var action = new CharacterActionAttack(Character, enemy) { ParentAction = this };
                 Character.ActionQueue.QueueActionFront(action);
                 await action.Await();
             }
@@ -75,6 +80,9 @@ public class CharacterActionFarm : CharacterAction
 
     public override string? ToString()
     {
-        return "Killing monsters... ";
+        if(Started)
+            return "Battling monsters for " + (TimeSpan - (DateTimeOffset.Now - TimeStart)).ToString(@"hh\:mm\:ss");
+        else
+            return "Battling monsters for " + TimeSpan.ToString(@"hh\:mm\:ss");
     }
 }

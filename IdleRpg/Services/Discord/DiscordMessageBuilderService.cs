@@ -30,8 +30,10 @@ public class DiscordMessageBuilderService
 
         await interaction.ModifyOriginalResponseAsync(c =>
         {
-            c.Attachments = new List<FileAttachment>() { new FileAttachment(mapStream, "map.png"), new FileAttachment(headerStream, "header.png") };
-            c.Components = new ComponentBuilderV2()
+            c
+                .AddAttachment(new FileAttachment(mapStream, "map.png"))
+                .AddAttachment(new FileAttachment(headerStream, "header.png"))
+                .Components = new ComponentBuilderV2()
                 .WithMediaGallery(["attachment://header.png"])
                 .WithNavigation("start")
                 .WithSection(sb => sb
@@ -61,17 +63,21 @@ public class DiscordMessageBuilderService
         using var header = ((IDiscordGame)gameService.GameCore).HeaderGenerator.GetImage(DiscordMenu.Main, character);
         using var headerStream = header.AsPngStream();
 
+        string queue = character.ActionQueue.ToDiscordString();
+
         await interaction.ModifyOriginalResponseAsync(c =>
         {
             c.Attachments = new List<FileAttachment>() { new FileAttachment(mapStream, "map.png"), new FileAttachment(headerStream, "header.png") };
             c.Components = new ComponentBuilderV2()
                 .WithMediaGallery(["attachment://header.png"])
                 .WithNavigation("actions")
-                .WithSection(sb => sb
-                    .WithTextDisplay($"{message}\nYour character:\n" +
-                        $"- Your character is {character.State}\n" +
-                        character.ActionQueue.ToDiscordString())
-                    .WithAccessory(new ThumbnailBuilder("attachment://map.png", null, false)))
+                .WithSection(sb => {
+                    sb.WithTextDisplay($"{message}\n" +
+                                        $"Your character is {character.State}\n");
+                    if (!string.IsNullOrEmpty(queue))
+                        sb.WithTextDisplay(queue);
+                    sb.WithAccessory(new ThumbnailBuilder("attachment://map.png", null, false));
+                })
                 .WithSeparator()
                 .WithActionRow([
                     new ButtonBuilder("Walk", "actions:walk", ButtonStyle.Primary, emote: Emoji.Parse(":compass:")),
@@ -171,4 +177,17 @@ public static class MenuHelper
         cb.WithSeparator();
         return cb;
     }
+
+    public static MessageProperties AddAttachment(this MessageProperties messageProperties, FileAttachment attachment)
+    {
+        if(!messageProperties.Attachments.IsSpecified)
+            messageProperties.Attachments = new List<FileAttachment>();
+        var attachments = messageProperties.Attachments.Value as List<FileAttachment>;
+        if (attachments != null)
+            attachments.Add(attachment);
+        else
+            throw new Exception("Exception not in list");
+        return messageProperties;
+    }
+
 }

@@ -8,12 +8,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using TinyRpg.Items;
 using TinyRpg.Maps;
 using TinyRpg.Npcs.Mobs;
 
 public class GameCore : IGameCore2D, IDiscordGame
 {
     public Type GetStats() => typeof(Stats);
+    public Type GetItemIdEnum() => typeof(ItemIds);
 
     public StatModifier CalculateStat(Enum s)
     {
@@ -136,7 +138,7 @@ public class GameCore : IGameCore2D, IDiscordGame
 
 
 
-    public IImageGenerator<Character, SpriteDirection> MapCharacterGenerator => new CharacterGenerator(); //would love to be able to do dependency injection here
+    public IImageGenerator<CharacterPlayer, SpriteDirection> MapCharacterGenerator => new CharacterGenerator(); //would love to be able to do dependency injection here
     public IImageGenerator<ICharacterCreateCharOptions> CharCreateCharacterGenerator => new CharacterGenerator(); //would love to be able to do dependency injection here
 
     List<long> ExpNeededPerLevel = [

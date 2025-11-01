@@ -12,7 +12,7 @@ internal class DiscordHeaderGenerator : IImageGenerator<DiscordMenu, Character>
     {
         if (source == DiscordMenu.Main)
         {
-            return Image.Load<Rgba32>(Path.Combine("Resources", "Games", "TinyRpg", "header.png"));
+            return Image.Load<Rgba32>(Path.Combine("Resources", "Games", "TinyRpg", "header2.png"));
         }
         return new Image<Rgba32>(1, 1);
     }

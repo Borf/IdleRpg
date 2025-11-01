@@ -6,8 +6,8 @@ public class MapInstance
     public required Map Map { get; set; }
     public List<Character> Characters { get; set; } = new();
 
-    public IEnumerable<CharacterNPC> Npcs => Characters.Where(c => c is CharacterNPC).Select(c => (CharacterNPC)c);
-    public IEnumerable<CharacterPlayer> Players => Characters.Where(c => c is CharacterPlayer).Select(c => (CharacterPlayer)c);
+    //public IEnumerable<CharacterNPC> Npcs => { lock(Characters) { return Characters.Where(c => c is CharacterNPC).Select(c => (CharacterNPC) c); } }
+    //public IEnumerable<CharacterPlayer> Players => Characters.Where(c => c is CharacterPlayer).Select(c => (CharacterPlayer)c);
 
     List<BgTask> bgTasks = new();
 
@@ -34,11 +34,19 @@ public class MapInstance
                         //TODO: bound check!
                         var location = new Location(spawner.SpawnTemplate.Position.X, spawner.SpawnTemplate.Position.Y) { MapInstance = this };
                         var otherChars = GetCharactersAround(location, spawner.SpawnTemplate.Range);
-                        while(location.X < 0 || location.X >= location.MapInstance.Map.Width ||
-                              location.Y < 0 || location.Y >= location.MapInstance.Map.Height || 
-                              otherChars.Any(c => c.Location.X == location.X && c.Location.Y == location.Y) || 
+                        int count = 0;
+                        while (location.X < 0 || location.X >= location.MapInstance.Map.Width ||
+                              location.Y < 0 || location.Y >= location.MapInstance.Map.Height ||
+                              otherChars.Any(c => c.Location.X == location.X && c.Location.Y == location.Y) ||
                               Map[location.X, location.Y].HasFlag(CellType.NotWalkable))
-                            location = new Location(spawner.SpawnTemplate.Position.X + Random.Shared.Next(-spawner.SpawnTemplate.Range, spawner.SpawnTemplate.Range), spawner.SpawnTemplate.Position.Y + Random.Shared.Next(-spawner.SpawnTemplate.Range, spawner.SpawnTemplate.Range)) { MapInstance = this };
+                        {
+                            location = new Location(spawner.SpawnTemplate.Position.X + Random.Shared.Next(spawner.SpawnTemplate.RangeX), spawner.SpawnTemplate.Position.Y + Random.Shared.Next(spawner.SpawnTemplate.RangeY)) { MapInstance = this };
+                            count++;
+                            if (count > 100)
+                            {
+                                logger.LogError($"Could not spawn {spawn.Mob} on {Map.Name}, no valid location found");
+                            }
+                        }
                         var npc = new CharacterNPC(serviceProvider, coreHolder.NpcTemplates[spawner.SpawnTemplate.Mob])
                         {
                             Spawner = spawner,
@@ -65,12 +73,14 @@ public class MapInstance
 
     private void SpawnCharacter(Character character)
     {
-        this.Characters.Add(character);
+        lock (Characters)
+            this.Characters.Add(character);
         //TODO: trigger listeners?
     }
 
     public List<Character> GetCharactersAround(Location location, int range)
     {
+        lock(Characters)
         return Characters
             .ToList()
             .Where(c => c != null && Math.Abs(location.X - c.Location.X) < range && Math.Abs(location.Y - c.Location.Y) < range)

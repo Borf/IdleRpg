@@ -40,14 +40,22 @@ public class CharacterActionAttack : CharacterAction
         if (!gameService.GameCore.IsAlive(Target))
         {
             Logger.LogInformation($"{Character.Name} has killed {Target.Name}");
-            if(Character is CharacterPlayer player)
-            {
-                player.Log(LogCategory.Battle, $"You killed a {Target.Name}");
-            }
             if (Target is CharacterNPC npc)
             {
-                //npc.NpcTemplate.ItemDrops
-                gameService.GameCore.GainExp(Character, npc.NpcTemplate);
+                if (Character is CharacterPlayer player)
+                {
+                    player.Log(LogCategory.Battle, $"You killed a {Target.Name}");
+                    gameService.GameCore.GainExp(Character, npc.NpcTemplate);
+
+                    foreach (var drop in npc.NpcTemplate.ItemDrops)
+                    {
+                        if (Random.Shared.NextDouble() <= drop.DropChance)
+                        {
+                            player.Log(LogCategory.Battle, "You got a " + gameService.ItemTemplates[drop.Item].Name);
+                            player.Inventory.Add(new InventoryItem(drop.Item, Guid.NewGuid()));
+                        }
+                    }
+                }
                 await npc.Die();
                 if(npc.Spawner != null)
                     npc.Spawner.SpawnedNpcs.Remove(npc);
@@ -62,7 +70,7 @@ public class CharacterActionAttack : CharacterAction
 
     public override string? ToString()
     {
-        return "Attacking";
+        return "Attacking " + Target.Name;
     }
 
 }

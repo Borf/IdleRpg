@@ -17,7 +17,7 @@ public class GameService : ICoreHolder
     private readonly IServiceProvider serviceProvider;
     private CoreLoader CoreLoader;
     public Dictionary<Enum, INpcTemplate> NpcTemplates { get; set; } = new();
-    public List<IItem> ItemTemplates { get; set; } = new();
+    public Dictionary<Enum, IItemTemplate> ItemTemplates { get; set; } = new();
     public List<ISkill> Skills { get; set; } = new();
 
     private List<Map> Maps = new();
@@ -120,7 +120,7 @@ public class GameService : ICoreHolder
     {
         using var scope = serviceProvider.CreateScope();
         using var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        var dbCharacter = context.Characters.Include(c => c.Stats).FirstOrDefault(c => c.Id == id);
+        var dbCharacter = context.Characters.Include(c => c.Stats).Include(c => c.Inventory).FirstOrDefault(c => c.Id == id);
         if(dbCharacter == null)
             return null;
 
@@ -130,7 +130,8 @@ public class GameService : ICoreHolder
             Id = id,
             Name = dbCharacter.Name,
             Location = new Location(dbCharacter.X, dbCharacter.Y) { MapInstance = Maps.First(m => m.Name == dbCharacter.Map).MapInstance(GameCore, serviceProvider) },
-            Stats = dbCharacter.Stats.ToDictionary(s => (Enum)Enum.Parse(statsEnum, s.Stat), s => s.Value),
+            Stats = dbCharacter.Stats.ToDictionary(s => (Enum)Enum.Parse(statsEnum, s.Stat), s => s.Value), //TODO: ewww
+            Inventory = dbCharacter.Inventory.Select(i => new Core.InventoryItem((Enum)Enum.Parse(GameCore.GetItemIdEnum(), i.ItemId+""), i.Id)).ToList(),
         };
         character.Location.MapInstance.Characters.Add(character);
 

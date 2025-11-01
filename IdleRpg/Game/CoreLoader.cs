@@ -143,10 +143,17 @@ public class CoreLoader : IDisposable
         Logger.LogInformation("Loading Items");
         coreHolder.ItemTemplates.Clear(); //TODO: make sure the old items are not referenced, or move them to the new item references somehow?
 
-        var types = assembly!.GetTypes().Where(t => t.IsAssignableTo(typeof(IItem))).ToList();
+        var types = assembly!.GetTypes().Where(t => t.IsAssignableTo(typeof(IItemTemplate))).ToList();
         Logger.LogInformation($"Found {types.Count} items");
         foreach (var t in types)
-            coreHolder.ItemTemplates.Add((IItem)Activator.CreateInstance(t)!);
+        {
+            var template = ((IItemTemplate)Activator.CreateInstance(t)!);
+            if (!string.IsNullOrEmpty(template.ImageFile))
+            {
+                template.InventoryImage = Image.Load<Rgba32>(Path.Combine("Resources", "Games", t.Namespace!.Replace('.', Path.DirectorySeparatorChar), template.ImageFile));
+            }
+            coreHolder.ItemTemplates[template.Id] = template;
+        }
     }
 
     private void LoadSkills()
@@ -163,7 +170,7 @@ public class CoreLoader : IDisposable
 
 public interface ICoreHolder
 {
-    List<IItem> ItemTemplates { get; set; }
+    Dictionary<Enum, IItemTemplate> ItemTemplates { get; set; }
     List<ISkill> Skills { get; set; }
     Dictionary<Enum, INpcTemplate> NpcTemplates { get; set; }
     IGameCore GameCore { get; set; }

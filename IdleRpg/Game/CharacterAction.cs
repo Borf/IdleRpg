@@ -4,7 +4,9 @@ namespace IdleRpg.Game;
 
 public abstract class CharacterAction
 {
+    public CharacterAction? ParentAction { get; set; } = null;
     public Character Character { get; protected set; }
+    public DateTimeOffset StartTime { get; set; }
     public abstract bool IsDone { get; }
     public bool Started { get; set; } = false;
     public BgTask BgTask { get; private set; } = null!;
@@ -24,6 +26,8 @@ public abstract class CharacterAction
     public virtual void Start(BgTaskManager bgTaskManager)
     {
         bgTaskManager.Run(BgTask);
+        Started = true;
+        StartTime = DateTimeOffset.Now;
     }
     public async Task Stop()
     {

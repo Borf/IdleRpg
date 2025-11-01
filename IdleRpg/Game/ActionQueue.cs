@@ -43,7 +43,6 @@ public class ActionQueue
                         {
                             Logger.LogInformation("Starting " + front);
                             front.Start(bgTaskManager);
-                            front.Started = true;
                             //break;
                         }
                     }
@@ -89,15 +88,29 @@ public class ActionQueue
 
     public string ToDiscordString()
     {
-        List<string> strings = new();
-        foreach(var action in Queue.Take(20))
+        lock (Queue)
         {
-            string? str = action.ToString();
-            if(str != null)
-                strings.Add(str + " " + (action.IsDone ? "done" : "not done") + ", " + (action.Started ? "started" : "not started") + ", " + action.BgTask.Task.Status);
-        }
+            List<string> strings = new();
+            foreach (var action in Queue.Where(q => q.ParentAction == null).Take(4).ToList())
+            {
+                string? str = action.ToString();
+                if (str != null)
+                {
+                    if (action.Started)
+                        str = $"[<t:{action.StartTime.ToUnixTimeSeconds()}:T>] {str}";
+                    else
+                        str = $"[queued] *{str}*";
+                    strings.Add($"- {str}");
+                    foreach(var subtask in Queue.Where(q => q.ParentAction == action))
+                    {
+                        strings.Add("  - " + subtask.ToString());
+                    }
 
-        return string.Join("\n", strings.Select(s => "- " + s));
+                }
+            }
+
+            return string.Join("\n", strings);
+        }
     }
 
     public void SignalActionDone()

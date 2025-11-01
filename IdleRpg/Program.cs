@@ -9,6 +9,7 @@ using L1PathFinder;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
 
 
 Console.WriteLine(@"  ___    _ _      ____  ____   ____ 
@@ -95,4 +96,3 @@ app.MapRazorComponents<App>()
 app.MapAdditionalIdentityEndpoints();
 
 app.Run();
-

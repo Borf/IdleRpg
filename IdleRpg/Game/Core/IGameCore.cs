@@ -6,6 +6,7 @@ namespace IdleRpg.Game.Core;
 public interface IGameCore
 {
     Type GetStats();
+    Type GetItemIdEnum();
     StatModifier CalculateStat(Enum s);
     List<Map> LoadMaps();
 
@@ -82,6 +83,6 @@ public static class CharacterCreateCharOptionsHelper
 
 public interface IGameCore2D : IGameCore
 {
-    IImageGenerator<Character, SpriteDirection> MapCharacterGenerator { get; }
+    IImageGenerator<CharacterPlayer, SpriteDirection> MapCharacterGenerator { get; }
     IImageGenerator<ICharacterCreateCharOptions> CharCreateCharacterGenerator { get; }
 }

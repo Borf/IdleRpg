@@ -1,5 +1,7 @@
 ﻿using IdleRpg.Game;
 using IdleRpg.Game.Core;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,7 +10,7 @@ using System.Threading.Tasks;
 using TinyRpg.Core;
 using TinyRpg.Items;
 
-namespace Rom.Items.Equipment.Weapons.Swords;
+namespace TinyRpg.Items.Equipment.Weapons.Swords;
 public class Cutlass : IEquippable
 {
     public Enum Id => ItemIds.WeaponCutlass;
@@ -24,4 +26,9 @@ public class Cutlass : IEquippable
         }
     };
 
+    public string Description => "A sharp little blade";
+
+    public Image<Rgba32>? InventoryImage { get; set; }
+
+    public string ImageFile => "Cutlass.png";
 }

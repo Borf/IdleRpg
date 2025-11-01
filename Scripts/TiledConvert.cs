@@ -18,6 +18,7 @@ using SixLabors.ImageSharp.Processing;
 
 string jsonFilePath = "../IdleRpg/Resources/Games/TinyRpg/Maps/Worldmap.tmj";
 string fileName = "../IdleRpg/Resources/Games/TinyRpg/Maps/Worldmap.map";
+string mobFileName = "../IdleRpg/Resources/Games/TinyRpg/Maps/Worldmap.mobs.json";
 string collisionFileName = "../IdleRpg/Resources/Games/TinyRpg/Maps/Worldmap.collision.png";
 string mapImageFile = "../IdleRpg/Resources/Games/TinyRpg/Maps/Worldmap.png";
 string mapImagePath = "../IdleRpg/Resources/Games/TinyRpg/Maps/Worldmap/";
@@ -49,24 +50,24 @@ for (int y = 0; y < height; y++)
 
 foreach (var layer in json.layers)
 {
-    foreach(var chunk in layer.chunks)
+    foreach (var chunk in layer.chunks)
     {
-        for(int x = chunk.x; x < chunk.x + chunk.width; x++)
+        for (int x = chunk.x; x < chunk.x + chunk.width; x++)
         {
-            for(int y = chunk.y ; y < chunk.y + chunk.height; y++)
+            for (int y = chunk.y; y < chunk.y + chunk.height; y++)
             {
                 int localX = x - chunk.x;
                 int localY = y - chunk.y;
                 int index = localY * chunk.width + localX;
                 long tileId = chunk.data[index];
-                if(tileId != 0)
+                if (tileId != 0)
                 {
                     var tile = json.tilesets.SelectMany(ts => ts.tiles).FirstOrDefault(t => t.id + json.tilesets[0].firstgid == tileId);
-                    if(tile != null && tile.properties != null)
+                    if (tile != null && tile.properties != null)
                     {
-                        foreach(var prop in tile.properties)
+                        foreach (var prop in tile.properties)
                         {
-                            if(prop.name == "blocking" && prop.type == "bool" && prop.value)
+                            if (prop.name == "blocking" && prop.type == "bool" && ((JsonElement)prop.value).GetBoolean())
                             {
                                 int mapX = x - minX;
                                 int mapY = y - minY;
@@ -99,6 +100,38 @@ for (int y = 0; y < height; y++)
             collisionMap[x, y] = new Rgba32(0, 255, 255, 255);
     }
 }
+
+
+var moblayer = json.layers.FirstOrDefault(l => l.name == "mobs");
+if(moblayer is not null)
+{
+    Console.WriteLine("MOBS!");
+    List<Mobinfo> Mobs = [];
+
+    foreach(var obj in moblayer.objects)
+    {
+        var mobName = ((JsonElement)obj.properties?.FirstOrDefault(p => p.name == "mob")?.value).GetString();
+        var amount = ((JsonElement)obj.properties?.FirstOrDefault(p => p.name == "amount")?.value).GetInt32();
+        var respawn = ((JsonElement)obj.properties?.FirstOrDefault(p => p.name == "respawntime")?.value).GetInt32() ;
+
+        Mobinfo mob = new()
+        {
+            MobName = mobName,
+            Shape = obj.name,
+            Amount = amount,
+            RespawnTime = respawn,
+            X = (int)obj.x/16,
+            Y = (int)obj.y/16,
+            Width = (int)obj.width/16,
+            Height = (int)obj.height/16
+        };
+
+        Mobs.Add(mob);
+    }
+
+    File.WriteAllText(mobFileName, JsonSerializer.Serialize(Mobs, new JsonSerializerOptions { WriteIndented = true }));
+}
+
 collisionMap.SaveAsPng(collisionFileName);
 Console.WriteLine("Zooming and splitting map");
 Configuration.Default.MemoryAllocator = MemoryAllocator.Create(new MemoryAllocatorOptions
@@ -108,7 +141,7 @@ Configuration.Default.MemoryAllocator = MemoryAllocator.Create(new MemoryAllocat
 using Image<Rgba32> mapImage = Image.Load<Rgba32>(mapImageFile);
 
 
-if(Directory.Exists(mapImagePath))
+if (Directory.Exists(mapImagePath))
     Directory.Delete(mapImagePath, true);
 Directory.CreateDirectory(mapImagePath);
 
@@ -132,9 +165,9 @@ while (mapImage.Width > tileSize || mapImage.Height > tileSize)
             int yy = y / tileSize;
 
             using var subImage = mapImage.Clone(ctx => ctx.Crop(new Rectangle(
-                x, 
-                y, 
-                Math.Min(tileSize, mapImage.Width - x), 
+                x,
+                y,
+                Math.Min(tileSize, mapImage.Width - x),
                 Math.Min(tileSize, mapImage.Height - y)
             )));
             subImage.SaveAsPng(Path.Combine(mapImagePath, zoom.ToString(), $"map_{yy}_{xx}.png"));
@@ -177,20 +210,33 @@ public partial class Map_v1_1
 
 
 
+public class Mobinfo
+{
+    public required string MobName { get; set; } = string.Empty;
+    public required string Shape { get; set; } = string.Empty;
+    public required int Amount { get; set; }
+    public required int RespawnTime { get; set; }
+    public required int X { get; set; }
+    public required int Y { get; set; }
+    public required int Width { get; set; }
+    public required int Height { get; set; }
+}
+
+
 
 public class TiledMap
 {
     public int compressionlevel { get; set; }
     public int height { get; set; }
     public bool infinite { get; set; }
-    public List<Layer> layers { get; set; } = new();
+    public List<Layer> layers { get; set; } = [];
     public int nextlayerid { get; set; }
     public int nextobjectid { get; set; }
     public string orientation { get; set; } = string.Empty;
     public string renderorder { get; set; } = string.Empty;
     public string tiledversion { get; set; } = string.Empty;
     public int tileheight { get; set; }
-    public List<Tileset> tilesets { get; set; } = new();
+    public List<Tileset> tilesets { get; set; } = [];
     public int tilewidth { get; set; }
     public string type { get; set; } = string.Empty;
     public string version { get; set; } = string.Empty;
@@ -199,13 +245,46 @@ public class TiledMap
 
 public class Layer
 {
-    public List<Chunk> chunks { get; set; } = new();
+    public int id { get; set; }
+    public List<Layer> layers { get; set; } = new();
+    public string name { get; set; } = string.Empty;
+    public int opacity { get; set; }
+    public string type { get; set; } = string.Empty;
+    public bool visible { get; set; }
+    public int x { get; set; }
+    public int y { get; set; }
+    public List<Chunk> chunks { get; set; } = [];
+    public int height { get; set; }
+    public int startx { get; set; }
+    public int starty { get; set; }
+    public int width { get; set; }
+    public string draworder { get; set; } = string.Empty;
+    public List<MapObject> objects { get; set; } = new();
+
+    public string image { get; set; } = string.Empty;
+    public int imageheight { get; set; }
+    public int imagewidth { get; set; }
+    public int offsetx { get; set; }
+    public int offsety { get; set; }
+    public bool locked { get; set; }
+}
+
+public class Chunk
+{
+    public List<long> data { get; set; } = [];
+    public int height { get; set; }
+    public int width { get; set; }
+    public int x { get; set; }
+    public int y { get; set; }
+}
+
+public class MapObject
+{
     public int height { get; set; }
     public int id { get; set; }
     public string name { get; set; } = string.Empty;
-    public int opacity { get; set; }
-    public int startx { get; set; }
-    public int starty { get; set; }
+    public List<Property> properties { get; set; } = [];
+    public int rotation { get; set; }
     public string type { get; set; } = string.Empty;
     public bool visible { get; set; }
     public int width { get; set; }
@@ -213,13 +292,11 @@ public class Layer
     public int y { get; set; }
 }
 
-public class Chunk
+public class Property
 {
-    public List<long> data { get; set; } = new();
-    public int height { get; set; }
-    public int width { get; set; }
-    public int x { get; set; }
-    public int y { get; set; }
+    public string name { get; set; } = string.Empty;
+    public string type { get; set; } = string.Empty;
+    public object value { get; set; } = null!;
 }
 
 public class Tileset
@@ -234,14 +311,14 @@ public class Tileset
     public int spacing { get; set; }
     public int tilecount { get; set; }
     public int tileheight { get; set; }
-    public List<Tile> tiles { get; set; } = new();
+    public List<Tile> tiles { get; set; } = [];
     public int tilewidth { get; set; }
 }
 
 public class Tile
 {
-    public long id { get; set; }
-    public List<Property1> properties { get; set; } = new();
+    public int id { get; set; }
+    public List<Property> properties { get; set; } = new();
     public Objectgroup? objectgroup { get; set; }
 }
 
@@ -249,7 +326,7 @@ public class Objectgroup
 {
     public string draworder { get; set; } = string.Empty;
     public string name { get; set; } = string.Empty;
-    public List<Object> objects { get; set; } = new();
+    public List<MapObject> objects { get; set; } = [];
     public int opacity { get; set; }
     public string type { get; set; } = string.Empty;
     public bool visible { get; set; }
@@ -257,22 +334,105 @@ public class Objectgroup
     public int y { get; set; }
 }
 
-public class Object
-{
-    public int height { get; set; }
-    public int id { get; set; }
-    public string name { get; set; } = string.Empty;
-    public int rotation { get; set; }
-    public string type { get; set; } = string.Empty;
-    public bool visible { get; set; }
-    public int width { get; set; }
-    public int x { get; set; }
-    public int y { get; set; }
-}
 
-public class Property1
-{
-    public string name { get; set; } = string.Empty;
-    public string type { get; set; } = string.Empty;
-    public bool value { get; set; }
-}
+
+
+
+//public class TiledMap
+//{
+//    public int compressionlevel { get; set; }
+//    public int height { get; set; }
+//    public bool infinite { get; set; }
+//    public List<Layer> layers { get; set; } = new();
+//    public int nextlayerid { get; set; }
+//    public int nextobjectid { get; set; }
+//    public string orientation { get; set; } = string.Empty;
+//    public string renderorder { get; set; } = string.Empty;
+//    public string tiledversion { get; set; } = string.Empty;
+//    public int tileheight { get; set; }
+//    public List<Tileset> tilesets { get; set; } = new();
+//    public int tilewidth { get; set; }
+//    public string type { get; set; } = string.Empty;
+//    public string version { get; set; } = string.Empty;
+//    public int width { get; set; }
+//}
+
+//public class Layer
+//{
+//    public List<Chunk> chunks { get; set; } = new();
+//    public int height { get; set; }
+//    public int id { get; set; }
+//    public string name { get; set; } = string.Empty;
+//    public int opacity { get; set; }
+//    public int startx { get; set; }
+//    public int starty { get; set; }
+//    public string type { get; set; } = string.Empty;
+//    public bool visible { get; set; }
+//    public int width { get; set; }
+//    public int x { get; set; }
+//    public int y { get; set; }
+//}
+
+//public class Chunk
+//{
+//    public List<long> data { get; set; } = new();
+//    public int height { get; set; }
+//    public int width { get; set; }
+//    public int x { get; set; }
+//    public int y { get; set; }
+//}
+
+//public class Tileset
+//{
+//    public int columns { get; set; }
+//    public int firstgid { get; set; }
+//    public string image { get; set; } = string.Empty;
+//    public int imageheight { get; set; }
+//    public int imagewidth { get; set; }
+//    public int margin { get; set; }
+//    public string name { get; set; } = string.Empty;
+//    public int spacing { get; set; }
+//    public int tilecount { get; set; }
+//    public int tileheight { get; set; }
+//    public List<Tile> tiles { get; set; } = new();
+//    public int tilewidth { get; set; }
+//}
+
+//public class Tile
+//{
+//    public long id { get; set; }
+//    public List<Property1> properties { get; set; } = new();
+//    public Objectgroup? objectgroup { get; set; }
+//}
+
+//public class Objectgroup
+//{
+//    public string draworder { get; set; } = string.Empty;
+//    public string name { get; set; } = string.Empty;
+//    public List<Object> objects { get; set; } = new();
+//    public int opacity { get; set; }
+//    public string type { get; set; } = string.Empty;
+//    public bool visible { get; set; }
+//    public int x { get; set; }
+//    public int y { get; set; }
+//}
+
+//public class Object
+//{
+//    public int height { get; set; }
+//    public int id { get; set; }
+//    public string name { get; set; } = string.Empty;
+//    public int rotation { get; set; }
+//    public string type { get; set; } = string.Empty;
+//    public bool visible { get; set; }
+//    public int width { get; set; }
+//    public int x { get; set; }
+//    public int y { get; set; }
+//}
+
+//public class Property1
+//{
+//    public string name { get; set; } = string.Empty;
+//    public string type { get; set; } = string.Empty;
+//    public bool value { get; set; }
+//}
