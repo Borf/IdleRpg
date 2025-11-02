@@ -88,6 +88,7 @@ public class ActionQueue
 
     public string ToDiscordString()
     {
+        SignalActionDone();
         lock (Queue)
         {
             List<string> strings = new();

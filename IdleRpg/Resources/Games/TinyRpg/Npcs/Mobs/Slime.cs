@@ -21,7 +21,7 @@ public class Slime : Mob
     };
     public override int AgroRange => 0;
 
-    public override List<ItemDrop> ItemDrops => [ new ItemDrop() { Item = ItemIds.FrogLeg, DropChance = 1 }];
+    public override List<ItemDrop> ItemDrops => [ new ItemDrop() { Item = ItemIds.Slime, DropChance = 0.25 }];
 
     public override int Exp => 1;
 }

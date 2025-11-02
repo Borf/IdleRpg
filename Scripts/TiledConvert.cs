@@ -16,7 +16,7 @@ using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
 
 
-string jsonFilePath = "../IdleRpg/Resources/Games/TinyRpg/Maps/Worldmap.tmj";
+string jsonFilePath = "../IdleRpg/Resources/Games/TinyRpg/Maps/Worldmap/Worldmap.tmj";
 string fileName = "../IdleRpg/Resources/Games/TinyRpg/Maps/Worldmap.map";
 string mobFileName = "../IdleRpg/Resources/Games/TinyRpg/Maps/Worldmap.mobs.json";
 string collisionFileName = "../IdleRpg/Resources/Games/TinyRpg/Maps/Worldmap.collision.png";
@@ -141,9 +141,8 @@ Configuration.Default.MemoryAllocator = MemoryAllocator.Create(new MemoryAllocat
 using Image<Rgba32> mapImage = Image.Load<Rgba32>(mapImageFile);
 
 
-if (Directory.Exists(mapImagePath))
-    Directory.Delete(mapImagePath, true);
-Directory.CreateDirectory(mapImagePath);
+if (!Directory.Exists(mapImagePath))
+    Directory.CreateDirectory(mapImagePath);
 
 int zoom = 0;
 while (mapImage.Width > tileSize || mapImage.Height > tileSize)
@@ -156,7 +155,11 @@ while (mapImage.Width > tileSize || mapImage.Height > tileSize)
         mapImage.Mutate(ctx => ctx.Resize(newWidth, newHeight));
     }
     Console.WriteLine($"Generating zoom level {zoom} with size {mapImage.Width}x{mapImage.Height}");
-    Directory.CreateDirectory(Path.Combine(mapImagePath, zoom.ToString()));
+
+    string zoomPath = Path.Combine(mapImagePath, zoom.ToString());
+    if(Directory.Exists(zoomPath))
+        Directory.Delete(zoomPath, true);
+    Directory.CreateDirectory(zoomPath);
     for (int x = 0; x < mapImage.Width; x += tileSize)
     {
         for (int y = 0; y < mapImage.Height; y += tileSize)
