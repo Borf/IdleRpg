@@ -1,0 +1,72 @@
+[
+  {
+    "MobName": "slime",
+    "Shape": "slime",
+    "Amount": 3,
+    "RespawnTime": 5,
+    "X": 744,
+    "Y": 706,
+    "Width": 6,
+    "Height": 3
+  },
+  {
+    "MobName": "Owl",
+    "Shape": "Owl",
+    "Amount": 20,
+    "RespawnTime": 5,
+    "X": 771,
+    "Y": 704,
+    "Width": 46,
+    "Height": 26
+  },
+  {
+    "MobName": "Frog",
+    "Shape": "Frog",
+    "Amount": 20,
+    "RespawnTime": 5,
+    "X": 772,
+    "Y": 702,
+    "Width": 46,
+    "Height": 26
+  },
+  {
+    "MobName": "Spider",
+    "Shape": "Spider",
+    "Amount": 20,
+    "RespawnTime": 5,
+    "X": 772,
+    "Y": 703,
+    "Width": 46,
+    "Height": 26
+  },
+  {
+    "MobName": "Worm",
+    "Shape": "Worm",
+    "Amount": 3,
+    "RespawnTime": 5,
+    "X": 814,
+    "Y": 690,
+    "Width": 9,
+    "Height": 13
+  },
+  {
+    "MobName": "Spider",
+    "Shape": "Spider",
+    "Amount": 20,
+    "RespawnTime": 5,
+    "X": 772,
+    "Y": 705,
+    "Width": 46,
+    "Height": 26
+  },
+  {
+    "MobName": "Bunny",
+    "Shape": "Bunny",
+    "Amount": 5,
+    "RespawnTime": 5,
+    "X": 751,
+    "Y": 707,
+    "Width": 21,
+    "Height": 7
+  }
+]

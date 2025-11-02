@@ -1,0 +1,70 @@
+{
+    "Map/SizeTest": {
+        "height": 4300,
+        "width": 2
+    },
+    "activeFile": "Worldmap.tmj",
+    "expandedProjectPaths": [
+        "."
+    ],
+    "fileStates": {
+        "": {
+            "scaleInDock": 1,
+            "scaleInEditor": 3
+        },
+        "Worldmap.tmj": {
+            "expandedGroupLayers": [
+                32
+            ],
+            "scale": 2,
+            "selectedLayer": 112,
+            "viewCenter": {
+                "x": 12339.25,
+                "y": 11530
+            }
+        },
+        "Worldmap.tmj#Inner": {
+            "scaleInDock": 4
+        },
+        "Worldmap.tmj#Overworld": {
+            "scaleInDock": 3,
+            "scaleInEditor": 1.5
+        },
+        "Worldmap.tmj#cave": {
+            "scaleInDock": 3,
+            "scaleInEditor": 1
+        },
+        "Worldmap.tmj#objects": {
+            "scaleInDock": 3
+        },
+        "Worldmap.tmj#ro": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "Worldmap.tmx": {
+            "scale": 38.59375,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 16.012955465587048,
+                "y": 16.012955465587044
+            }
+        }
+    },
+    "last.imagePath": "C:/Users/Borf/Desktop/git/IdleRpg/IdleRpg/Resources/Games/TinyRpg/Maps",
+    "map.fixedSize": false,
+    "map.lastUsedFormat": "json",
+    "openFiles": [
+        "Worldmap.tmj"
+    ],
+    "project": "worldmap.tiled-project",
+    "property.type": "int",
+    "recentFiles": [
+        "Worldmap.tmj",
+        "Worldmap.tmx"
+    ],
+    "tileset.embedInMap": true,
+    "tileset.tileSize": {
+        "height": 16,
+        "width": 16
+    }
+}

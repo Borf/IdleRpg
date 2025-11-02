@@ -27,13 +27,15 @@ public class WorldMap : Map
         // register how to instances work on this map
 
         // warp portals 'n stuff
+        LoadMobs<Npcs.NpcIds>();
 
         Spawns.Add(new SpawnTemplate()
         {
             Position = new Point(20, 20),
             Amount = 5,
             Mob = Npcs.NpcIds.Slime,
-            Range = 5,
+            RangeX = 5,
+            RangeY = 5,
             RespawnTime = TimeSpan.FromSeconds(5),
             SpawnType = SpawnType.Sphere
         });
@@ -42,7 +44,8 @@ public class WorldMap : Map
             Position = new Point(746, 707),
             Amount = 5,
             Mob = Npcs.NpcIds.Slime,
-            Range = 3,
+            RangeX = 3,
+            RangeY = 3,
             RespawnTime = TimeSpan.FromSeconds(5),
             SpawnType = SpawnType.Rect
         });
@@ -51,7 +54,8 @@ public class WorldMap : Map
             Position = new Point(795, 717),
             Amount = 30,
             Mob = Npcs.NpcIds.Slime,
-            Range = 20,
+            RangeX = 20,
+            RangeY = 20,
             RespawnTime = TimeSpan.FromSeconds(5),
             SpawnType = SpawnType.Rect
         });
