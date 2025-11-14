@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace TinyRpg.Npcs.Mobs;
 
-public abstract class Mob : INpcTemplate
+public abstract class Mob : IMonsterTemplate
 {
     public abstract Enum Id { get; }
     public abstract string Name { get; }

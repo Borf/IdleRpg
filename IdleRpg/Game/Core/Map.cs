@@ -111,7 +111,7 @@ public class Map(string name)
                 {
                     Position = new Util.Point(mob.X, mob.Y),
                     Amount = mob.Amount,
-                    Mob = Enum.Parse<T>(mob.MobName, true),
+                    MobId = Enum.Parse<T>(mob.MobName, true),
                     RangeX = mob.Width,
                     RangeY = mob.Height,
                     RespawnTime = TimeSpan.FromSeconds(mob.RespawnTime),
@@ -187,7 +187,7 @@ public class Map(string name)
             Map = this,
         };
         //TODO: this might take longer later, so put it in a b ackground thread
-        instance.LoadNpcs(gameCore, serviceProvider);
+        instance.LoadMonsterSpawners(gameCore, serviceProvider);
 
         return instance;
     }

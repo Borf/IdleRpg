@@ -13,7 +13,7 @@ public interface IGameCore
     public (Point position, string mapName) SpawnLocation { get; }
     void Damage(Character source, Character target, IDamageProperties damageProperties);
     bool IsAlive(Character chacater);
-    void GainExp(Character character, INpcTemplate npcTemplate);
+    void GainExp(Character character, IMonsterTemplate npcTemplate);
     ICharacterCreateCharOptions GetNewCharacterOptions();
     void InitializeCharacter(CharacterPlayer newCharacter, ICharacterCreateCharOptions options);
 }

@@ -11,7 +11,7 @@ public class MapInstance
 
     List<BgTask> bgTasks = new();
 
-    public void LoadNpcs(IGameCore gameCore, IServiceProvider serviceProvider)
+    public void LoadMonsterSpawners(IGameCore gameCore, IServiceProvider serviceProvider)
     {
         var bgTaskManager = serviceProvider.GetRequiredService<BgTaskManager>();
         var coreHolder = serviceProvider.GetRequiredService<ICoreHolder>();
@@ -23,13 +23,13 @@ public class MapInstance
                 SpawnTemplate = spawn,
                 LastSpawnTime = DateTimeOffset.Now
             };
-            spawner.Task = new BgTask($"Spawner {spawn.Mob} on {Map.Name}", async (token) =>
+            spawner.Task = new BgTask($"Spawner {spawn.MobId} on {Map.Name}", async (token) =>
             {
                 bool starting = true;
                 while (!token.IsCancellationRequested)
                 {
-                    spawner.SpawnedNpcs.RemoveAll(npc => !gameCore.IsAlive(npc));
-                    if (spawner.SpawnedNpcs.Count < spawn.Amount)
+                    spawner.SpawnedMonsters.RemoveAll(npc => !gameCore.IsAlive(npc));
+                    if (spawner.SpawnedMonsters.Count < spawn.Amount)
                     {
                         //TODO: bound check!
                         var location = new Location(spawner.SpawnTemplate.Position.X, spawner.SpawnTemplate.Position.Y) { MapInstance = this };
@@ -44,24 +44,24 @@ public class MapInstance
                             count++;
                             if (count > 100)
                             {
-                                logger.LogError($"Could not spawn {spawn.Mob} on {Map.Name}, no valid location found");
+                                logger.LogError($"Could not spawn {spawn.MobId} on {Map.Name}, no valid location found");
                             }
                         }
-                        var npc = new CharacterNPC(serviceProvider, coreHolder.NpcTemplates[spawner.SpawnTemplate.Mob])
+                        var npc = new CharacterMonster(serviceProvider, coreHolder.MonsterTemplates[spawner.SpawnTemplate.MobId])
                         {
                             Spawner = spawner,
                             Location = location,
                             Id = (ulong)Random.Shared.NextInt64(), //TODO: check for clashes
                         };
                         logger.LogInformation($"Spawning {npc.Name} at {npc.Location.MapInstance.Map.Name}:{npc.Location.X},{npc.Location.Y}");
-                        spawner.SpawnedNpcs.Add(npc);
+                        spawner.SpawnedMonsters.Add(npc);
                         this.SpawnCharacter(npc);
                         npc.Start(serviceProvider);
                     }
                     if (!starting)
                         await Task.Delay(spawn.RespawnTime, token);
                     else
-                        if (spawner.SpawnedNpcs.Count == spawn.Amount)
+                        if (spawner.SpawnedMonsters.Count == spawn.Amount)
                         starting = false;
                 }
             });
@@ -93,5 +93,5 @@ public class Spawner
     public required SpawnTemplate SpawnTemplate { get; set; }
     public DateTimeOffset LastSpawnTime { get; set; } = DateTimeOffset.MinValue;
     public BgTask Task { get; set; } = null!;
-    public List<CharacterNPC> SpawnedNpcs = new();
+    public List<CharacterMonster> SpawnedMonsters = new();
 }

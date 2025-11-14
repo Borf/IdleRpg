@@ -14,4 +14,7 @@ public enum NpcIds
     Spider = 10004,
     Worm = 10005,
     Owl = 10006,
+
+
+    NpcStarterVillageMerchant = 20001,
 }

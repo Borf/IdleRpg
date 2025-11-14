@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System;
 using TinyRpg.Items;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.PixelFormats;
 namespace TinyRpg.Npcs.Mobs;
 
 public class Slime : Mob
@@ -21,7 +19,10 @@ public class Slime : Mob
     };
     public override int AgroRange => 0;
 
-    public override List<ItemDrop> ItemDrops => [ new ItemDrop() { Item = ItemIds.Slime, DropChance = 0.25 }];
+    public override List<ItemDrop> ItemDrops => [
+        new ItemDrop() { Item = ItemIds.Slime, DropChance = 0.25 },
+        new ItemDrop() { Item = ItemIds.WeaponCutlass, DropChance = 0.01 },
+        ];
 
     public override int Exp => 1;
 }

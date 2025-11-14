@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System;
 using TinyRpg.Items;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.PixelFormats;
 namespace TinyRpg.Npcs.Mobs;
 
 public class Spider : Mob

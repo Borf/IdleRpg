@@ -16,12 +16,11 @@ public class GameService : ICoreHolder
     private readonly BgTaskManager BgTaskManager;
     private readonly IServiceProvider serviceProvider;
     private CoreLoader CoreLoader;
-    public Dictionary<Enum, INpcTemplate> NpcTemplates { get; set; } = new();
+    public Dictionary<Enum, IMonsterTemplate> MonsterTemplates { get; set; } = new();
     public Dictionary<Enum, IItemTemplate> ItemTemplates { get; set; } = new();
     public List<ISkill> Skills { get; set; } = new();
 
     private List<Map> Maps = new();
-    private List<MapInstance> MapInstances = new();
     private List<CharacterPlayer> Players = new();
     public IGameCore GameCore { get; set; } = null!;
     public Type statsEnum { get; set; } = null!;

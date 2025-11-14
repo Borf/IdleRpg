@@ -35,7 +35,7 @@ public class ActionsBattleMenu : InteractionModuleBase<SocketInteractionContext>
                 .WithSeparator()
                 .WithTextDisplay($"Current settings:\n" +
                 $"- Farm time: {character.NextFarmAction.TimeSpan}\n" +
-                $"- Mobs: {(character.NextFarmAction.MobIds.Any() ? string.Join(", ", character.NextFarmAction.MobIds.Select(m => gameService.NpcTemplates[m].Name)) : "Any")}")
+                $"- Mobs: {(character.NextFarmAction.MobIds.Any() ? string.Join(", ", character.NextFarmAction.MobIds.Select(m => gameService.MonsterTemplates[m].Name)) : "Any")}")
                 .WithSeparator()
                 .WithActionRow([
                     new ButtonBuilder("Start", "actions:battle:start",            ButtonStyle.Success, emote: Emoji.Parse(":play_pause:")),

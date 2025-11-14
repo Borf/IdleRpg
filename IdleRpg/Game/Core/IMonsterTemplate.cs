@@ -3,7 +3,7 @@ using SixLabors.ImageSharp.PixelFormats;
 
 namespace IdleRpg.Game.Core;
 
-public interface INpcTemplate
+public interface IMonsterTemplate
 {
     Enum Id { get; }
     string Name { get; }

@@ -37,7 +37,7 @@ public class MapGeneratorService
         var characters = character.Location.MapInstance.GetCharactersAround(character.Location, 100);
         foreach (var c in characters)
         {
-            if (c is CharacterNPC npc && !string.IsNullOrEmpty(npc.NpcTemplate.ImageFile) && npc.NpcTemplate.Image != null)
+            if (c is CharacterMonster npc && !string.IsNullOrEmpty(npc.NpcTemplate.ImageFile) && npc.NpcTemplate.Image != null)
             {
                 image.Mutate(ip => ip.DrawImage(npc.NpcTemplate.Image, new Point(
                     (c.Location.X - rect.X) * map.MapImageTileSize,  //TODO: zoom should be factored in here too

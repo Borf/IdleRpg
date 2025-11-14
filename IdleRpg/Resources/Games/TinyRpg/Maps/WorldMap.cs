@@ -33,7 +33,7 @@ public class WorldMap : Map
         {
             Position = new Point(20, 20),
             Amount = 5,
-            Mob = Npcs.NpcIds.Slime,
+            MobId = Npcs.NpcIds.Slime,
             RangeX = 5,
             RangeY = 5,
             RespawnTime = TimeSpan.FromSeconds(5),
@@ -43,7 +43,7 @@ public class WorldMap : Map
         {
             Position = new Point(746, 707),
             Amount = 5,
-            Mob = Npcs.NpcIds.Slime,
+            MobId = Npcs.NpcIds.Slime,
             RangeX = 3,
             RangeY = 3,
             RespawnTime = TimeSpan.FromSeconds(5),
@@ -53,11 +53,18 @@ public class WorldMap : Map
         {
             Position = new Point(795, 717),
             Amount = 30,
-            Mob = Npcs.NpcIds.Slime,
+            MobId = Npcs.NpcIds.Slime,
             RangeX = 20,
             RangeY = 20,
             RespawnTime = TimeSpan.FromSeconds(5),
             SpawnType = SpawnType.Rect
+        });
+
+
+        Spawns.Add(new SpawnTemplate()
+        {
+            Position = new Point(739, 731),
+            MobId = Npcs.NpcIds.NpcStarterVillageMerchant,
         });
     }
 }

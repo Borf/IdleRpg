@@ -118,7 +118,7 @@ public class GameCore : IGameCore2D, IDiscordGame
     }
     public bool IsAlive(Character character) => character.Stats[Stats.Hp] > 0;
 
-    public void GainExp(Character character, INpcTemplate npcTemplate)
+    public void GainExp(Character character, IMonsterTemplate npcTemplate)
     {
         if (npcTemplate is Mob mob)
         {

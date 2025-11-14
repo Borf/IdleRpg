@@ -40,7 +40,7 @@ public class CharacterActionAttack : CharacterAction
         if (!gameService.GameCore.IsAlive(Target))
         {
             Logger.LogInformation($"{Character.Name} has killed {Target.Name}");
-            if (Target is CharacterNPC npc)
+            if (Target is CharacterMonster npc)
             {
                 if (Character is CharacterPlayer player)
                 {
@@ -58,7 +58,7 @@ public class CharacterActionAttack : CharacterAction
                 }
                 await npc.Die();
                 if(npc.Spawner != null)
-                    npc.Spawner.SpawnedNpcs.Remove(npc);
+                    npc.Spawner.SpawnedMonsters.Remove(npc);
                 npc.Location.MapInstance.Characters.Remove(npc);
             }
         }
