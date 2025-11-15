@@ -23,6 +23,7 @@ public class DiscordMessageBuilderService
     public async Task StartMenu(IDiscordInteraction interaction, CharacterPlayer character, string message = "")
     {
         using var mapImage = mapGenerator.GenerateMapImage(character, 8, 0);
+        mapImage.Mutate(ip => ip.Resize(mapImage.Width * 4, mapImage.Height * 4, KnownResamplers.NearestNeighbor));
         using var mapStream = mapImage.AsPngStream();
 
         using var header = ((IDiscordGame)gameService.GameCore).HeaderGenerator.GetImage(DiscordMenu.Main, character);

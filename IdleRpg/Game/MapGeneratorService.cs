@@ -1,10 +1,13 @@
 ﻿using IdleRpg.Game.Core;
+using IdleRpg.Util;
 using SixLabors.Fonts;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Drawing;
 using SixLabors.ImageSharp.Drawing.Processing;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
+using BitmapFont = IdleRpg.Util.BitmapFont;
+using Point = SixLabors.ImageSharp.Point;
 
 namespace IdleRpg.Game;
 
@@ -14,12 +17,14 @@ public class MapGeneratorService
 
     private Font font;
     private Font npcFont;
+    private BitmapFont npcBitmapFont;
     private GameService gameService;
 
     public MapGeneratorService(GameService gameService)
     {
         this.font = SystemFonts.CreateFont("Tahoma", 20);
         this.npcFont = SystemFonts.CreateFont("Consolas", 12);
+        this.npcBitmapFont = new BitmapFont(System.IO.Path.Combine("Resources", "PixelFont"));
         this.gameService = gameService;
     }
 
@@ -53,26 +58,16 @@ public class MapGeneratorService
 
                 image.Mutate(ip => ip.DrawImage(npc.Template.Image, pos, 1.0f));
 
-                var fsize = TextMeasurer.MeasureBounds(npc.Name, new TextOptions(npcFont) { Font = npcFont });
-                var tpos = new Point(pos.X + map.MapImageTileSize/2  - (int)(fsize.Width/2), pos.Y - (int)fsize.Height);
+                var width = npcBitmapFont.CalculateWidth(npc.Name);
+                var tpos = new Point(pos.X + map.MapImageTileSize/2  - (int)(width/2), pos.Y - 8);
 
-                image.Mutate(ip => ip.Fill(new DrawingOptions() { GraphicsOptions = new() { BlendPercentage = 0.5f } }, Brushes.Solid(Color.White), new RectangleF(
-                    tpos.X+fsize.X-1,  //TODO: zoom should be factored in here too
-                    tpos.Y+fsize.Y-1, fsize.Width+2, fsize.Height+2)));
+                image.Mutate(ip => ip.Fill(new DrawingOptions() { GraphicsOptions = new() { BlendPercentage = 0.5f } }, Brushes.Solid(Color.Black), new RectangleF(
+                    tpos.X-1,  //TODO: zoom should be factored in here too
+                    tpos.Y+2, width+3, 7)));
 
 
-                image.Mutate(ip => ip.DrawText(new DrawingOptions()
-                {
-                    GraphicsOptions = new()
-                    {
-                        Antialias = false,
-                        AntialiasSubpixelDepth = 0,
-                    }
-                },new RichTextOptions(npcFont)
-                {
-                    Origin = new PointF(tpos.X,tpos.Y), 
-                    HintingMode = HintingMode.Standard,
-                }, npc.Name, Brushes.Solid(Color.Black), null));
+                image.Mutate(ip => ip.DrawBitmapText(npcBitmapFont, npc.Name, new Point(tpos.X, tpos.Y), Color.Black));
+
             }
             else if (c is CharacterPlayer player)
             {
