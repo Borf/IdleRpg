@@ -9,8 +9,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TinyRpg.Npcs.Mobs;
+namespace TinyRpg.Monsters;
 
+//TODO: move to core
 public abstract class Mob : IMonsterTemplate
 {
     public abstract Enum Id { get; }

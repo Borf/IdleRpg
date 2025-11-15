@@ -7,7 +7,7 @@ public abstract class CharacterAction
     public CharacterAction? ParentAction { get; set; } = null;
     public Character Character { get; protected set; }
     public DateTimeOffset StartTime { get; set; }
-    public abstract bool IsDone { get; }
+    public virtual bool IsDone => BgTask.Finished;
     public bool Started { get; set; } = false;
     public BgTask BgTask { get; private set; } = null!;
     public abstract string Status();

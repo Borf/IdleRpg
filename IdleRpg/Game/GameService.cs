@@ -16,12 +16,13 @@ public class GameService : ICoreHolder
     private readonly BgTaskManager BgTaskManager;
     private readonly IServiceProvider serviceProvider;
     private CoreLoader CoreLoader;
-    public Dictionary<Enum, IMonsterTemplate> MonsterTemplates { get; set; } = new();
-    public Dictionary<Enum, IItemTemplate> ItemTemplates { get; set; } = new();
-    public List<ISkill> Skills { get; set; } = new();
+    public Dictionary<Enum, IMonsterTemplate> MonsterTemplates { get; set; } = [];
+    public Dictionary<Enum, IItemTemplate> ItemTemplates { get; set; } = [];
+    public List<INpcTemplate> NpcTemplates { get; set; } = [];
+    public List<ISkill> Skills { get; set; } = [];
 
-    private List<Map> Maps = new();
-    private List<CharacterPlayer> Players = new();
+    private List<Map> Maps = [];
+    private List<CharacterPlayer> Players = [];
     public IGameCore GameCore { get; set; } = null!;
     public Type statsEnum { get; set; } = null!;
     public List<StatModifier> PrimaryModifiers { get; set; } = new();
@@ -87,7 +88,7 @@ public class GameService : ICoreHolder
         SemaphoreSlim LoadSemaphore = new SemaphoreSlim(6); // 6 maps at the same time
         List<Task> loadTasks = new();
         foreach (var map in Maps)
-            loadTasks.Add(Task.Run(async () => { await LoadSemaphore.WaitAsync(); try { _logger.LogInformation($"Loading map {map.Name}"); map.Load(); map.Loaded = true; } finally { LoadSemaphore.Release(); } }));
+            loadTasks.Add(Task.Run(async () => { await LoadSemaphore.WaitAsync(); try { _logger.LogInformation($"Loading map {map.Name}"); map.Load(this); map.Loaded = true; } finally { LoadSemaphore.Release(); } }));
         await Task.WhenAll(loadTasks.ToArray());
 
         foreach(var map in Maps.Where(m => m.InstanceType == InstanceType.NoInstance))

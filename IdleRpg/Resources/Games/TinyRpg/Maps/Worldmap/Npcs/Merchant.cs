@@ -4,19 +4,18 @@ using System;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 
-namespace TinyRpg.Npcs.Npcs.StarterArea;
+namespace TinyRpg.Maps.Worldmap.Npcs;
 
-public class Merchant : IMonsterTemplate
+public class Merchant : INpcTemplate
 {
-    public Enum Id => NpcIds.NpcStarterVillageMerchant;
-
     public string Name => "Merchant";
 
-    public Dictionary<Enum, int> Stats => [];
+    public IdleRpg.Util.Point Position => new(739, 731);
 
-    public List<ItemDrop> ItemDrops => [];
+    public Type Map => typeof(WorldMap);
 
     public Image<Rgba32>? Image { get; set; }
 
     public string ImageFile => "Merchant.png";
+
 }

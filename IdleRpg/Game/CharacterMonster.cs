@@ -5,15 +5,16 @@ namespace IdleRpg.Game;
 public class CharacterMonster : Character
 {
 //    public ICharacterState<CharacterNPC> State { get; set; }
-    public IMonsterTemplate NpcTemplate { get; set; }
+    public IMonsterTemplate Template { get; set; }
     BgTask AiTask;
     public Spawner? Spawner { get; set; }
     
-    public CharacterMonster(IServiceProvider serviceProvider, IMonsterTemplate npcTemplate) : base(serviceProvider)
+    public CharacterMonster(IServiceProvider serviceProvider, IMonsterTemplate template) : base(serviceProvider)
     {
-        NpcTemplate = npcTemplate;
-        Name = npcTemplate.Name;
-        foreach (var stat in npcTemplate.Stats)
+        Id = (ulong)Random.Shared.NextInt64(); //TODO: check for clashes (and check if this is needed)
+        Template = template;
+        Name = template.Name;
+        foreach (var stat in template.Stats)
         {
             Stats[stat.Key] = stat.Value;
         }

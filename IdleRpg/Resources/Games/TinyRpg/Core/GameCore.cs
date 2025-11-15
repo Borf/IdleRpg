@@ -10,7 +10,7 @@ using System.Linq;
 using System.Numerics;
 using TinyRpg.Items;
 using TinyRpg.Maps;
-using TinyRpg.Npcs.Mobs;
+using TinyRpg.Monsters;
 
 public class GameCore : IGameCore2D, IDiscordGame
 {

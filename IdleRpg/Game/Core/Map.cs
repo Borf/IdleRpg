@@ -61,9 +61,10 @@ public class Map(string name)
     public L1PathPlanner Planner { get; private set; } = null!;
     //PathFindData PathFindData { get; set; } = null!;
     public InstanceType InstanceType { get; set; } = InstanceType.NoInstance;
-    public List<SpawnTemplate> Spawns { get; set; } = new();
+    public List<MonsterSpawnTemplate> Spawns { get; set; } = [];
+    public List<INpcTemplate> NpcTemplates { get; set; } = [];
     public string MapImagePath { get; private set; } = string.Empty;
-    public virtual void Load()
+    public virtual void Load(GameService gameService) //TODO: should this be gameService parameter?
     {
         var filename = Path.Combine("Resources", "Games", GameService.CoreName, "Maps", $"{Name}.map");
         MapImagePath = Path.Combine("Resources", "Games", GameService.CoreName, "Maps", Name);
@@ -103,11 +104,11 @@ public class Map(string name)
         var mobJsonPath = Path.Combine("Resources", "Games", GameService.CoreName, "Maps", $"{Name}.mobs.json");
         if (File.Exists(mobJsonPath))
         {
-            var mobData = JsonSerializer.Deserialize<List<Mobinfo>>(File.ReadAllText(mobJsonPath));
+            var mobData = JsonSerializer.Deserialize<List<Mobinfo>>(File.ReadAllText(mobJsonPath)) ?? [];
 
             foreach (var mob in mobData)
             {
-                Spawns.Add(new SpawnTemplate()
+                Spawns.Add(new MonsterSpawnTemplate()
                 {
                     Position = new Util.Point(mob.X, mob.Y),
                     Amount = mob.Amount,
@@ -122,6 +123,11 @@ public class Map(string name)
 
     }
 
+    public void LoadNpcs(GameService gameService)
+    {
+        NpcTemplates = gameService.NpcTemplates.Where(npc => npc.Map.IsEquivalentTo(this.GetType())).ToList(); // should this be isEquivalentTo as that relates to COM?
+
+    }
 
     public CellType this[int X, int Y]
     {
@@ -188,6 +194,10 @@ public class Map(string name)
         };
         //TODO: this might take longer later, so put it in a b ackground thread
         instance.LoadMonsterSpawners(gameCore, serviceProvider);
+        foreach(var template in NpcTemplates)
+        {
+            instance.Characters.Add(new CharacterNpc(serviceProvider, template, instance)); //TODO: passing instance here feels a bit dirty
+        }
 
         return instance;
     }

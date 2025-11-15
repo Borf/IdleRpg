@@ -8,7 +8,6 @@ namespace IdleRpg.Game.PlayerActions;
 public class CharacterActionFarm : CharacterAction
 {
     public override string Status() => $"Farming monsters";
-    public override bool IsDone => BgTask.Finished;
     private ILogger<CharacterActionFarm> Logger;
     
     public List<Enum> MobIds { get; set; } = new();
@@ -36,7 +35,7 @@ public class CharacterActionFarm : CharacterAction
         {
             var charsNear = Character.Location.MapInstance.GetCharactersAround(Character.Location, 20); //TODO: range should be configurable
             var enemies = charsNear
-                .Where(c => (c is CharacterMonster npc) && (!MobIds.Any() || MobIds.Contains(npc.NpcTemplate.Id)))
+                .Where(c => (c is CharacterMonster npc) && (!MobIds.Any() || MobIds.Contains(npc.Template.Id)))
                 .Select(c => (CharacterMonster)c)
                 .OrderBy(c => c.Location.DistanceTo(Character.Location));
             if(!enemies.Any())

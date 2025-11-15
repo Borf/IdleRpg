@@ -51,9 +51,9 @@ public class MapInstance
                         {
                             Spawner = spawner,
                             Location = location,
-                            Id = (ulong)Random.Shared.NextInt64(), //TODO: check for clashes
                         };
-                        logger.LogInformation($"Spawning {npc.Name} at {npc.Location.MapInstance.Map.Name}:{npc.Location.X},{npc.Location.Y}");
+                        if(!starting)
+                            logger.LogInformation($"Spawning {npc.Name} at {npc.Location.MapInstance.Map.Name}:{npc.Location.X},{npc.Location.Y}");
                         spawner.SpawnedMonsters.Add(npc);
                         this.SpawnCharacter(npc);
                         npc.Start(serviceProvider);
@@ -90,7 +90,7 @@ public class MapInstance
 
 public class Spawner
 {
-    public required SpawnTemplate SpawnTemplate { get; set; }
+    public required MonsterSpawnTemplate SpawnTemplate { get; set; }
     public DateTimeOffset LastSpawnTime { get; set; } = DateTimeOffset.MinValue;
     public BgTask Task { get; set; } = null!;
     public List<CharacterMonster> SpawnedMonsters = new();

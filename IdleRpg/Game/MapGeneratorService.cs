@@ -13,11 +13,13 @@ public class MapGeneratorService
     private Dictionary<Map, ImageCache> ImageCaches = new();
 
     private Font font;
+    private Font npcFont;
     private GameService gameService;
 
     public MapGeneratorService(GameService gameService)
     {
         this.font = SystemFonts.CreateFont("Tahoma", 20);
+        this.npcFont = SystemFonts.CreateFont("Consolas", 12);
         this.gameService = gameService;
     }
 
@@ -37,11 +39,40 @@ public class MapGeneratorService
         var characters = character.Location.MapInstance.GetCharactersAround(character.Location, 100);
         foreach (var c in characters)
         {
-            if (c is CharacterMonster npc && !string.IsNullOrEmpty(npc.NpcTemplate.ImageFile) && npc.NpcTemplate.Image != null)
+            if (c is CharacterMonster monster && !string.IsNullOrEmpty(monster.Template.ImageFile) && monster.Template.Image != null)
             {
-                image.Mutate(ip => ip.DrawImage(npc.NpcTemplate.Image, new Point(
+                image.Mutate(ip => ip.DrawImage(monster.Template.Image, new Point(
                     (c.Location.X - rect.X) * map.MapImageTileSize,  //TODO: zoom should be factored in here too
                     (c.Location.Y - rect.Y) * map.MapImageTileSize), 1.0f));
+            }
+            else if (c is CharacterNpc npc && !string.IsNullOrEmpty(npc.Template.ImageFile) && npc.Template.Image != null)
+            {
+                var pos = new Point(
+                    (c.Location.X - rect.X) * map.MapImageTileSize,  //TODO: zoom should be factored in here too
+                    (c.Location.Y - rect.Y) * map.MapImageTileSize);
+
+                image.Mutate(ip => ip.DrawImage(npc.Template.Image, pos, 1.0f));
+
+                var fsize = TextMeasurer.MeasureBounds(npc.Name, new TextOptions(npcFont) { Font = npcFont });
+                var tpos = new Point(pos.X + map.MapImageTileSize/2  - (int)(fsize.Width/2), pos.Y - (int)fsize.Height);
+
+                image.Mutate(ip => ip.Fill(new DrawingOptions() { GraphicsOptions = new() { BlendPercentage = 0.5f } }, Brushes.Solid(Color.White), new RectangleF(
+                    tpos.X+fsize.X-1,  //TODO: zoom should be factored in here too
+                    tpos.Y+fsize.Y-1, fsize.Width+2, fsize.Height+2)));
+
+
+                image.Mutate(ip => ip.DrawText(new DrawingOptions()
+                {
+                    GraphicsOptions = new()
+                    {
+                        Antialias = false,
+                        AntialiasSubpixelDepth = 0,
+                    }
+                },new RichTextOptions(npcFont)
+                {
+                    Origin = new PointF(tpos.X,tpos.Y), 
+                    HintingMode = HintingMode.Standard,
+                }, npc.Name, Brushes.Solid(Color.Black), null));
             }
             else if (c is CharacterPlayer player)
             {

@@ -8,8 +8,6 @@ namespace IdleRpg.Game.PlayerActions;
 public class CharacterActionAttack : CharacterAction
 {
     public override string Status() => $"Attacking {Target?.Name}";
-    public override bool IsDone => BgTask.Finished;
-
     public Character Target { get; set; }
     private ILogger<CharacterActionAttack> Logger;
 
@@ -45,9 +43,9 @@ public class CharacterActionAttack : CharacterAction
                 if (Character is CharacterPlayer player)
                 {
                     player.Log(LogCategory.Battle, $"You killed a {Target.Name}");
-                    gameService.GameCore.GainExp(Character, npc.NpcTemplate);
+                    gameService.GameCore.GainExp(Character, npc.Template);
 
-                    foreach (var drop in npc.NpcTemplate.ItemDrops)
+                    foreach (var drop in npc.Template.ItemDrops)
                     {
                         if (Random.Shared.NextDouble() <= drop.DropChance)
                         {

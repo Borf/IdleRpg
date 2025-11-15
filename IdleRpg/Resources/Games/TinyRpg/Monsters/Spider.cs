@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using System;
 using TinyRpg.Items;
-namespace TinyRpg.Npcs.Mobs;
+using TinyRpg.Npcs;
+namespace TinyRpg.Monsters;
 
 public class Spider : Mob
 {

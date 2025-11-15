@@ -2,7 +2,7 @@
 
 namespace IdleRpg.Game.Core;
 
-public class SpawnTemplate
+public class MonsterSpawnTemplate
 {
     public required Point Position { get; init; }
     public required Enum MobId { get; init; }

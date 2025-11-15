@@ -67,11 +67,9 @@ public class CharacterActionWalk : CharacterAction
         { 
             if(Character.Location.X == TargetLocation.X && Character.Location.Y == TargetLocation.Y && Character.Location.MapInstance == TargetLocation.MapInstance)
                 return true;
-            if (BgTask.Finished)
-                return true;
             if (Length <= 0)
                 return true;
-            return false;
+            return base.IsDone;
         } 
     }
 

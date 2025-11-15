@@ -2,13 +2,14 @@
 using System.Collections.Generic;
 using System;
 using TinyRpg.Items;
-namespace TinyRpg.Npcs.Mobs;
+using TinyRpg.Npcs;
+namespace TinyRpg.Monsters;
 
-public class Frog : Mob
+public class Worm : Mob
 {
-    public override Enum Id => NpcIds.Frog;
-    public override string Name => "Frog";
-    public override string ImageFile => "Frog.png";
+    public override Enum Id => NpcIds.Worm;
+    public override string Name => "Worm";
+    public override string ImageFile => "Worm.png";
     public override Dictionary<Enum, int> Stats => new()
     {
         { Core.Stats.MaxHp, 4 },
@@ -20,9 +21,8 @@ public class Frog : Mob
     public override int AgroRange => 0;
 
     public override List<ItemDrop> ItemDrops => [
-        new ItemDrop() { Item = ItemIds.FrogLeg, DropChance = 0.2 },
-        new ItemDrop() { Item = ItemIds.Slime, DropChance = 0.1 },
+        new ItemDrop() { Item = ItemIds.Slime, DropChance = 0.2 },
+        new ItemDrop() { Item = ItemIds.RedPotion, DropChance = 0.1 },
     ];
-
-    public override int Exp => 3;
+    public override int Exp => 1;
 }
