@@ -121,7 +121,7 @@ public class GameService : ICoreHolder
     {
         using var scope = serviceProvider.CreateScope();
         using var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        var dbCharacter = context.Characters.Include(c => c.Stats).Include(c => c.Inventory).FirstOrDefault(c => c.Id == id);
+        var dbCharacter = context.Characters.Include(c => c.Stats).Include(c => c.Inventory).Include(c => c.Equips).FirstOrDefault(c => c.Id == id);
         if(dbCharacter == null)
             return null;
 
@@ -134,6 +134,11 @@ public class GameService : ICoreHolder
             Stats = dbCharacter.Stats.ToDictionary(s => (Enum)Enum.Parse(statsEnum, s.Stat), s => s.Value), //TODO: ewww
             Inventory = dbCharacter.Inventory.Select(i => new Core.InventoryItem((Enum)Enum.Parse(GameCore.GetItemIdEnum(), i.ItemId+""), i.Id)).ToList(),
         };
+        character.EquippedItems = dbCharacter.Equips.ToDictionary(kv => (Enum)Enum.Parse(equipEnum, kv.EquipSlot), kv => character.Inventory.First(i => i.Guid == kv.ItemId));
+
+
+
+
         character.Location.MapInstance.Characters.Add(character);
 
         return character;
