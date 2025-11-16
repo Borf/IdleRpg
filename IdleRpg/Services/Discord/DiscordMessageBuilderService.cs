@@ -59,6 +59,7 @@ public class DiscordMessageBuilderService
     public async Task ActionsMenu(IDiscordInteraction interaction, Character character, string message = "")
     {
         using var mapImage = mapGenerator.GenerateMapImage(character, 16, 0);
+        mapImage.Mutate(ip => ip.Resize(mapImage.Width * 2, mapImage.Height * 2, KnownResamplers.NearestNeighbor));
         using var mapStream = mapImage.AsPngStream();
 
         using var header = ((IDiscordGame)gameService.GameCore).HeaderGenerator.GetImage(DiscordMenu.Main, character);
@@ -169,8 +170,18 @@ public static class MenuHelper
             int index = 0;
             foreach (var crumb in crumbs)
             {
-                path += (index > 0 ? ":" : "") + crumb;
-                arb.WithButton(crumb.FirstCharToUpper(), path, index == crumbs.Count - 1 ? ButtonStyle.Success : ButtonStyle.Secondary);
+                var title = crumb;
+                var crumb_ = crumb;
+                if(title.Contains("#"))
+                {
+                    title = title.Substring(title.IndexOf("#") + 1);
+                    crumb_ = crumb.Substring(0, crumb.IndexOf("#"));
+                }
+                if (crumb_.Contains("|"))
+                    crumb_ = crumb_.Replace("|", ":");
+                path += (index > 0 ? ":" : "") + crumb_;
+
+                arb.WithButton(title.FirstCharToUpper(), path, index == crumbs.Count - 1 ? ButtonStyle.Success : ButtonStyle.Secondary);
                 index++;
             }
         }

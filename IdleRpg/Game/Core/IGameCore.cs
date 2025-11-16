@@ -7,6 +7,9 @@ public interface IGameCore
 {
     Type GetStats();
     Type GetItemIdEnum();
+    Type GetEquipEnum();
+    Enum[] GetMoneyTypes();
+
     StatModifier CalculateStat(Enum s);
     List<Map> LoadMaps();
 

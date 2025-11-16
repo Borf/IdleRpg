@@ -105,6 +105,7 @@ public class CoreLoader : IDisposable
                 {
                     coreHolder.GameCore = core;
                     coreHolder.statsEnum = core.GetStats();
+                    coreHolder.equipEnum = core.GetEquipEnum();
                     LoadItems();
                     LoadMonsterTemplates();
                     LoadNpcTemplates();
@@ -194,4 +195,5 @@ public interface ICoreHolder
     List<INpcTemplate> NpcTemplates { get; set; }
     IGameCore GameCore { get; set; }
     Type statsEnum { get; set; }
+    Type equipEnum { get; set; }
 }

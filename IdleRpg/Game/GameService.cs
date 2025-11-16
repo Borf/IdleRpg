@@ -25,6 +25,7 @@ public class GameService : ICoreHolder
     private List<CharacterPlayer> Players = [];
     public IGameCore GameCore { get; set; } = null!;
     public Type statsEnum { get; set; } = null!;
+    public Type equipEnum { get; set; } = null!;
     public List<StatModifier> PrimaryModifiers { get; set; } = new();
     public List<StatModifier> AllModifiers { get; private set; } = new();
     public List<StatModifier> sortedModifiers { get; set; } = new();

@@ -6,6 +6,7 @@ using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using System;
 using System.Collections.Generic;
+using TinyRpg.Core;
 
 public class OwlFeather : IItemTemplate
 {
@@ -17,4 +18,5 @@ public class OwlFeather : IItemTemplate
     public Image<Rgba32>? InventoryImage { get; set; }
 
     public string ImageFile => "OwlFeather.png";
+    public Dictionary<Enum, int> Value => new() { { Stats.Money, 5 } };
 }

@@ -10,4 +10,5 @@ public interface IItemTemplate
     string Description { get; }
     Image<Rgba32>? InventoryImage { get; set;  }
     string ImageFile { get; }
+    Dictionary<Enum, int> Value { get; }
 }

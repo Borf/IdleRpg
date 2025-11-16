@@ -16,6 +16,8 @@ public class GameCore : IGameCore2D, IDiscordGame
 {
     public Type GetStats() => typeof(Stats);
     public Type GetItemIdEnum() => typeof(ItemIds);
+    public Type GetEquipEnum() => typeof(EquipSlots);
+    public Enum[] GetMoneyTypes() => [ Stats.Money ];
 
     public StatModifier CalculateStat(Enum s)
     {
@@ -30,6 +32,7 @@ public class GameCore : IGameCore2D, IDiscordGame
             Stats.LookFace => new FixedStatModifier(stat, 0),
             Stats.LookHair => new FixedStatModifier(stat, 0),
 
+            Stats.Money => new FixedStatModifier(stat, 0),
             Stats.TotalExp => new FixedStatModifier(stat, 0),
             Stats.Hp => new FixedStatModifier(stat, 1),
             Stats.Sp => new FixedStatModifier(stat, 1),
@@ -222,6 +225,9 @@ public enum Stats
     Sp,
     [Group("Core", nameof(Sp))]
     MaxSp,
+
+    [NotCalculated, Group("Core"), Hidden]
+    Money
 }
 
 
@@ -241,6 +247,13 @@ public enum EquipSlots
     Helm = 1<<2,
 }
 
+public enum ItemTypes
+{
+    Equip,
+    Usable,
+    Misc,
+    //TODO: .... more types? how will we filter in UI? maybe combobox with multiselect?
+}
 
 public class DamageProperties : IDamageProperties
 {

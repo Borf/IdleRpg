@@ -126,5 +126,84 @@ public class CharacterInventoryMenu : InteractionModuleBase<SocketInteractionCon
 
     }
 
+    [ComponentInteraction("character:inventory:item")]
+    public async Task CharacterInventoryItem(string[] itemGuids)
+    {
+        await DeferAsync(ephemeral: true);
+        var character = gameService.GetCharacter(Context.User.Id);
+        var items = character.Inventory.GroupBy(i => i.ItemId).ToDictionary(kv => kv.First().ItemId, kv => kv.ToList());
+        var item = character.Inventory.First(i => i.Guid.ToString() == itemGuids[0]);
+        var itemTemplate = gameService.ItemTemplates[item.ItemId];
+
+        using var header = ((IDiscordGame)gameService.GameCore).HeaderGenerator.GetImage(DiscordMenu.Main, character);
+        using var headerStream = header.AsPngStream();
+
+        var image = gameService.ItemTemplates[item.ItemId].InventoryImage;
+        using var imageStream = image?.AsPngStream();
+
+
+
+        var sb = new SectionBuilder()
+            .WithTextDisplay(
+            $"# {itemTemplate.Name}\n" +
+            $"## {itemTemplate.Description}\n" +
+            $"- `Amount        ` {items[item.ItemId].Count} {itemTemplate.Name}{(items[item.ItemId].Count > 1 ? "s" : "")}\n" +
+            $"- `Price         ` {string.Join(", ", itemTemplate.Value.Select(kv => $"{kv.Value} {kv.Key}"))} each, {string.Join(", ", itemTemplate.Value.Select(kv => $"{items[item.ItemId].Count * kv.Value} {kv.Key} total"))}\n")
+            .WithAccessory(new ThumbnailBuilder("attachment://item.png", null, false));
+
+        bool canBeEquipped = false;
+
+        if(itemTemplate is IEquipable equipable)
+        {
+            canBeEquipped = true;
+
+            string equipStr = $"- `Equipment type` {equipable.EquipSlot}\n" +
+                $"- `When equipped ` {equipable.EquipDescription}\n";
+            if(character.EquippedItems.ContainsKey(equipable.EquipSlot))
+            {
+                var equip = character.EquippedItems[equipable.EquipSlot];
+                if (equip == item)
+                    canBeEquipped = false;
+                equipStr += $"- `Current Equip ` {gameService.ItemTemplates[equip.ItemId].Name} ({((IEquipable)gameService.ItemTemplates[equip.ItemId]).EquipDescription})\n";
+            }
+            sb.WithTextDisplay(equipStr);
+
+        }
+
+        var ar = new ActionRowBuilder()
+            .WithButton("Sell All", $"character:inventory:sellall:{item.Guid}")
+            .WithButton("Equip", $"character:inventory:equip:{item.Guid}", disabled: !canBeEquipped);
+
+
+        await ModifyOriginalResponseAsync(c =>
+        {
+            c.AddAttachment(new FileAttachment(headerStream, "header.png"));
+            c.AddAttachment(new FileAttachment(imageStream, "item.png"));
+
+            c.Components = new ComponentBuilderV2()
+                .WithMediaGallery(["attachment://header.png"])
+                .WithNavigation($"character:inventory:item|{itemGuids[0]}#{itemTemplate.Name}")
+                .WithSection(sb)
+                .WithActionRow(ar)
+                .Build();
+        });
+    }
+    [ComponentInteraction("character:inventory:item:*")]
+    public async Task CharacterInventoryItem(string itemGuid)
+    {
+        await CharacterInventoryItem([itemGuid]);
+    }
+
+    [ComponentInteraction("character:inventory:equip:*")]
+    public async Task CharacterInventoryEquip(string itemGuid)
+    {
+        var character = gameService.GetCharacter(Context.User.Id);
+        var items = character.Inventory.GroupBy(i => i.ItemId).ToDictionary(kv => kv.First().ItemId, kv => kv.ToList());
+        var item = character.Inventory.First(i => i.Guid.ToString() == itemGuid);
+        var itemTemplate = gameService.ItemTemplates[item.ItemId];
+        var equip = itemTemplate as IEquipable;
+        character.EquippedItems[equip.EquipSlot] = item;
+        await CharacterInventoryItem([itemGuid]);
+    }
 
 }

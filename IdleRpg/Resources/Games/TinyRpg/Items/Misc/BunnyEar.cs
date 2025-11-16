@@ -6,6 +6,7 @@ using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using System;
 using System.Collections.Generic;
+using TinyRpg.Core;
 
 public class BunnyEar : IItemTemplate
 {
@@ -17,4 +18,5 @@ public class BunnyEar : IItemTemplate
     public Image<Rgba32>? InventoryImage { get; set; }
 
     public string ImageFile => "BunnyEar.png";
+    public Dictionary<Enum, int> Value => new() { { Stats.Money, 5 } };
 }

@@ -10,7 +10,7 @@ public class Character
 {
     public ulong Id { get; set; } // is the playerID for players, but dunno what it is for NPCs :swt:
     public string Name { get; set; } = string.Empty;
-    public Dictionary<Enum, long> Stats { get; set; } = new();
+    public Dictionary<Enum, long> Stats { get; set; } = new(); //TODO: move this to a sublayer so it's shared for CharacterPlayer and CharacterMonster ?
     public Location Location { get; set; } = null!;
     public IServiceProvider ServiceProvider { get; }
     

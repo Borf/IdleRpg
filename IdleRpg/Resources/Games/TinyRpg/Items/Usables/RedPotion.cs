@@ -6,6 +6,7 @@ using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using System;
 using System.Collections.Generic;
+using TinyRpg.Core;
 
 public class RedPotion : IUsable
 {
@@ -17,4 +18,5 @@ public class RedPotion : IUsable
     public Image<Rgba32>? InventoryImage { get; set; }
 
     public string ImageFile => "RedPotion.png";
+    public Dictionary<Enum, int> Value => new() { { Stats.Money, 5 } };
 }

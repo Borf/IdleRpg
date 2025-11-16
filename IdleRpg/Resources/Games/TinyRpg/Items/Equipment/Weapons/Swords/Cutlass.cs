@@ -11,7 +11,7 @@ using TinyRpg.Core;
 using TinyRpg.Items;
 
 namespace TinyRpg.Items.Equipment.Weapons.Swords;
-public class Cutlass : IEquippable
+public class Cutlass : IEquipable, IItemTemplate
 {
     public Enum Id => ItemIds.WeaponCutlass;
     public string Name => "Cutlass";
@@ -31,4 +31,6 @@ public class Cutlass : IEquippable
     public Image<Rgba32>? InventoryImage { get; set; }
 
     public string ImageFile => "Cutlass.png";
+
+    public Dictionary<Enum, int> Value => new() { { Stats.Money, 100 } };
 }

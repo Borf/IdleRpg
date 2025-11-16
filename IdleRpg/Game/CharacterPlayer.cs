@@ -13,6 +13,7 @@ public class CharacterPlayer : Character
     public CharacterActionFarm NextFarmAction { get; set; }
 
     public List<Core.InventoryItem> Inventory { get; set; } = [];
+    public Dictionary<Enum, Core.InventoryItem> EquippedItems { get; set; } = []; //GameService.equipEnum for key
 
     public void Log(LogCategory category, string message)
     {
