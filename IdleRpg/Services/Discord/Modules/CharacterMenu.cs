@@ -88,13 +88,24 @@ public class CharacterMenu : InteractionModuleBase<SocketInteractionContext>
             statsPerGroup[groupStr][group?.MaxValueOf!] += " / " + stat.Value.ToString();
         }
 
+        var buffs = "## Buffs:\n";
+        foreach(var buff in character.Buffs)
+        {
+            if(buff.Source == BuffSource.Equip)
+                buffs += $"- From {((IItemTemplate)buff.AppliedFromEquip!).Name}:\n{string.Join("\n", buff.Modifiers.Select(m => $"  {m.Stat} = {m.Description}"))}\n";
+            else
+                buffs += $"- From {buff.Source}:\n{string.Join("\n", buff.Modifiers.Select(m => $"  {m.Stat} = {m.Description}"))}\n";
+        }
+
+
         string stats = string.Join("\n", statsPerGroup.Select(g => $"## {g.Key}\n{string.Join("\n", g.Value.Select(kv => $"- `{kv.Key,-15}`{kv.Value}"))}"));
         await ModifyOriginalResponseAsync(c =>
         {
             var cb = new ComponentBuilderV2()
                 .WithMediaGallery(["attachment://header.png"])
                 .WithNavigation("character:stats")
-                .WithTextDisplay(stats);
+                .WithTextDisplay(stats)
+                .WithTextDisplay(buffs);
 
             if (adjustable)
                 cb.WithActionRow([

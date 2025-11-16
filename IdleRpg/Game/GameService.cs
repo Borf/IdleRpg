@@ -136,6 +136,17 @@ public class GameService : ICoreHolder
         };
         character.EquippedItems = dbCharacter.Equips.ToDictionary(kv => (Enum)Enum.Parse(equipEnum, kv.EquipSlot), kv => character.Inventory.First(i => i.Guid == kv.ItemId));
 
+        foreach (var equip in character.EquippedItems)
+        {
+            var equipTemplate = (IEquipable)ItemTemplates[equip.Value.ItemId];
+            character.Buffs.Add(new Buff()
+            {
+                AppliedBy = character,
+                Source = BuffSource.Equip,
+                AppliedFromEquip = equipTemplate,
+                Modifiers = equipTemplate.EquipEffects
+            });
+        }
 
 
 

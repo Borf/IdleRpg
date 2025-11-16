@@ -23,6 +23,7 @@ public class Cutlass : IEquipable, IItemTemplate
         {
             Stat = Stats.Attack,
             Calculation = (currentStats) => currentStats[Stats.Attack] + 3,
+            Description = "Attack + 3"
         }
     };
 

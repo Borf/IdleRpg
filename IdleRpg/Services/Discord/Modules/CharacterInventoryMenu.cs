@@ -202,7 +202,18 @@ public class CharacterInventoryMenu : InteractionModuleBase<SocketInteractionCon
         var item = character.Inventory.First(i => i.Guid.ToString() == itemGuid);
         var itemTemplate = gameService.ItemTemplates[item.ItemId];
         var equip = (IEquipable)itemTemplate;
+
+        //TODO: move these 2 to a method in character to equip stuff (that also removes old buffs)
         character.EquippedItems[equip.EquipSlot] = item;
+        character.Buffs.Add(new Buff()
+        {
+            AppliedBy = character,
+            Source = BuffSource.Equip,
+            AppliedFromEquip = equip,
+            Modifiers = equip.EquipEffects
+        });
+        character.CalculateStats();
+
         await CharacterInventoryItem([itemGuid]);
     }
 

@@ -11,6 +11,7 @@ public class Character
     public ulong Id { get; set; } // is the playerID for players, but dunno what it is for NPCs :swt:
     public string Name { get; set; } = string.Empty;
     public Dictionary<Enum, long> Stats { get; set; } = new(); //TODO: move this to a sublayer so it's shared for CharacterPlayer and CharacterMonster ?
+    public List<Buff> Buffs { get; init; } = [];
     public Location Location { get; set; } = null!;
     public IServiceProvider ServiceProvider { get; }
     
@@ -29,6 +30,18 @@ public class Character
         {
             if (gameService.NotCalculatedStats.Contains(modifier.Stat))
                 continue;
+            Stats[modifier.Stat] = modifier.Calculation(Stats);
+        }
+        Buffs.RemoveAll(buff => DateTimeOffset.Now - buff.StartTime > buff.Duration); //TODO: we need to trigger this on expire
+
+        if (this is CharacterPlayer characterPlayer)
+        {
+            //remove equip buffs if the equipment is no longer equipped
+            //TODO: refactor this to have a nicer expression
+            Buffs.RemoveAll(buff => buff.Source == BuffSource.Equip && buff.AppliedFromEquip != null && (!characterPlayer.EquippedItems.ContainsKey(buff.AppliedFromEquip.EquipSlot) || gameService.ItemTemplates[characterPlayer.EquippedItems[buff.AppliedFromEquip.EquipSlot].ItemId] != buff.AppliedFromEquip)); //TODO: we need to trigger this on expire
+        }
+        foreach (var modifier in Buffs.SelectMany(b => b.Modifiers).OrderBy(m => gameService.sortedModifiers.IndexOf(m)))
+        {
             Stats[modifier.Stat] = modifier.Calculation(Stats);
         }
     }
