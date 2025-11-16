@@ -97,7 +97,6 @@ public class CharacterMenu : InteractionModuleBase<SocketInteractionContext>
                 buffs += $"- From {buff.Source}:\n{string.Join("\n", buff.Modifiers.Select(m => $"  {m.Stat} = {m.Description}"))}\n";
         }
 
-
         string stats = string.Join("\n", statsPerGroup.Select(g => $"## {g.Key}\n{string.Join("\n", g.Value.Select(kv => $"- `{kv.Key,-15}`{kv.Value}"))}"));
         await ModifyOriginalResponseAsync(c =>
         {

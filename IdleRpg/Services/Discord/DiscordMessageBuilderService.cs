@@ -47,7 +47,7 @@ public class DiscordMessageBuilderService
                 .WithActionRow([
                     new ButtonBuilder("Character", "character", ButtonStyle.Primary, emote: Emoji.Parse(":man_mage:")),
                     new ButtonBuilder("Actions", "actions", ButtonStyle.Primary, emote: Emoji.Parse(":exclamation:")),
-                    //new ButtonBuilder("Inventory", "inventory", ButtonStyle.Primary, emote: Emoji.Parse(":handbag:")),
+                    new ButtonBuilder("Surroundings", "area", ButtonStyle.Primary, emote: Emoji.Parse(":map:")),
                     new ButtonBuilder("Handbook", "handbook", ButtonStyle.Primary, emote: Emoji.Parse(":notebook_with_decorative_cover:"), isDisabled: true),
                     new ButtonBuilder("Quests", "quests", ButtonStyle.Primary, emote: Emoji.Parse(":compass:"), isDisabled: true),
                 ])
