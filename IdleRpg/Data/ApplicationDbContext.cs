@@ -9,6 +9,7 @@ namespace IdleRpg.Data
         public DbSet<Character> Characters => Set<Character>();
         public DbSet<CharacterStat> CharacterStats => Set<CharacterStat>();
         public DbSet<InventoryItem> InventoryItems => Set<InventoryItem>();
+        public DbSet<CharacterEquip> CharacterEquip => Set<CharacterEquip>();
 
 
     }

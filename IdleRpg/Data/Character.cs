@@ -10,6 +10,7 @@ public class Character
     public string Map { get; set; } = string.Empty;
     public int X { get; set; } = 0;
     public int Y { get; set; } = 0;
-    public List<CharacterStat> Stats { get; set; } = [];
-    public List<InventoryItem> Inventory { get; set; } = [];
+    public List<CharacterStat> Stats { get; init; } = [];
+    public List<InventoryItem> Inventory { get; init; } = [];
+    public List<CharacterEquip> Equips { get; init; } = [];
 }

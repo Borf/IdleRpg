@@ -201,7 +201,7 @@ public class CharacterInventoryMenu : InteractionModuleBase<SocketInteractionCon
         var items = character.Inventory.GroupBy(i => i.ItemId).ToDictionary(kv => kv.First().ItemId, kv => kv.ToList());
         var item = character.Inventory.First(i => i.Guid.ToString() == itemGuid);
         var itemTemplate = gameService.ItemTemplates[item.ItemId];
-        var equip = itemTemplate as IEquipable;
+        var equip = (IEquipable)itemTemplate;
         character.EquippedItems[equip.EquipSlot] = item;
         await CharacterInventoryItem([itemGuid]);
     }

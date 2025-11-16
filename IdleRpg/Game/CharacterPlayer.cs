@@ -46,7 +46,7 @@ public class CharacterPlayer : Character
         using var scope = ServiceProvider.CreateScope();
         using var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
-        var character = context.Characters.Include(c => c.Stats).Include(c => c.Inventory).FirstOrDefault(c => c.Id == Id);
+        var character = context.Characters.Include(c => c.Stats).Include(c => c.Inventory).Include(c => c.Equips).FirstOrDefault(c => c.Id == Id);
         if(character == null)
         {
             character = new Data.Db.Character()
@@ -98,6 +98,33 @@ public class CharacterPlayer : Character
         foreach (var dbItem in character.Inventory.Where(i => !Inventory.Any(inv => inv.Guid == i.Id)))
             context.InventoryItems.Remove(dbItem);
 
+
+
+        foreach(var dbEquip in character.Equips)
+        {
+            var dbEquipSlot = (Enum)Enum.Parse(gameService.equipEnum, dbEquip.EquipSlot);
+            if (EquippedItems.ContainsKey(dbEquipSlot))
+            {
+                if (EquippedItems[dbEquipSlot].Guid != dbEquip.ItemId) //TODO: dunno if this if is needed
+                    dbEquip.ItemId = EquippedItems[dbEquipSlot].Guid;
+            }
+            else
+                context.CharacterEquip.Remove(dbEquip);
+        }
+        foreach(var equip in EquippedItems)
+        {
+            if(!character.Equips.Any(e => e.EquipSlot == equip.Key.ToString()))
+            {
+                var newEquip = new CharacterEquip()
+                {
+                    Character = character,
+                    EquipSlot = equip.Key.ToString(),
+                    ItemId = equip.Value.Guid,
+                };
+                character.Equips.Add(newEquip);
+                context.CharacterEquip.Add(newEquip);
+            }
+        }
         await context.SaveChangesAsync();
     }
 
