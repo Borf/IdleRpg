@@ -41,7 +41,7 @@ public class CharacterMenu : InteractionModuleBase<SocketInteractionContext>
                     new ButtonBuilder("Stats", "character:stats",       ButtonStyle.Primary, emote: Emoji.Parse(":1234:")),
                     new ButtonBuilder("Inventory", "character:inventory",ButtonStyle.Primary, emote: Emoji.Parse(":briefcase:")),
                     new ButtonBuilder("Skills", "character:skills",     ButtonStyle.Primary, emote: Emoji.Parse(":notebook_with_decorative_cover:"), isDisabled: true),
-                    new ButtonBuilder("Equip", "character:equip",       ButtonStyle.Primary, emote: Emoji.Parse(":womans_clothes:"), isDisabled: true),
+                    new ButtonBuilder("Equip", "character:equip",       ButtonStyle.Primary, emote: Emoji.Parse(":womans_clothes:")),
                     new ButtonBuilder("Dress Up", "character:dressup",  ButtonStyle.Primary, emote: Emoji.Parse(":compass:"), isDisabled: true),
 //                    new ButtonBuilder("Jobs", "character:jobs",         ButtonStyle.Primary, emote: Emoji.Parse(":compass:")),
                 ])
