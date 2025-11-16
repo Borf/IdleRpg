@@ -61,6 +61,11 @@ public class GameService : ICoreHolder
             AllModifiers.Add(modifier);
         }
 
+        foreach (var item in ItemTemplates.Values.Where(i => i is IEquipable).Select(s => (IEquipable)s))
+        {
+            AllModifiers.AddRange(item.EquipEffects);
+        }
+
         //foreach (var item in ItemTemplates.Where(item => item.GetType().IsAssignableTo(typeof(IEquippable))).Select(item => (IEquippable)item))
         //    AllModifiers.AddRange(item.EquipEffects);
 
