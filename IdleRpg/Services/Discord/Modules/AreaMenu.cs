@@ -55,8 +55,8 @@ public class AreaMenu : InteractionModuleBase<SocketInteractionContext>
                     canTalk = true;
             }
             var monsters = charsAround
-                .Select(n => n as CharacterMonster)
-                .Where(n => n is not null)
+                .Where(n => n is CharacterMonster)
+                .Select(n => (CharacterMonster)n)
                 .GroupBy(m => m.Template.Id)
                 .ToDictionary(m => m.Key, m => m.ToList());
 
@@ -104,7 +104,7 @@ public class AreaMenu : InteractionModuleBase<SocketInteractionContext>
 
         var charsAround = character.Location.MapInstance.GetCharactersAround(character.Location, 16);
 
-        var npcs = charsAround.Select(n => n as CharacterNpc).Where(n => n is not null).ToList();
+        var npcs = charsAround.Where(n => n is CharacterNpc).Select(n => (CharacterNpc)n).ToList();
 
         var cb = new ComponentBuilderV2()
                     .WithMediaGallery(["attachment://header.png"])
