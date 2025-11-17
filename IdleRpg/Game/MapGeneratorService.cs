@@ -163,7 +163,7 @@ class ImageCache : List<ImageCacheEntry>
             return entry;
 
         string tilePath = System.IO.Path.Combine(map.MapImagePath, zoom.ToString(), $"map_{y}_{x}.png");
-
+        Console.WriteLine("Loading " + tilePath);
         entry = new ImageCacheEntry()
         {
             X = x,

@@ -31,7 +31,7 @@ public class CharacterPlayer : Character
         {
             while (!token.IsCancellationRequested)
             {
-                Task.Delay(TimeSpan.FromSeconds(5), token).Wait(token);
+                Task.Delay(TimeSpan.FromSeconds(120), token).Wait(token);
                 if (token.IsCancellationRequested)
                     break;
                 await Save();
