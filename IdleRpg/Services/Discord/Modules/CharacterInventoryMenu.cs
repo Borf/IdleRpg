@@ -41,10 +41,12 @@ public class CharacterInventoryMenu : InteractionModuleBase<SocketInteractionCon
         var items = character.Inventory.GroupBy(i => i.ItemId).ToList();
         var sortedItems = items.OrderBy(i => gameService.ItemTemplates[i.First().ItemId].Name);
 
-        var font = SystemFonts.CreateFont("Tahoma", 12);
-        var font2 = SystemFonts.CreateFont("Tahoma", 13, FontStyle.Bold);
-        var font3 = SystemFonts.CreateFont("Tahoma", 12, FontStyle.Italic);
-
+        var fc = new FontCollection();
+        fc.Add(Path.Combine("Resources", "tahoma.ttf"));
+        var fs = fc.Get("Tahoma");
+        var font = fs.CreateFont(12);
+        var font2 = fs.CreateFont(13, FontStyle.Bold);
+        var font3 = fs.CreateFont(12, FontStyle.Italic);
 
         using var header = ((IDiscordGame)gameService.GameCore).HeaderGenerator.GetImage(DiscordMenu.Main, character);
         using var headerStream = header.AsPngStream();

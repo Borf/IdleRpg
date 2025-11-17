@@ -15,15 +15,11 @@ public class MapGeneratorService
 {
     private Dictionary<Map, ImageCache> ImageCaches = new();
 
-    private Font font;
-    private Font npcFont;
     private BitmapFont npcBitmapFont;
     private GameService gameService;
 
     public MapGeneratorService(GameService gameService)
     {
-        this.font = SystemFonts.CreateFont("Tahoma", 20);
-        this.npcFont = SystemFonts.CreateFont("Consolas", 12);
         this.npcBitmapFont = new BitmapFont(System.IO.Path.Combine("Resources", "PixelFont"));
         this.gameService = gameService;
     }
