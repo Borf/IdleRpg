@@ -67,7 +67,7 @@ public class Map(string name)
     public virtual void Load(GameService gameService) //TODO: should this be gameService parameter?
     {
         var filename = Path.Combine("Resources", "Games", GameService.CoreName, "Maps", $"{Name}.map");
-        MapImagePath = Path.Combine("Resources", "Games", GameService.CoreName, "Maps", Name);
+        MapImagePath = Path.Combine("Resources", "Games", GameService.CoreName, "Maps", Name.ToLower());
 
         var data = File.ReadAllBytes(filename);
         using var decompressor = new BrotliDecompressor();

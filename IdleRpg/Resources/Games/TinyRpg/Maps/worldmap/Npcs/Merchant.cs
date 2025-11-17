@@ -5,7 +5,7 @@ using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using TinyRpg.Items;
 
-namespace TinyRpg.Maps.WorldMap.Npcs;
+namespace TinyRpg.Maps.worldmap.Npcs;
 
 public class Merchant : INpcTemplate, INpcMerchant, INpcDialog
 {
