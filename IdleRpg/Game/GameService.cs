@@ -108,7 +108,8 @@ public class GameService : ICoreHolder
 
 
     public CharacterPlayer GetCharacter(ulong id)
-    {//TODO: set character name
+    {
+        _logger.LogInformation("Loading character {0}", id);
         var character = Players.FirstOrDefault(c => c.Id == id);
         if (character == null)
         {
@@ -118,7 +119,6 @@ public class GameService : ICoreHolder
             if (character != null)
                 Players.Add(character);
         }
-
         character?.CalculateStats();
         return character ?? throw new CharacterNotFoundException("Could not get character");
     }

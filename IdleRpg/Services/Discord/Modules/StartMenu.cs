@@ -14,11 +14,13 @@ public class StartMenu : InteractionModuleBase<SocketInteractionContext>
 {
     private GameService gameService;
     private DiscordMessageBuilderService dmb;
+    private ILogger<StartMenu> _logger;
 
-    public StartMenu(GameService gameService, MapGeneratorService mapGenerator, DiscordMessageBuilderService dmb)
+    public StartMenu(GameService gameService, MapGeneratorService mapGenerator, DiscordMessageBuilderService dmb, ILogger<StartMenu> logger)
     {
         this.gameService = gameService;
         this.dmb = dmb;
+        this._logger = logger;
     }
 
     [ComponentInteraction("start:new")]
@@ -29,8 +31,9 @@ public class StartMenu : InteractionModuleBase<SocketInteractionContext>
         {
             var character = gameService.GetCharacter(Context.User.Id);
             await dmb.StartMenu(Context.Interaction, character);
-        }catch(Exception)
+        }catch(Exception e)
         {
+            _logger.LogInformation("Error loading character {0}", e);
             await dmb.CreateCharacter(Context.Interaction, gameService.GameCore.GetNewCharacterOptions());
         }
 
