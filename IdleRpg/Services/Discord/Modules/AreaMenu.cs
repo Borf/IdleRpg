@@ -45,7 +45,15 @@ public class AreaMenu : InteractionModuleBase<SocketInteractionContext>
             msg = "You see nobody around you";
         else
         {
+            var players = charsAround.Select(n => n as CharacterPlayer).Where(n => n is not null).Select(n => n!).ToList();
+            if (players.Count > 0)
+                msg += "# Players:\n";
+            foreach (var player in players)
+                msg += $"- {player.Name} ({player.Location.DistanceTo(character.Location)}m away)\n";
+
             var npcs = charsAround.Select(n => n as CharacterNpc).Where(n => n is not null).Select(n => n!).ToList();
+            if (npcs.Count > 0)
+                msg += "# Npcs:\n";
             foreach (var npc in npcs)
             {
                 msg += $"- {npc.Name} ({npc.Location.DistanceTo(character.Location)}m away)\n";
