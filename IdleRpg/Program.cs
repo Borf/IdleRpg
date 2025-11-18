@@ -21,8 +21,11 @@ Console.WriteLine(@"  ___    _ _      ____  ____   ____
 
 var builder = WebApplication.CreateBuilder(args);
 
+var memoryLogStore = new InMemoryLogStore();
 builder.Logging.AddConsole(c => c.FormatterName = "proper")
                .AddConsoleFormatter<ProperFormatter, ProperFormatterOptions>(c => { });
+builder.Logging.AddProvider(new MemoryLoggerProvider(memoryLogStore));
+builder.Services.AddSingleton(memoryLogStore);
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
