@@ -67,9 +67,12 @@ public class InteractionHandler : IHostedService
                         break;
                 }
         }
-        catch
+        catch (Exception e)
         {
-            await interaction.RespondAsync("Error!");
+            if(interaction.HasResponded)
+                await interaction.ModifyOriginalResponseAsync(m => m.Content = $"Error: \n```\n{e}\n```");
+            else
+                await interaction.RespondAsync($"Error: \n```\n{e}\n```");
             //if (interaction.Type is InteractionType.ApplicationCommand)
             //    await interaction.GetOriginalResponseAsync().ContinueWith(async (msg) => await msg.Result.DeleteAsync());
         }

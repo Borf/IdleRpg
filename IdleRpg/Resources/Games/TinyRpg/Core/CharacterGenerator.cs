@@ -35,6 +35,7 @@ public class CharacterGenerator : IImageGenerator<CharacterPlayer, SpriteDirecti
             image.Mutate(ip => ip.DrawImage(hair, 1.0f));
         }
 
+        if(source.Stats.ContainsKey(Stats.LookShirt))
         {
             int shirtId = (int)source.Stats[Stats.LookShirt];
             if (shirtId > 0)
@@ -45,6 +46,7 @@ public class CharacterGenerator : IImageGenerator<CharacterPlayer, SpriteDirecti
             }
         }
 
+        if (source.Stats.ContainsKey(Stats.LookPants))
         {
             int pantsId = (int)source.Stats[Stats.LookPants];
             //if (pantsId > 0)
