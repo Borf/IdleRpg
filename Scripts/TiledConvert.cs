@@ -16,12 +16,12 @@ using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
 
 
-string jsonFilePath = "../IdleRpg/Resources/Games/TinyRpg/Maps/Worldmap/Worldmap.tmj";
-string fileName = "../IdleRpg/Resources/Games/TinyRpg/Maps/Worldmap.map";
-string mobFileName = "../IdleRpg/Resources/Games/TinyRpg/Maps/Worldmap.mobs.json";
-string collisionFileName = "../IdleRpg/Resources/Games/TinyRpg/Maps/Worldmap.collision.png";
-string mapImageFile = "../IdleRpg/Resources/Games/TinyRpg/Maps/Worldmap.png";
-string mapImagePath = "../IdleRpg/Resources/Games/TinyRpg/Maps/Worldmap/";
+string jsonFilePath = "../IdleRpg/Resources/Games/TinyRpg/Maps/worldmap/Worldmap.tmj";
+string fileName = "../IdleRpg/Resources/Games/TinyRpg/Maps/WorldMap.map";
+string mobFileName = "../IdleRpg/Resources/Games/TinyRpg/Maps/WorldMap.mobs.json";
+string collisionFileName = "../IdleRpg/Resources/Games/TinyRpg/Maps/WorldMap.collision.png";
+string mapImageFile = "../IdleRpg/Resources/Games/TinyRpg/Maps/worldmap/WorldMap.png";
+string mapImagePath = "../IdleRpg/Resources/Games/TinyRpg/Maps/worldmap/";
 int tileSize = 1024;
 
 var json = JsonSerializer.Deserialize<TiledMap>(File.ReadAllText(jsonFilePath))!;
@@ -72,6 +72,14 @@ foreach (var layer in json.layers)
                                 int mapX = x - minX;
                                 int mapY = y - minY;
                                 map.CellType[mapX, mapY] |= CellType.NotWalkable;
+                                map.CellType[mapX, mapY] &= ~CellType.Walkable;
+                            }
+                            else if (prop.name == "blocking" && prop.type == "bool" && !((JsonElement)prop.value).GetBoolean())
+                            {
+                                int mapX = x - minX;
+                                int mapY = y - minY;
+                                map.CellType[mapX, mapY] &= ~CellType.NotWalkable;
+                                map.CellType[mapX, mapY] |= CellType.Walkable;
                             }
                         }
                     }
@@ -133,6 +141,7 @@ if(moblayer is not null)
 }
 
 collisionMap.SaveAsPng(collisionFileName);
+
 Console.WriteLine("Zooming and splitting map");
 Configuration.Default.MemoryAllocator = MemoryAllocator.Create(new MemoryAllocatorOptions
 {
