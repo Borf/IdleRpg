@@ -107,7 +107,7 @@ public class ActionsWalkMenu : InteractionModuleBase<SocketInteractionContext>
             if (newTile == "N")
                 y = Math.Max(0, y - height / 2);
             else if (newTile == "S")
-                y = Math.Min(map.Height, x + height / 2);
+                y = Math.Min(map.Height, y + height / 2);
             else if (newTile == "W")
                 x = Math.Max(0, x - width / 2);
             else if(newTile == "E")
