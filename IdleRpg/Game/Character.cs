@@ -21,6 +21,7 @@ public class Character
     {
         ServiceProvider = serviceProvider;
         ActionQueue = serviceProvider.GetRequiredService<ActionQueue>();// new(ServiceProvider.GetRequiredService<BgTaskManager>());
+        ActionQueue.Logger = serviceProvider.GetRequiredService<ILoggerFactory>().CreateLogger($"ActionQueue");
     }
 
     public void CalculateStats()

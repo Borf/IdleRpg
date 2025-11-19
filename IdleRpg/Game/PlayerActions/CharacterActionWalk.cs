@@ -12,12 +12,12 @@ public class CharacterActionWalk : CharacterAction
     public int DistanceWalked { get; set; } = 0;
     public override string Status() => $"Walking to {TargetLocation?.X}, {TargetLocation?.Y}";
     public List<Point>? CurrentPath { get; set; }
-    private ILogger<CharacterActionWalk> Logger;
+    private ILogger Logger;
 
     public CharacterActionWalk(Character character, Location targetLocation) : base(character)
     {
         TargetLocation = targetLocation;
-        Logger = character.ServiceProvider.GetRequiredService<ILogger<CharacterActionWalk>>();
+        Logger = character.ServiceProvider.GetRequiredService<ILoggerFactory>().CreateLogger($"CharacterActionWalk:{character.Name}");
     }
 
     protected override async Task BackgroundTask(CancellationToken token)

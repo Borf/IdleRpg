@@ -9,12 +9,12 @@ public class CharacterActionAttack : CharacterAction
 {
     public override string Status() => $"Attacking {Target?.Name}";
     public Character Target { get; set; }
-    private ILogger<CharacterActionAttack> Logger;
+    private ILogger Logger;
 
     public CharacterActionAttack(Character character, Character target) : base(character)
     {
         Target = target;
-        Logger = character.ServiceProvider.GetRequiredService<ILogger<CharacterActionAttack>>();
+        Logger = character.ServiceProvider.GetRequiredService<ILoggerFactory>().CreateLogger($"CharacterActionAttack:{character.Name}");
     }
 
     protected override async Task BackgroundTask(CancellationToken token)

@@ -131,10 +131,9 @@ public class GameService : ICoreHolder
             return null;
 
         _logger.LogInformation($"Loading character {dbCharacter.Name} from database", dbCharacter);
-        var character = new CharacterPlayer(serviceProvider)
+        var character = new CharacterPlayer(dbCharacter.Name, serviceProvider)
         {
             Id = id,
-            Name = dbCharacter.Name,
             Location = new Location(dbCharacter.X, dbCharacter.Y) { MapInstance = Maps.First(m => m.Name == dbCharacter.Map).MapInstance(GameCore, serviceProvider) },
             Stats = dbCharacter.Stats.ToDictionary(s => (Enum)Enum.Parse(statsEnum, s.Stat), s => s.Value), //TODO: ewww
             Inventory = dbCharacter.Inventory.Select(i => new Core.InventoryItem((Enum)Enum.Parse(GameCore.GetItemIdEnum(), i.ItemId+""), i.Id)).ToList(),
@@ -173,13 +172,11 @@ public class GameService : ICoreHolder
     public CharacterPlayer CreateCharacter(ulong id, string name, ICharacterCreateCharOptions options)
     {
         _logger.LogInformation($"Creating character {id}");
-        CharacterPlayer newCharacter = new CharacterPlayer(serviceProvider)
+        CharacterPlayer newCharacter = new CharacterPlayer(name, serviceProvider)
         {
             Id = id,
             Location = GetLocation(GameCore.SpawnLocation), //TODO
         };
-
-        newCharacter.Name = name;
         newCharacter.Stats = NotCalculatedStats.ToDictionary(s => s, s => GameCore.CalculateStat(s).Calculation(newCharacter.Stats));
         GameCore.InitializeCharacter(newCharacter, options);
         

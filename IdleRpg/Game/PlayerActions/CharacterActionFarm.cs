@@ -8,7 +8,7 @@ namespace IdleRpg.Game.PlayerActions;
 public class CharacterActionFarm : CharacterAction
 {
     public override string Status() => $"Farming monsters";
-    private ILogger<CharacterActionFarm> Logger;
+    private ILogger Logger;
     
     public List<Enum> MobIds { get; set; } = new();
     public TimeSpan TimeSpan { get; set; } = TimeSpan.FromHours(1);
@@ -20,7 +20,7 @@ public class CharacterActionFarm : CharacterAction
 
     public CharacterActionFarm(Character character) : base(character)
     {
-        Logger = character.ServiceProvider.GetRequiredService<ILogger<CharacterActionFarm>>();
+        Logger = character.ServiceProvider.GetRequiredService<ILoggerFactory>().CreateLogger($"CharacterActionFarm:{character.Name}");
     }
 
     public override void Start(BgTaskManager bgTaskManager)

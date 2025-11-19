@@ -23,8 +23,10 @@ public class CharacterPlayer : Character
     }
 
 
-    public CharacterPlayer(IServiceProvider serviceProvider) : base(serviceProvider)
+    public CharacterPlayer(string name, IServiceProvider serviceProvider) : base(serviceProvider)
     {
+        this.Name = name;
+        ActionQueue.Logger = serviceProvider.GetRequiredService<ILoggerFactory>().CreateLogger($"ActionQueue:{Name}");
         NextFarmAction = new(this);
         serviceProvider.GetRequiredService<BgTaskManager>().Run(
         new BgTask("Auto save " + this.Name, async token =>

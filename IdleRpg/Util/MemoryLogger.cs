@@ -11,23 +11,18 @@ public class MemoryLogger : ILogger
         _store = store;
     }
 
-    public IDisposable BeginScope<TState>(TState state) => null;
+    public IDisposable? BeginScope<TState>(TState state) where TState : notnull => null;
     public bool IsEnabled(LogLevel logLevel) => true;
 
     public void Log<TState>(
         LogLevel logLevel,
         EventId eventId,
         TState state,
-        Exception exception,
-        Func<TState, Exception, string> formatter)
+        Exception? exception,
+        Func<TState, Exception?, string> formatter)
     {
         var msg = formatter(state, exception);
         var line = $"{DateTime.Now:HH:mm:ss} [{logLevel}] {_categoryName}: {msg}";
-
-        // Write to console
-        //Console.WriteLine(line);
-
-        // Store in memory
         _store.Add(line);
     }
 }

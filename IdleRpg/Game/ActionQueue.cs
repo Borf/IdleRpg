@@ -1,4 +1,5 @@
-﻿using IdleRpg.Util;
+﻿using IdleRpg.Data.Db;
+using IdleRpg.Util;
 
 namespace IdleRpg.Game;
 
@@ -10,14 +11,13 @@ public class ActionQueue
     private BgTaskManager bgTaskManager;
     public bool Any => Queue.Any();
     public CharacterAction? First => Queue.FirstOrDefault();
-    private ILogger<ActionQueue> Logger;
+    public ILogger Logger { get; set; }
 
-    public ActionQueue(BgTaskManager bgTaskManager, ILogger<ActionQueue> logger)
+    public ActionQueue(BgTaskManager bgTaskManager, ILoggerFactory loggerFactory)
     {
         this.bgTaskManager = bgTaskManager;
         Task = new BgTask("Character ActionQueueTask", Handler);
         bgTaskManager.Run(Task);
-        Logger = logger;
     }
     private async Task Handler(CancellationToken token)
     {
