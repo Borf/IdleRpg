@@ -226,7 +226,7 @@ public enum Stats
     [Group("Core", nameof(Sp))]
     MaxSp,
 
-    [NotCalculated, Group("Core"), Hidden]
+    [NotCalculated, Group("Core")]
     Money
 }
 

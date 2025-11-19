@@ -172,10 +172,14 @@ public class CharacterInventoryMenu : InteractionModuleBase<SocketInteractionCon
 
         }
 
-        var ar = new ActionRowBuilder()
-            .WithButton("Sell All", $"character:inventory:sellall:{item.Guid}")
-            .WithButton("Equip", $"character:inventory:equip:{item.Guid}", disabled: !canBeEquipped);
+        bool canSell = character.Location.MapInstance.GetCharactersAround(character.Location, 16)
+            .Select(n => n as CharacterNpc)
+            .Any(n => n is not null && n.Template.Features.HasFlag(NpcFeatures.Merchant));
 
+
+        var ar = new ActionRowBuilder()
+            .WithButton("Sell All", $"character:inventory:sellall:{item.Guid}", disabled: !canSell)
+            .WithButton("Equip", $"character:inventory:equip:{item.Guid}", disabled: !canBeEquipped);
 
         await ModifyOriginalResponseAsync(c =>
         {
@@ -217,6 +221,30 @@ public class CharacterInventoryMenu : InteractionModuleBase<SocketInteractionCon
         character.CalculateStats();
 
         await CharacterInventoryItem([itemGuid]);
+    }
+
+    [ComponentInteraction("character:inventory:sellall:*")]
+    public async Task CharacterInventorySellAll(string itemGuid)
+    {
+        var character = gameService.GetCharacter(Context.User.Id);
+        var items = character.Inventory.GroupBy(i => i.ItemId).ToDictionary(kv => kv.First().ItemId, kv => kv.ToList());
+        var item = character.Inventory.First(i => i.Guid.ToString() == itemGuid);
+        var itemTemplate = gameService.ItemTemplates[item.ItemId];
+
+        var skipGuid = false;
+
+        skipGuid = character.EquippedItems.Any(kv => kv.Value.ItemId == item.ItemId);
+
+        foreach(var it in items[item.ItemId])
+        {
+            if (skipGuid && it.Guid.ToString() == itemGuid)
+                continue;
+            foreach(var money in itemTemplate.Value)
+                character.Stats[money.Key] = character.Stats.GetValueOrDefault(money.Key, 0) + money.Value;
+            character.Inventory.Remove(it);
+        }
+        await character.Save();
+        await CharacterInventory();
     }
 
 }
