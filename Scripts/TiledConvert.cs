@@ -92,7 +92,7 @@ foreach (var layer in json.layers)
 Console.WriteLine("Fixing walkability");
 for (int y = 0; y < height; y++)
     for (int x = 0; x < width; x++)
-        if (!map.CellType[x, y].HasFlag(CellType.NotWalkable))
+        if (!map.CellType[x, y].HasFlag(CellType.NotWalkable) && !map.CellType[x, y].HasFlag(CellType.Walkable))
             map.CellType[x, y] |= CellType.Walkable;
 
 
@@ -102,10 +102,16 @@ for (int y = 0; y < height; y++)
 {
     for (int x = 0; x < width; x++)
     {
+        int r = 0;
+        int g = 0;
+        int b = 0;
+
         if (map.CellType[x, y].HasFlag(CellType.NotWalkable))
-            collisionMap[x, y] = new Rgba32(255, 0, 0, 255);
+            r = 255;
         else
-            collisionMap[x, y] = new Rgba32(0, 255, 255, 255);
+            g = 255;
+
+        collisionMap[x, y] = new Rgba32(r, g, b, 255);
     }
 }
 
@@ -141,6 +147,7 @@ if(moblayer is not null)
 }
 
 collisionMap.SaveAsPng(collisionFileName);
+Environment.Exit(-1);
 
 Console.WriteLine("Zooming and splitting map");
 Configuration.Default.MemoryAllocator = MemoryAllocator.Create(new MemoryAllocatorOptions
