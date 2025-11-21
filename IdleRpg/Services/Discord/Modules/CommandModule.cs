@@ -59,7 +59,7 @@ public class CommandModule : InteractionModuleBase<SocketInteractionContext>
     {
         //TODO: get level enum value somehow?
         var characters = context.Characters.Include(c => c.Stats).ToList();
-        characters = characters.OrderBy(c => c.Stats.First(s => s.Stat == "Level").Value).ToList();
+        characters = characters.Where(c => c.Stats.First(s => s.Stat == "Level").Value > 1).OrderByDescending(c => c.Stats.First(s => s.Stat == "Level").Value).ToList();
         string msg = "# Levels\n";
         msg += string.Join("\n", characters.Take(20).Select(c => $"- <@{c.Id}> {c.Name} ({c.Stats.First(s => s.Stat == "Level").Value})"));
         await RespondAsync(msg);
