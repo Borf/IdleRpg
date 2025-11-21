@@ -1,8 +1,10 @@
 ﻿using Discord;
 using Discord.Interactions;
+using IdleRpg.Data;
 using IdleRpg.Game;
 using IdleRpg.Game.Core;
 using IdleRpg.Util;
+using Microsoft.EntityFrameworkCore;
 
 namespace IdleRpg.Services.Discord.Modules;
 
@@ -10,11 +12,13 @@ public class CommandModule : InteractionModuleBase<SocketInteractionContext>
 {
     private GameService gameService;
     private InMemoryLogStore logStore;
+    private ApplicationDbContext context;
 
-    public CommandModule(GameService gameService, InMemoryLogStore logStore)
+    public CommandModule(GameService gameService, InMemoryLogStore logStore, ApplicationDbContext context)
     {
         this.gameService = gameService;
         this.logStore = logStore;
+        this.context = context;
     }
 
     [SlashCommand("setup", "Adds the control panel")]
@@ -48,5 +52,16 @@ public class CommandModule : InteractionModuleBase<SocketInteractionContext>
 
         await RespondWithFileAsync(ms, "log.txt", "# Here is your log");
 
+    }
+
+    [SlashCommand("rankings", "Shows the levels of players")]
+    public async Task Rankings()
+    {
+        //TODO: get level enum value somehow?
+        var characters = context.Characters.Include(c => c.Stats).ToList();
+        characters = characters.OrderBy(c => c.Stats.First(s => s.Stat == "Level").Value).ToList();
+        string msg = "# Levels\n";
+        msg += string.Join("\n", characters.Take(20).Select(c => $"- <@{c.Id}> {c.Name} ({c.Stats.First(s => s.Stat == "Level").Value})"));
+        await RespondAsync(msg);
     }
 }
