@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using IdleRpg.Util;
+using System.Diagnostics.CodeAnalysis;
 
 namespace IdleRpg.Game.Core;
 
@@ -33,4 +34,5 @@ public class Location
     }
 
     public int DistanceTo(Location location) => Math.Abs(X - location.X) + Math.Abs(Y - location.Y);
+    public int DistanceTo(Point location) => Math.Abs(X - location.X) + Math.Abs(Y - location.Y);
 }

@@ -29,35 +29,12 @@ public class WorldMap : Map
         LoadMobs<Npcs.NpcIds>();
         LoadNpcs(gameService);
 
-        Spawns.Add(new MonsterSpawnTemplate()
+        MapLocations.Add(new()
         {
-            Position = new Point(20, 20),
-            Amount = 5,
-            MobId = Npcs.NpcIds.Slime,
-            RangeX = 5,
-            RangeY = 5,
-            RespawnTime = TimeSpan.FromSeconds(5),
-            SpawnType = SpawnType.Sphere
-        });
-        Spawns.Add(new MonsterSpawnTemplate()
-        {
-            Position = new Point(746, 707),
-            Amount = 5,
-            MobId = Npcs.NpcIds.Slime,
-            RangeX = 3,
-            RangeY = 3,
-            RespawnTime = TimeSpan.FromSeconds(5),
-            SpawnType = SpawnType.Rect
-        });
-        Spawns.Add(new MonsterSpawnTemplate()
-        {
-            Position = new Point(795, 717),
-            Amount = 30,
-            MobId = Npcs.NpcIds.Slime,
-            RangeX = 20,
-            RangeY = 20,
-            RespawnTime = TimeSpan.FromSeconds(5),
-            SpawnType = SpawnType.Rect
+            Name = "Village",
+            Position = new(740, 738),
+            Region = "Starter",
+            HasMerchant = true
         });
     }
 }

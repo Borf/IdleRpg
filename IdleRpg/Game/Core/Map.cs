@@ -1,4 +1,5 @@
-﻿using L1PathFinder;
+﻿using IdleRpg.Util;
+using L1PathFinder;
 using MemoryPack;
 using MemoryPack.Compression;
 using Microsoft.Extensions.DependencyInjection;
@@ -7,6 +8,7 @@ using SixLabors.ImageSharp.Memory;
 using SixLabors.ImageSharp.PixelFormats;
 using System.Diagnostics;
 using System.Text.Json;
+using Point = IdleRpg.Util.Point;
 
 namespace IdleRpg.Game.Core;
 
@@ -63,6 +65,7 @@ public class Map(string name)
     public InstanceType InstanceType { get; set; } = InstanceType.NoInstance;
     public List<MonsterSpawnTemplate> Spawns { get; set; } = [];
     public List<INpcTemplate> NpcTemplates { get; set; } = [];
+    public List<MapLocation> MapLocations { get; set; } = [];
     public string MapImagePath { get; private set; } = string.Empty;
     public virtual void Load(GameService gameService) //TODO: should this be gameService parameter?
     {
@@ -212,4 +215,17 @@ public enum InstanceType
     PartyInstance,
     GuildInstance,
     FixedSizeInstance,
+}
+
+public enum MapLocationType
+{
+    Village
+}
+public class MapLocation
+{
+    public Point Position { get; set; } = new Point(0, 0);
+    public string Name { get; set; } = string.Empty;
+    public MapLocationType LocationType { get; set; } = MapLocationType.Village;
+    public string Region { get; set; } = string.Empty;
+    public bool HasMerchant { get; set; } = false;
 }

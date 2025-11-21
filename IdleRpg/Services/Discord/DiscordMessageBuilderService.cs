@@ -84,7 +84,8 @@ public class DiscordMessageBuilderService
                 .WithActionRow([
                     new ButtonBuilder("Walk", "actions:walk", ButtonStyle.Primary, emote: Emoji.Parse(":compass:")),
                     new ButtonBuilder("Battle", "actions:battle", ButtonStyle.Primary, emote: Emoji.Parse(":exclamation:")),
-                    new ButtonBuilder("Quest", "actions:quest", ButtonStyle.Primary, emote: Emoji.Parse(":handbag:")),
+                    new ButtonBuilder("Teleport", "actions:teleport", ButtonStyle.Primary, emote: Emoji.Parse(":dizzy:")),
+                    new ButtonBuilder("Quest", "actions:quest", ButtonStyle.Primary, emote: Emoji.Parse(":compass:")),
                 ])
                 .Build();
         });

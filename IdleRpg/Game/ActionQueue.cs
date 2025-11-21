@@ -11,7 +11,7 @@ public class ActionQueue
     private BgTaskManager bgTaskManager;
     public bool Any => Queue.Any();
     public CharacterAction? First => Queue.FirstOrDefault();
-    public ILogger Logger { get; set; }
+    public ILogger Logger { get; set; } = null!;
 
     public ActionQueue(BgTaskManager bgTaskManager, ILoggerFactory loggerFactory)
     {
