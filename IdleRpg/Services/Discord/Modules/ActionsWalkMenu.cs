@@ -129,17 +129,27 @@ public class ActionsWalkMenu : InteractionModuleBase<SocketInteractionContext>
             {
                 int X = Random.Shared.Next(x, x + width);
                 int Y = Random.Shared.Next(y, y + height);
-                while (!map[X, Y].HasFlag(CellType.Walkable))
+                int count = 0;
+                while (!map[X, Y].HasFlag(CellType.Walkable) && character.Location.MapInstance.Map.Planner.Search(new L1PathFinder.Point(X, Y), new L1PathFinder.Point(character.Location.X, character.Location.Y), out var currentPath) <= 0 && count < 64)
                 {
                     X = Random.Shared.Next(x, x + width);
                     Y = Random.Shared.Next(y, y + height);
+                    count++;
                 }
-                logger.LogInformation($"Moving character {character.Name} to {X}, {Y}");
-                await character.ActionQueue.ClearActions(); //TODO: only clear if walking..otherwise ask question?
-                character.WalkTo(new Location(X, Y, character.Location));
-                await DeferAsync(ephemeral: true);
-                await dmb.ActionsMenu(Context.Interaction, character, "You started walking");
-                return;
+                if (count < 64)
+                {
+                    logger.LogInformation($"Moving character {character.Name} to {X}, {Y}");
+                    await character.ActionQueue.ClearActions(); //TODO: only clear if walking..otherwise ask question?
+                    character.WalkTo(new Location(X, Y, character.Location));
+                    await DeferAsync(ephemeral: true);
+                    await dmb.ActionsMenu(Context.Interaction, character, "You started walking");
+                    return;
+                }
+                else
+                {
+                    await DeferAsync(ephemeral: true);
+                    await dmb.ActionsMenu(Context.Interaction, character, "You could not get to this position");
+                }
             }
         }
         await CharacterWorldmap(x, y, width, height);

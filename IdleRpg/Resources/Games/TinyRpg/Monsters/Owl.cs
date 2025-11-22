@@ -22,7 +22,7 @@ public class Owl : Mob
 
     public override List<ItemDrop> ItemDrops => [
         new ItemDrop() { Item = ItemIds.OwlFeather, DropChance = 0.1 },
-        new ItemDrop() { Item = ItemIds.RedPotion, DropChance = 0.1 },
+        new ItemDrop() { Item = ItemIds.ArmorShirt, DropChance = 0.05 },
     ];
 
     public override int Exp => 1;

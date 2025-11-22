@@ -16,8 +16,12 @@ public enum ItemIds
     CobWeb = 5003,
     BunnyTail = 5004,
     BunnyEar = 5005,
+    OwlFeather = 10001,
 
     //weapon
     WeaponCutlass = 10000,
-    OwlFeather = 10001,
+
+
+    //armor
+    ArmorShirt = 20001,
 }
