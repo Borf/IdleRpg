@@ -91,8 +91,11 @@ public class CharacterMenu : InteractionModuleBase<SocketInteractionContext>
         var buffs = "## Buffs:\n";
         foreach(var buff in character.Buffs)
         {
-            if(buff.Source == BuffSource.Equip)
-                buffs += $"- From {((IItemTemplate)buff.AppliedFromEquip!).Name}:\n{string.Join("\n", buff.Modifiers.Select(m => $"  {m.Stat} = {m.Description}"))}\n";
+            if (buff.Source == BuffSource.Equip)
+            {
+                if(buff.Modifiers.Any(m => !string.IsNullOrEmpty(m.Description)))
+                    buffs += $"- From {((IItemTemplate)buff.AppliedFromEquip!).Name}:\n{string.Join("\n", buff.Modifiers.Where(m => !string.IsNullOrEmpty(m.Description)).Select(m => $"  {m.Stat} = {m.Description}"))}\n";
+            }
             else
                 buffs += $"- From {buff.Source}:\n{string.Join("\n", buff.Modifiers.Select(m => $"  {m.Stat} = {m.Description}"))}\n";
         }

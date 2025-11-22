@@ -22,7 +22,8 @@ public class Spider : Mob
 
     public override List<ItemDrop> ItemDrops => [
         new ItemDrop() { Item = ItemIds.SpiderLeg, DropChance = 0.125 },
-        new ItemDrop() { Item = ItemIds.CobWeb, DropChance = 0.1 }
+        new ItemDrop() { Item = ItemIds.CobWeb, DropChance = 0.1 },
+        new ItemDrop() { Item = ItemIds.PantsPants, DropChance = 0.05 }
     ];
     public override int Exp => 1;
 }

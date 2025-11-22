@@ -244,7 +244,8 @@ public enum EquipSlots
 {
     Weapon = 1<<0,
     Armor = 1<<1,
-    Helm = 1<<2,
+    Pants = 1<<2,
+    Helm = 1<<3,
 }
 
 public enum ItemTypes

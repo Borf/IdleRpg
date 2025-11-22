@@ -24,4 +24,8 @@ public enum ItemIds
 
     //armor
     ArmorShirt = 20001,
+
+
+    //pants
+    PantsPants = 30001,
 }
