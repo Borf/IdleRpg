@@ -12,7 +12,7 @@ using TinyRpg.Core;
 namespace TinyRpg.Items.Equipment.Pants;
 public class Pants : IEquipable, IItemTemplate
 {
-    public Enum Id => ItemIds.ArmorShirt;
+    public Enum Id => ItemIds.PantsPants;
     public string Name => "Pants";
     public Enum EquipSlot => EquipSlots.Pants;
     public string EquipDescription => "Def + 2";
