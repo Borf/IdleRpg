@@ -12,11 +12,13 @@ public class ActionsMenu : InteractionModuleBase<SocketInteractionContext>
 {
     private GameService gameService;
     private DiscordMessageBuilderService dmb;
+    private ILogger<ActionsMenu> logger;
 
-    public ActionsMenu(GameService gameService, MapGeneratorService mapGenerator, DiscordMessageBuilderService dmb)
+    public ActionsMenu(GameService gameService, MapGeneratorService mapGenerator, DiscordMessageBuilderService dmb, ILogger<ActionsMenu> logger)
     {
         this.gameService = gameService;
         this.dmb = dmb;
+        this.logger = logger;
     }
 
     [ComponentInteraction("actions")]
@@ -27,9 +29,10 @@ public class ActionsMenu : InteractionModuleBase<SocketInteractionContext>
         await dmb.ActionsMenu(Context.Interaction, character);
     }
 
-    [ComponentInteraction("actions:teleport:*:*")]
+    [ComponentInteraction("actions:doteleport:*:*")]
     public async Task ActionsTeleportToLocation(string area, string locationname)
     {
+        logger.LogInformation("Teleporting {User} to {Area} - {Location}", Context.User.Username, area, locationname);
         await DeferAsync(ephemeral: true);
         var character = gameService.GetCharacter(Context.User.Id);
         var locations = character.Location.MapInstance.Map.MapLocations;
@@ -66,7 +69,7 @@ public class ActionsMenu : InteractionModuleBase<SocketInteractionContext>
         ar = new();
         foreach (var loc in cats.First(c => c.Key == cat))
         {
-            ar.WithButton(loc.Name, $"actions:teleport:{loc.Region}:{loc.Name}");
+            ar.WithButton(loc.Name, $"actions:doteleport:{loc.Region}:{loc.Name}");
             if(ar.ComponentCount() == 5)
             {
                 cb.WithActionRow(ar);
