@@ -65,21 +65,48 @@ public class DiscordMessageBuilderService
         using var header = ((IDiscordGame)gameService.GameCore).HeaderGenerator.GetImage(DiscordMenu.Main, character);
         using var headerStream = header.AsPngStream();
 
-        string queue = character.ActionQueue.ToDiscordString();
+
+        var cb = new ComponentBuilderV2()
+                .WithMediaGallery(["attachment://header.png"])
+                .WithNavigation("actions")
+                .WithTextDisplay("# Current Actions")
+                //.WithSection(sb => {
+                //    sb.WithTextDisplay($"{message}\n" +
+                //                        $"Your character is {character.State}\n");
+                //    sb.WithAccessory(new ThumbnailBuilder("attachment://map.png", null, false));
+                //})
+                ;
+        character.ActionQueue.SignalActionDone(); //update
+
+        lock (character.ActionQueue.Queue)
+        {
+            int i = 0;
+            foreach (var action in character.ActionQueue.Queue.Where(q => q.ParentAction == null).Take(4).ToList())
+            {
+                string? str = action.ToString();
+                if (str != null)
+                {
+                    if (action.Started)
+                        str = $"▶️ {str}";
+                    else
+                        str = $"⏸️ {str}";
+                    var ar = new ActionRowBuilder();
+                    cb.WithActionRow(ar);
+                    ar.WithButton(str, "actions:" + i);
+                    ar.WithButton(null, "actions:stop:" + i++, ButtonStyle.Danger, Emoji.Parse(":stop_button:"));
+                    foreach (var subtask in character.ActionQueue.Queue.Where(q => q.ParentAction == action))
+                        cb.WithTextDisplay("⠀⠀⠀○ " + subtask.ToString());
+                }
+            }
+        }
+
+        cb.WithTextDisplay("# Queue new action");
+
 
         await interaction.ModifyOriginalResponseAsync(c =>
         {
             c.Attachments = new List<FileAttachment>() { new FileAttachment(mapStream, "map.png"), new FileAttachment(headerStream, "header.png") };
-            c.Components = new ComponentBuilderV2()
-                .WithMediaGallery(["attachment://header.png"])
-                .WithNavigation("actions")
-                .WithSection(sb => {
-                    sb.WithTextDisplay($"{message}\n" +
-                                        $"Your character is {character.State}\n");
-                    if (!string.IsNullOrEmpty(queue))
-                        sb.WithTextDisplay(queue);
-                    sb.WithAccessory(new ThumbnailBuilder("attachment://map.png", null, false));
-                })
+            c.Components = cb
                 .WithSeparator()
                 .WithActionRow([
                     new ButtonBuilder("Walk", "actions:walk", ButtonStyle.Primary, emote: Emoji.Parse(":compass:")),

@@ -109,7 +109,6 @@ public class ActionQueue
 
                 }
             }
-
             return string.Join("\n", strings);
         }
     }

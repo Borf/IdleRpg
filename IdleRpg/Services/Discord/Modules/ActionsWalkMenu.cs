@@ -139,7 +139,6 @@ public class ActionsWalkMenu : InteractionModuleBase<SocketInteractionContext>
                 if (count < 64)
                 {
                     logger.LogInformation($"Moving character {character.Name} to {X}, {Y}");
-                    await character.ActionQueue.ClearActions(); //TODO: only clear if walking..otherwise ask question?
                     character.WalkTo(new Location(X, Y, character.Location));
                     await DeferAsync(ephemeral: true);
                     await dmb.ActionsMenu(Context.Interaction, character, "You started walking");
