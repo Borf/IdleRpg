@@ -36,6 +36,24 @@ public class CharacterActionWalk : CharacterAction
             new L1PathFinder.Point(Character.Location.X, Character.Location.Y), 
             out List<Point> currentPath);
         CurrentPath = currentPath;
+        if(Length <= 0 || CurrentPath.Count == 0)
+        {
+            Length = Character.Location.MapInstance.Map.Planner.Search(
+                        new L1PathFinder.Point(TargetLocation.X, TargetLocation.Y),
+                        new L1PathFinder.Point(Character.Location.X, Character.Location.Y),
+                        out currentPath);
+            currentPath.Reverse();
+            if(Length <= 0 || CurrentPath.Count == 0)
+            {
+                Console.WriteLine("Still not working after reverse route");
+            }
+            else
+            {
+                Console.WriteLine("Working after reverse route");
+            }
+        }
+
+
         if (Length <= 0 || CurrentPath.Count == 0)
         {
             Length = -1;
@@ -130,6 +148,7 @@ public class CharacterActionWalk : CharacterAction
                 break;
         }
         Logger.LogInformation($"Done Moving {Character.Name}, took {DistanceWalked} steps");
+        Length = -1;
     }
 
     public override bool IsDone
